@@ -2,6 +2,8 @@
 
 #include <iostream>
 #include <string>
+#include <fstream>
+#include <Windows.h>
 
 #define SCRITTY_NAME "Scritty 0.0 Pre-alpha"
 #define SCRITTY_AUTHOR "Joel Odom"
@@ -253,8 +255,27 @@ bool isready_handler(const std::string line)
    return false;
 }
 
+bool quit_handler(const std::string line)
+{
+   /* REQUIREMENT
+
+   * quit
+   quit the program as soon as possible
+
+   */
+
+   return line == "quit";
+}
+
 int main(int argc, const char* argv[])
 {
+   // open a log file (TODO: include date and time when started)
+   CHAR temp_path[MAX_PATH + 1];
+   ::GetTempPath(MAX_PATH + 1, temp_path);
+   std::ofstream log_file(std::string(temp_path) + "scritty.log",
+      std::ios_base::out | std::ios_base::app);
+   log_file << "Starting Scritty..." << std::endl;
+
    /* REQUIREMENT
 
    * all communication is done via standard input and output with text
@@ -276,10 +297,23 @@ int main(int argc, const char* argv[])
 
    for (std::string line; std::getline(std::cin, line);)
    {
+      log_file << "Received line: " << line << std::endl;
+
+      if (quit_handler(line))
+         break;
+#error  Next command I need to handle is ucinewgame
       // allow each command handler a chance to handle in turn
-      isready_handler(line)
-         || uci_handler(line);
+      if (!
+         (isready_handler(line)
+         || uci_handler(line)
+         ))
+      {
+         log_file << "Failed to process line." << std::endl;
+      }
    }
+
+   log_file << "Exiting Scritty." << std::endl;
+   log_file.close();
 
    return 0;
 }
@@ -425,10 +459,6 @@ These are all the command the engine gets from the interface.
 * ponderhit
 	the user has played the expected move. This will be sent if the engine was told to ponder on the same move
 	the user has played. The engine should continue searching but switch from pondering to normal search.
-
-* quit
-	quit the program as soon as possible
-
 
 Engine to GUI:
 --------------
