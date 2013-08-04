@@ -3,6 +3,7 @@
 #include "UCIHandler.h"
 #include <iostream>
 #include "scritty.h"
+#include "Logger.h"
 
 using namespace scritty;
 
@@ -22,9 +23,9 @@ bool UCIHandler::handle_uci(const uci_tokens &tokens)
 
    */
 
-   if (tokens[0] == "uci")
+   if (tokens.size() > 0 && tokens[0] == "uci")
    {
-      /* REQUIREMENT
+      /* REQUIREMENT TODO: read and make sure I'm supporting all necessary
 
       * id
       * name <x>
@@ -184,11 +185,10 @@ bool UCIHandler::handle_uci(const uci_tokens &tokens)
       Risky\n"
       "option name NalimovPath type string default c:\\n"
       "option name Clear Hash type button\n"
-      
+
       */
 
-      // no options
-      // TODO: read above to see if I'm missing anything required
+      // place options, etc. here
 
       /* REQUIREMENT
 
@@ -224,7 +224,7 @@ bool UCIHandler::handle_isready(const uci_tokens &tokens)
 
    */
 
-   if (tokens[0] == "isready")
+   if (tokens.size() > 0 && tokens[0] == "isready")
    {
       /* REQUIREMENT
 
@@ -254,5 +254,66 @@ bool UCIHandler::handle_quit(const uci_tokens &tokens)
 
    */
 
-   return tokens[0] == "quit";
+   return tokens.size() > 0 && tokens[0] == "quit";
+}
+
+bool UCIHandler::handle_ucinewgame(const uci_tokens &tokens)
+{
+   /* REQUIREMENT
+
+   * ucinewgame
+   this is sent to the engine when the next search (started with "position"
+   and "go") will be from
+   a different game. This can be a new game the engine should play or a new game
+   it should analyse but
+   also the next position from a testsuite with positions only.
+   If the GUI hasn't sent a "ucinewgame" before the first "position" command,
+   the engine shouldn't
+   expect any further ucinewgame commands as the GUI is probably not supporting
+   the ucinewgame command.
+   So the engine should not rely on this command even though all new GUIs should
+   support it.
+   As the engine's reaction to "ucinewgame" can take some time the GUI should
+   always send "isready"
+   after "ucinewgame" to wait for the engine to finish its operation.
+
+   */
+
+   return tokens.size() > 0 && tokens[0] == "ucinewgame";
+}
+
+bool UCIHandler::handle_position(const uci_tokens &tokens)
+{
+   /* REQUIREMENT
+
+   * position [fen <fenstring> | startpos ]  moves <move1> .... <movei>
+	   set up the position described in fenstring on the internal board and
+	   play the moves on the internal chess board.
+	   if the game was played  from the start position the string "startpos" will
+      be sent
+	   Note: no "new" command is needed. However, if this position is from a
+      different game than
+	   the last position sent to the engine, the GUI should have sent a
+      "ucinewgame" inbetween.
+
+   */
+
+   if (tokens.size() < 2 || tokens[0] != "position")
+      return false;
+
+   if (tokens[1] == "startpos")
+   {
+      // TODO set board to start position here
+      return true;
+   }
+
+   if (tokens[1] != "fen")
+   {
+      Logger::LogMessage("Bad position command.");
+      return false;
+   }
+
+   // TODO handle fen here
+
+   return true;
 }

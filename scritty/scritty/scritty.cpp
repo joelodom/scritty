@@ -54,9 +54,11 @@ int main(int argc, const char *argv[])
       if (!
          (handler.handle_isready(tokens)
          || handler.handle_uci(tokens)
+         || handler.handle_ucinewgame(tokens)
+         || handler.handle_position(tokens)
          ))
       {
-         Logger::GetStream() << "Failed to process line." << std::endl;
+         Logger::GetStream() << "Failed to process line: " << line << std::endl;
       }
    }
 
@@ -136,23 +138,6 @@ These are all the command the engine gets from the interface.
 	Example:
 	   "register later"
 	   "register name Stefan MK code 4359874324"
-
-* ucinewgame
-   this is sent to the engine when the next search (started with "position" and "go") will be from
-   a different game. This can be a new game the engine should play or a new game it should analyse but
-   also the next position from a testsuite with positions only.
-   If the GUI hasn't sent a "ucinewgame" before the first "position" command, the engine shouldn't
-   expect any further ucinewgame commands as the GUI is probably not supporting the ucinewgame command.
-   So the engine should not rely on this command even though all new GUIs should support it.
-   As the engine's reaction to "ucinewgame" can take some time the GUI should always send "isready"
-   after "ucinewgame" to wait for the engine to finish its operation.
-   
-* position [fen <fenstring> | startpos ]  moves <move1> .... <movei>
-	set up the position described in fenstring on the internal board and
-	play the moves on the internal chess board.
-	if the game was played  from the start position the string "startpos" will be sent
-	Note: no "new" command is needed. However, if this position is from a different game than
-	the last position sent to the engine, the GUI should have sent a "ucinewgame" inbetween.
 
 * go
 	start calculating on the current position set up with the "position" command.

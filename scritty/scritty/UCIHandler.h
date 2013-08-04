@@ -14,6 +14,8 @@ namespace scritty
       bool handle_uci(const uci_tokens &tokens);
       bool handle_isready(const uci_tokens &tokens);
       bool handle_quit(const uci_tokens &tokens);
+      bool handle_ucinewgame(const uci_tokens &tokens);
+      bool handle_position(const uci_tokens &tokens);
    };
 }
 
