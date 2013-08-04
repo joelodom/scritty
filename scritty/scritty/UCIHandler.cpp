@@ -312,29 +312,47 @@ bool UCIHandler::handle_position(const uci_tokens &tokens)
    if (tokens[1] == "startpos")
    {
       m_engine.SetToStartPos();
-      return true;
    }
-
-   if (tokens[1] != "fen")
+   else if (tokens[1] == "fen")
    {
-      Logger::LogMessage("Bad position command.");
+      // see http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
+      Logger::LogMessage("TODO fen under construction");
+      return false;
+   }
+   else
+   {
+      Logger::LogMessage("Bad position command.  Expected startpos or fen.");
       return false;
    }
 
-   /* REQUIREMENT
+   if (tokens.size() > 3)
+   {
+      if (tokens[2] != "moves")
+      {
+         Logger::LogMessage("Bad position command.  Expected moves.");
+         return false;
+      }
 
-   Move format:
-   ------------
+      /* REQUIREMENT
 
-   The move format is in long algebraic notation.
-   A nullmove from the Engine to the GUI should be sent as 0000.
-   Examples:  e2e4, e7e5, e1g1 (white short castling), e7e8q (for promotion)
+      Move format:
+      ------------
 
-   */
+      The move format is in long algebraic notation.
+      A nullmove from the Engine to the GUI should be sent as 0000.
+      Examples:  e2e4, e7e5, e1g1 (white short castling), e7e8q (for promotion)
 
-   // see http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
-   
-   // TODO under construction
+      */
+
+      for (auto it = tokens.begin() + 3; it != tokens.end(); ++it)
+      {
+         if (!m_engine.ApplyMove(*it))
+         {
+            Logger::LogMessage("ApplyMove failed.");
+            return false;
+         }
+      }
+   }
 
    return true;
 }

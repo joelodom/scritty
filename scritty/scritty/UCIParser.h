@@ -15,7 +15,7 @@ namespace scritty
    public:
       static void BreakIntoTokens(
          const std::string &command, uci_tokens *tokens);
-      static void ParseMove(const std::string &s, Move *move);
+      static bool ParseMove(const std::string &s, Move *move);
    };
 }
 

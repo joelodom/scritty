@@ -4,6 +4,7 @@
 #define SCRITTY_ENGINE_H
 
 #include <cstring>
+#include <string>
 
 namespace scritty
 {
@@ -18,20 +19,22 @@ namespace scritty
 
    class Board
    {
-   public:
-      void SetToStartPos();
+      friend class Engine;
+      friend class Position;
 
    private:
+      Board() {}
       char m_squares[8][8];
    };
 
    class Position
    {
-   public:
-      void SetToStartPos();
+      friend class Engine;
 
    private:
+      Position() {}
       Board m_board;
+      bool m_white_to_move;
    };
 
    class Engine
@@ -39,8 +42,19 @@ namespace scritty
    public:
       Engine();
       void SetToStartPos();
+      bool ApplyMove(const std::string &str); // algebraic notation
+      char GetPieceAt(const std::string &square) const; // algebraic notation
+      bool IsWhiteToMove() const;
 
    private:
+      static bool IsMoveLegal(const Position &position, const Move &move);
+      static inline bool IsOpponentsPiece(char mine, char theirs);
+      static inline bool IsOnBoard(unsigned char file, unsigned char rank);
+      static bool IsRookMoveLegal(
+         const Position &position, const Move &move);
+      static bool IsBishopMoveLegal(
+         const Position &position, const Move &move);
+
       Position m_position;
    };
 }
