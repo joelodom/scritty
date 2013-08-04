@@ -279,12 +279,20 @@ bool UCIHandler::handle_ucinewgame(const uci_tokens &tokens)
 
    */
 
-   return tokens.size() > 0 && tokens[0] == "ucinewgame";
+   if (tokens.size() < 1 || tokens[0] != "ucinewgame")
+      return false;
+
+   m_engine.SetToStartPos();
+   return true;
 }
 
 bool UCIHandler::handle_position(const uci_tokens &tokens)
 {
    /* REQUIREMENT
+
+   * Before the engine is asked to search on a position, there will always be a
+   position command
+   to tell the engine about the current position.
 
    * position [fen <fenstring> | startpos ]  moves <move1> .... <movei>
 	   set up the position described in fenstring on the internal board and
@@ -303,7 +311,7 @@ bool UCIHandler::handle_position(const uci_tokens &tokens)
 
    if (tokens[1] == "startpos")
    {
-      // TODO set board to start position here
+      m_engine.SetToStartPos();
       return true;
    }
 
@@ -313,7 +321,20 @@ bool UCIHandler::handle_position(const uci_tokens &tokens)
       return false;
    }
 
-   // TODO handle fen here
+   /* REQUIREMENT
+
+   Move format:
+   ------------
+
+   The move format is in long algebraic notation.
+   A nullmove from the Engine to the GUI should be sent as 0000.
+   Examples:  e2e4, e7e5, e1g1 (white short castling), e7e8q (for promotion)
+
+   */
+
+   // see http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
+   
+   // TODO under construction
 
    return true;
 }

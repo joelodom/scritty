@@ -5,6 +5,7 @@
 
 #include <string>
 #include "UCIParser.h"
+#include "Engine.h"
 
 namespace scritty
 {
@@ -16,6 +17,9 @@ namespace scritty
       bool handle_quit(const uci_tokens &tokens);
       bool handle_ucinewgame(const uci_tokens &tokens);
       bool handle_position(const uci_tokens &tokens);
+
+   private:
+      Engine m_engine;
    };
 }
 

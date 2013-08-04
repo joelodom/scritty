@@ -74,9 +74,6 @@ int main(int argc, const char *argv[])
 * The engine will always be in forced mode which means it should never start calculating
   or pondering without receiving a "go" command first.
 
-* Before the engine is asked to search on a position, there will always be a position command
-  to tell the engine about the current position.
-
 * by default all the opening book handling is done by the GUI,
   but there is an option for the engine to use its own book ("OwnBook" option, see below)
 
@@ -88,16 +85,6 @@ int main(int argc, const char *argv[])
 * if the engine receives a command which is not supposed to come, for example "stop" when the engine is
   not calculating, it should also just ignore it.
   
-
-Move format:
-------------
-
-The move format is in long algebraic notation.
-A nullmove from the Engine to the GUI should be sent as 0000.
-Examples:  e2e4, e7e5, e1g1 (white short castling), e7e8q (for promotion)
-
-
-
 GUI to engine:
 --------------
 
