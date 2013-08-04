@@ -4,6 +4,7 @@
 #include "Logger.h"
 #include <iostream>
 #include "UCIParser.h"
+#include "gtest/gtest.h"
 
 using namespace scritty;
 
@@ -49,6 +50,14 @@ int main(int argc, const char *argv[])
 
       if (handler.handle_quit(tokens))
          break;
+
+      if (tokens[0] == "runtests")
+      {
+         ::testing::InitGoogleTest(&argc, (char**)argv);
+         int rv = RUN_ALL_TESTS();
+         Logger::GetStream() << "Test results: " << rv << std::endl;
+         std::cout << "Test results: " << rv << std::endl;
+      }
 
       // allow each command handler a chance to handle
       if (!

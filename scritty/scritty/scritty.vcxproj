@@ -75,6 +75,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\third-party\gtest-1.6.0\include;..\..\third-party\gtest-1.6.0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -99,6 +100,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>..\..\third-party\gtest-1.6.0\include;..\..\third-party\gtest-1.6.0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -107,9 +109,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\third-party\gtest-1.6.0\src\gtest-all.cc" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="scritty.cpp" />
+    <ClCompile Include="tests.cpp" />
     <ClCompile Include="UCIHandler.cpp" />
     <ClCompile Include="UCIParser.cpp" />
   </ItemGroup>
