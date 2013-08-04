@@ -4,6 +4,7 @@
 #define SCRITTY_UCIPARSER_H
 
 #include <vector>
+#include "Engine.h"
 
 typedef std::vector<std::string> uci_tokens;
 
@@ -14,6 +15,7 @@ namespace scritty
    public:
       static void BreakIntoTokens(
          const std::string &command, uci_tokens *tokens);
+      static void ParseMove(const std::string &s, Move *move);
    };
 }
 

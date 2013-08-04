@@ -24,3 +24,14 @@ using namespace scritty;
       std::istream_iterator<std::string>(),
       std::back_inserter(*tokens));
 }
+
+/*static*/ void UCIParser::ParseMove(const std::string &s, Move *move)
+{
+   // assumes properly formatted string
+   move->start_file = s[0] - 'a';
+   move->start_rank = s[1] - '1';
+   move->end_file = s[2] - 'a';
+   move->end_rank = s[3] - '1';
+   move->promotion_piece = s.size() > 4 ? s[4] : '\0';
+   // TODO: should promotion piece be uppercase for white?
+}
