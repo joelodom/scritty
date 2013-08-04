@@ -65,6 +65,7 @@ int main(int argc, const char *argv[])
          || handler.handle_uci(tokens)
          || handler.handle_ucinewgame(tokens)
          || handler.handle_position(tokens)
+         || handler.handle_go(tokens)
          ))
       {
          Logger::GetStream() << "Failed to process line: " << line << std::endl;

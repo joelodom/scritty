@@ -356,3 +356,8 @@ bool UCIHandler::handle_position(const uci_tokens &tokens)
 
    return true;
 }
+
+bool UCIHandler::handle_quit(const uci_tokens &tokens)
+{
+#error working here and on shall_we_play_a_game
+}

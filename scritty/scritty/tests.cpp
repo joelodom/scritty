@@ -3,12 +3,30 @@
 #include "gtest/gtest.h"
 #include "UCIParser.h"
 #include "Engine.h"
+#include "UCIHandler.h"
 
 using namespace scritty;
 
 TEST(test_gtest, test_gtest)
 {
    EXPECT_TRUE(true) << "law of noncontradiction failed";
+}
+
+namespace scritty // for FRIEND_TEST
+{
+   TEST(integration_tests, shall_we_play_a_game)
+   {
+      UCIHandler handler;
+
+      uci_tokens tokens;
+      UCIParser::BreakIntoTokens("position startpos moves e2e4", &tokens);
+      EXPECT_TRUE(handler.handle_position(tokens));
+      EXPECT_EQ('P', handler.m_engine.GetPieceAt("e4"));
+
+      tokens.clear();
+      UCIParser::BreakIntoTokens("go movetime 2000", &tokens);
+      EXPECT_TRUE(handler.handle_position(tokens));
+   }
 }
 
 TEST(uciparser_tests, test_break_into_tokens)
