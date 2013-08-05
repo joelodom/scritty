@@ -25,6 +25,12 @@ namespace scritty // for FRIEND_TEST
 
       tokens.clear();
       UCIParser::BreakIntoTokens("go movetime 2000", &tokens);
+      EXPECT_TRUE(handler.handle_go(tokens));
+      EXPECT_EQ('p', handler.m_engine.GetPieceAt("e5"));
+
+      tokens.clear();
+      UCIParser::BreakIntoTokens(
+         "position startpos moves e2e4 e7e5 g1f3", &tokens);
       EXPECT_TRUE(handler.handle_position(tokens));
    }
 }
@@ -149,4 +155,13 @@ TEST(engine_tests, test_legal_bishop_moves)
    EXPECT_TRUE(engine.ApplyMove("f1c4"));
    EXPECT_TRUE(engine.ApplyMove("d7d5"));
    EXPECT_TRUE(engine.ApplyMove("c4d5")); // capture
+}
+
+TEST(engine_tests, test_legal_knight_move)
+{
+   Engine engine;
+   EXPECT_TRUE(engine.ApplyMove("e2e4"));
+   EXPECT_TRUE(engine.ApplyMove("e7e5"));
+   EXPECT_TRUE(engine.ApplyMove("g1f3"));
+   EXPECT_EQ('N', engine.GetPieceAt("f3"));
 }

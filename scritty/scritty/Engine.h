@@ -50,9 +50,11 @@ namespace scritty
       static bool IsMoveLegal(const Position &position, const Move &move);
       static inline bool IsOpponentsPiece(char mine, char theirs);
       static inline bool IsOnBoard(unsigned char file, unsigned char rank);
-      static bool IsRookMoveLegal(
+      static inline bool IsRookMoveLegal(
          const Position &position, const Move &move);
-      static bool IsBishopMoveLegal(
+      static inline bool IsBishopMoveLegal(
+         const Position &position, const Move &move);
+      static inline bool IsKnightMoveLegal(
          const Position &position, const Move &move);
 
       Position m_position;

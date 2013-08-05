@@ -46,7 +46,7 @@ bool Engine::ApplyMove(const std::string &str)
       return true;
    }
 
-   Logger::LogMessage("illegal move");
+   Logger::LogMessage("Illegal move.");
    return false;
 }
 
@@ -65,7 +65,7 @@ bool Engine::IsWhiteToMove() const
    return (mine < 'Z' && theirs > 'a') || (mine > 'a' && theirs < 'Z');
 }
 
-/*static*/ bool Engine::IsRookMoveLegal(
+/*static*/ inline bool Engine::IsRookMoveLegal(
    const Position &position, const Move &move)
 {
    if (move.start_file == move.end_file)
@@ -131,7 +131,7 @@ bool Engine::IsWhiteToMove() const
    return false; // moved off rank or file
 }
 
-/*static*/ bool Engine::IsBishopMoveLegal(
+/*static*/ inline bool Engine::IsBishopMoveLegal(
    const Position &position, const Move &move)
 {
    char file_increment = move.end_file > move.start_file ? 1 : -1;
@@ -154,6 +154,45 @@ bool Engine::IsWhiteToMove() const
    }
 
    return true;
+}
+
+/*static*/ inline bool Engine::IsKnightMoveLegal(
+   const Position &position, const Move &move)
+{
+   // check that it is a valid motion
+
+   if ((move.end_rank == move.start_rank + 2
+      && move.end_file == move.start_file - 1)
+
+      || (move.end_rank == move.start_rank + 2
+      && move.end_file == move.start_file + 1)
+
+      || (move.end_rank == move.start_rank + 1
+      && move.end_file == move.start_file + 2)
+
+      || (move.end_rank == move.start_rank - 1
+      && move.end_file == move.start_file + 2)
+
+      || (move.end_rank == move.start_rank - 2
+      && move.end_file == move.start_file + 1)
+
+      || (move.end_rank == move.start_rank - 2
+      && move.end_file == move.start_file - 1)
+
+      || (move.end_rank == move.start_rank - 1
+      && move.end_file == move.start_file - 2)
+
+      || (move.end_rank == move.start_rank + 1
+      && move.end_file == move.start_file - 2))
+   {
+      // check that it is a valid empty square or capture
+      return position.m_board.m_squares[move.end_file][move.end_rank] == '\0'
+         || IsOpponentsPiece(
+         position.m_board.m_squares[move.start_file][move.start_rank],
+         position.m_board.m_squares[move.end_file][move.end_rank]);
+   }
+
+   return false;
 }
 
 /*static*/ bool Engine::IsMoveLegal(const Position &position, const Move &move)
@@ -240,6 +279,9 @@ bool Engine::IsWhiteToMove() const
       break;
    case 'N': // TODO
    case 'n':
+      if (!IsKnightMoveLegal(position, move))
+         return false;
+      break;
    case 'K': // TODO
    case 'k':
    default:
