@@ -45,6 +45,7 @@ namespace scritty
       bool ApplyMove(const std::string &str); // algebraic notation
       char GetPieceAt(const std::string &square) const; // algebraic notation
       bool IsWhiteToMove() const;
+      void GetBestMove(std::string *best); // algebraic notation
 
    private:
       static bool IsMoveLegal(const Position &position, const Move &move);

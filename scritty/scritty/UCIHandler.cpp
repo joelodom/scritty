@@ -438,16 +438,20 @@ bool UCIHandler::handle_go(const uci_tokens &tokens)
 
       */
 
-      std::string move = "e7e5";
 
-      if (!m_engine.ApplyMove(move))
+      std::string best;
+      m_engine.GetBestMove(&best);
+
+      Logger::GetStream() << "Best move: " << best << std::endl;
+
+      if (!m_engine.ApplyMove(best))
       {
          Logger::GetStream() << "Failed to apply own move: "
-            << move << std::endl;
+            << best << std::endl;
          return false;
       }
 
-      std::cout << "bestmove " << move << std::endl;
+      std::cout << "bestmove " << best << std::endl;
 
       return true;
    }

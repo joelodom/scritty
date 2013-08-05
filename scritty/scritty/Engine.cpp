@@ -140,20 +140,21 @@ bool Engine::IsWhiteToMove() const
    char file = move.start_file + file_increment;
    char rank = move.start_rank + rank_increment;
 
-   while (file != move.end_file && rank != move.end_rank)
+   while (file != move.end_file || rank != move.end_rank)
    {
       if (!IsOnBoard(file, rank))
          return false;
       if (position.m_board.m_squares[file][rank] != '\0')
-         return IsOpponentsPiece(
-         position.m_board.m_squares[move.start_file][move.start_rank],
-         position.m_board.m_squares[file][rank])
-         && file == move.end_file && rank == move.end_rank;
+         return false;
       file += file_increment;
       rank += rank_increment;
    }
 
-   return true;
+   // we are at the end file and rank, so motion was legal and not blocked
+
+   return position.m_board.m_squares[file][rank] == '\0' || IsOpponentsPiece(
+      position.m_board.m_squares[move.start_file][move.start_rank],
+      position.m_board.m_squares[file][rank]);
 }
 
 /*static*/ inline bool Engine::IsKnightMoveLegal(
@@ -221,7 +222,8 @@ bool Engine::IsWhiteToMove() const
 
    switch (piece)
    {
-   case 'P': // TODO: en passant, promotion, captures
+   case 'P': // TODO: en passant, promotion
+#error implementing pawn captures next
       if (move.start_rank == 1)
       {
          if (move.end_rank - move.start_rank > 2)
@@ -296,4 +298,24 @@ bool Engine::IsWhiteToMove() const
 char Engine::GetPieceAt(const std::string &square) const
 {
    return m_position.m_board.m_squares[square[0] - 'a'][square[1] - '1'];
+}
+
+void Engine::GetBestMove(std::string *best)
+{
+   // possibly the smartest chess algorithm of all time
+
+   Move move;
+
+   do
+   {
+      move.start_file = rand() % 8;
+      move.start_rank = rand() % 8;
+      move.end_file = rand() % 8;
+      move.end_rank = rand() % 8;
+   } while (!IsMoveLegal(m_position, move));
+
+   *best = move.start_file + 'a';
+   *best += move.start_rank + '1';
+   *best += move.end_file + 'a';
+   *best += move.end_rank + '1';
 }
