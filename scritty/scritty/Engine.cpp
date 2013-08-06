@@ -27,6 +27,15 @@ Engine::Engine()
    SetToStartPos();
 }
 
+/*static*/ void Engine::ApplyKnownLegalMoveToPosition(const Move &move,
+   Position *position)
+{
+   position->m_board.m_squares[move.end_file][move.end_rank]
+   = position->m_board.m_squares[move.start_file][move.start_rank];
+   position->m_board.m_squares[move.start_file][move.start_rank] = '\0';
+   position->m_white_to_move = !position->m_white_to_move;
+}
+
 bool Engine::ApplyMove(const std::string &str)
 {
    Move move;
@@ -39,10 +48,7 @@ bool Engine::ApplyMove(const std::string &str)
 
    if (IsMoveLegal(m_position, move))
    {
-      m_position.m_board.m_squares[move.end_file][move.end_rank]
-         = m_position.m_board.m_squares[move.start_file][move.start_rank];
-      m_position.m_board.m_squares[move.start_file][move.start_rank] = '\0';
-      m_position.m_white_to_move = !m_position.m_white_to_move;
+      ApplyKnownLegalMoveToPosition(move, &m_position);
       return true;
    }
 
@@ -196,6 +202,25 @@ bool Engine::IsWhiteToMove() const
    return false;
 }
 
+/*static*/ bool Engine::CanPieceBeCapturedOnNextMove(
+   unsigned char file, unsigned char rank, const Position &position)
+{
+   Move move;
+   move.end_file = file;
+   move.end_rank = rank;
+   
+   for (move.start_rank = 0; move.start_rank <= 7; ++move.start_rank)
+   {
+      for (move.start_file = 0; move.start_file <= 7; ++move.start_file)
+      {
+         if (IsMoveLegal(position, move))
+            return true;
+      }
+   }
+
+   return false;
+}
+
 /*static*/ bool Engine::IsMoveLegal(const Position &position, const Move &move)
 {
    // is this the correct player to move and is there a piece there?
@@ -203,9 +228,9 @@ bool Engine::IsWhiteToMove() const
    const char piece
       = position.m_board.m_squares[move.start_file][move.start_rank];
 
-   if ((piece < 'Z' && !position.m_white_to_move)
-      || (piece > 'a' && position.m_white_to_move)
-      || (piece == '\0'))
+   if ((piece == '\0')
+      || (piece < 'Z' && !position.m_white_to_move)
+      || (piece > 'a' && position.m_white_to_move))
       return false;
 
    // did the piece actually move?
@@ -313,7 +338,23 @@ bool Engine::IsWhiteToMove() const
       return false; // ???
    }
 
-   // if king was in check, is now king out of check? TODO
+   // is my king in check after the move?
+
+   Position new_position(position);
+   ApplyKnownLegalMoveToPosition(move, &new_position);
+   char my_king = position.m_white_to_move ? 'K' : 'k';
+
+   for (unsigned char rank = 0; rank <= 7; ++rank)
+   {
+      for (unsigned char file = 0; file <= 7; ++file)
+      {
+         if (new_position.m_board.m_squares[file][rank] == my_king)
+         {
+            if (CanPieceBeCapturedOnNextMove(file, rank, new_position))
+               return false;
+         }
+      }
+   }
 
    return true;
 }

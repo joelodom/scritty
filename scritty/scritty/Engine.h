@@ -57,6 +57,11 @@ namespace scritty
          const Position &position, const Move &move);
       static inline bool IsKnightMoveLegal(
          const Position &position, const Move &move);
+      static void ApplyKnownLegalMoveToPosition(const Move &move,
+         Position *position);
+      static bool CanPieceBeCapturedOnNextMove(
+         unsigned char file, unsigned char rank,
+         const Position &position);
 
       Position m_position;
    };
