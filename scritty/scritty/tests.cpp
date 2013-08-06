@@ -194,5 +194,27 @@ TEST(engine_tests, move_test_pawn_capture)
    EXPECT_TRUE(engine.ApplyMove("b7b5"));
    EXPECT_TRUE(engine.ApplyMove("c3d5"));
    EXPECT_TRUE(engine.ApplyMove("c8f5"));
-   EXPECT_TRUE(engine.ApplyMove("e4f5"));
+   EXPECT_TRUE(engine.ApplyMove("e4f5")); // pawn capture
+}
+
+TEST(engine_tests, illegal_move_test_3)
+{
+   // e2e4 b7b5 f1b5 c8b7 g1f3 d8c8 d2d4 a7a5 c1f4 e7e6 b1c3 f8b4 f4d2 f7f6 a2a3
+   Engine engine;
+   EXPECT_TRUE(engine.ApplyMove("e2e4"));
+   EXPECT_TRUE(engine.ApplyMove("b7b5"));
+   EXPECT_TRUE(engine.ApplyMove("f1b5"));
+   EXPECT_TRUE(engine.ApplyMove("c8b7"));
+   EXPECT_TRUE(engine.ApplyMove("g1f3"));
+   EXPECT_TRUE(engine.ApplyMove("d8c8"));
+   EXPECT_TRUE(engine.ApplyMove("d2d4"));
+   EXPECT_TRUE(engine.ApplyMove("a7a5"));
+   EXPECT_TRUE(engine.ApplyMove("c1f4"));
+   EXPECT_TRUE(engine.ApplyMove("e7e6"));
+   EXPECT_TRUE(engine.ApplyMove("b1c3"));
+   EXPECT_TRUE(engine.ApplyMove("f8b4"));
+   EXPECT_TRUE(engine.ApplyMove("f4d2"));
+   EXPECT_TRUE(engine.ApplyMove("f7f6"));
+   EXPECT_TRUE(engine.ApplyMove("a2a3"));
+   EXPECT_FALSE(engine.ApplyMove("d7d5")); // illegal -- puts king in check
 }

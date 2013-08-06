@@ -223,7 +223,18 @@ bool Engine::IsWhiteToMove() const
    switch (piece)
    {
    case 'P': // TODO: en passant, promotion
-#error implementing pawn captures next
+      if (move.end_file == move.start_file - 1
+         || move.end_file == move.start_file + 1)
+      {
+         // capture
+         if (move.end_rank != move.start_rank + 1)
+            return false;
+         if (!IsOpponentsPiece(piece,
+            position.m_board.m_squares[move.end_file][move.end_rank]))
+            return false;
+         break;
+      }
+
       if (move.start_rank == 1)
       {
          if (move.end_rank - move.start_rank > 2)
@@ -244,6 +255,18 @@ bool Engine::IsWhiteToMove() const
 
       break;
    case 'p':
+      if (move.end_file == move.start_file - 1
+         || move.end_file == move.start_file + 1)
+      {
+         // capture
+         if (move.end_rank != move.start_rank - 1)
+            return false;
+         if (!IsOpponentsPiece(piece,
+            position.m_board.m_squares[move.end_file][move.end_rank]))
+            return false;
+         break;
+      }
+
       if (move.start_rank == 6)
       {
          if (move.start_rank - move.end_rank > 2)
