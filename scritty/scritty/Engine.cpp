@@ -254,7 +254,8 @@ bool Engine::IsWhiteToMove() const
          // capture
          if (move.end_rank != move.start_rank + 1)
             return false;
-         if (!IsOpponentsPiece(piece,
+         if (position.m_board.m_squares[move.end_file][move.end_rank] == '\0'
+            || !IsOpponentsPiece(piece,
             position.m_board.m_squares[move.end_file][move.end_rank]))
             return false;
          break;
@@ -286,7 +287,8 @@ bool Engine::IsWhiteToMove() const
          // capture
          if (move.end_rank != move.start_rank - 1)
             return false;
-         if (!IsOpponentsPiece(piece,
+         if (position.m_board.m_squares[move.end_file][move.end_rank] == '\0'
+            || !IsOpponentsPiece(piece,
             position.m_board.m_squares[move.end_file][move.end_rank]))
             return false;
          break;
