@@ -226,3 +226,34 @@ TEST(engine_tests, illegal_move_test_4)
    EXPECT_TRUE(engine.ApplyMove("b1c3"));
    EXPECT_FALSE(engine.ApplyMove("a7b6")); // pawn diagonal without capture
 }
+
+TEST(engine_tests, illegal_move_test_5)
+{
+   // e2e4 d7d5 b1c3 b7b5 c3b5 c8f5 e4f5 d8d6 b5d6 e7d6 f1b5 c7c6 b5c6
+   Engine engine;
+   EXPECT_TRUE(engine.ApplyMove("e2e4"));
+   EXPECT_TRUE(engine.ApplyMove("d7d5"));
+   EXPECT_TRUE(engine.ApplyMove("b1c3"));
+   EXPECT_TRUE(engine.ApplyMove("b7b5"));
+   EXPECT_TRUE(engine.ApplyMove("c3b5"));
+   EXPECT_TRUE(engine.ApplyMove("c8f5"));
+   EXPECT_TRUE(engine.ApplyMove("e4f5"));
+   EXPECT_TRUE(engine.ApplyMove("d8d6"));
+   EXPECT_TRUE(engine.ApplyMove("b5d6"));
+   EXPECT_TRUE(engine.ApplyMove("e7d6"));
+   EXPECT_TRUE(engine.ApplyMove("f1b5"));
+   EXPECT_TRUE(engine.ApplyMove("c7c6"));
+   EXPECT_TRUE(engine.ApplyMove("b5c6"));
+   EXPECT_EQ('\0', engine.GetPieceAt("d7"));
+   EXPECT_FALSE(engine.ApplyMove("d6d7")); // illegal -- backward pawn move
+}
+
+TEST(engine_tests, castle_test)
+{
+   UCIHandler handler;
+   uci_tokens tokens;
+   UCIParser::BreakIntoTokens(
+      "position startpos moves e2e4 d7d5 e4d5 b7b5 f1b5 b8d7 g1f3 f7f6 e1g1",
+      &tokens);
+   EXPECT_TRUE(handler.handle_position(tokens));
+}

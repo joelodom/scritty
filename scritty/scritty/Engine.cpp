@@ -223,6 +223,10 @@ bool Engine::IsWhiteToMove() const
 
 /*static*/ bool Engine::IsMoveLegal(const Position &position, const Move &move)
 {
+   // TODO: go to pre-calculated move lists like:
+   // legal_moves[piece][start_file][start_rank][end_file][end_rank] is a null
+   // terminated list of squares to check for interposing pieces
+
    // is this the correct player to move and is there a piece there?
 
    const char piece
@@ -271,7 +275,8 @@ bool Engine::IsWhiteToMove() const
       }
       else
       {
-         if (move.end_rank - move.start_rank > 1)
+         if (move.end_rank < move.start_rank
+            || move.end_rank - move.start_rank > 1)
             return false;
       }
 
@@ -304,7 +309,8 @@ bool Engine::IsWhiteToMove() const
       }
       else
       {
-         if (move.start_rank - move.end_rank > 1)
+         if (move.end_rank > move.start_rank
+            || move.start_rank - move.end_rank > 1)
             return false;
       }
 
