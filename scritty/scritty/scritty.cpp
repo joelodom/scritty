@@ -41,7 +41,8 @@ int main(int argc, const char *argv[])
 
    */
 
-   for (std::string line; std::getline(std::cin, line);)
+   std::string line;
+   while (std::getline(std::cin, line))
    {
       Logger::GetStream() << "Received line: " << line << std::endl;
 

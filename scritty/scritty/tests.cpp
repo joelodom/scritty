@@ -4,6 +4,11 @@
 #include "UCIParser.h"
 #include "Engine.h"
 #include "UCIHandler.h"
+#include <fstream>
+
+#define GAMES_FILE "C:\\Users\\Joel\\Google Drive\\chess_games_db" \
+   "\\3965020games.uci"
+#define GAMES_IN_FILE 3965020
 
 using namespace scritty;
 
@@ -18,22 +23,59 @@ namespace scritty // for FRIEND_TEST
 {
    TEST(integration_tests, shall_we_play_a_game)
    {
-      //UCIHandler handler;
+      UCIHandler handler;
 
-      //uci_tokens tokens;
-      //UCIParser::BreakIntoTokens("position startpos moves e2e4", &tokens);
-      //EXPECT_TRUE(handler.handle_position(tokens));
-      //EXPECT_EQ('P', handler.m_engine.GetPieceAt("e4"));
+      uci_tokens tokens;
+      UCIParser::BreakIntoTokens("position startpos moves e2e4", &tokens);
+      EXPECT_TRUE(handler.handle_position(tokens));
+      EXPECT_EQ('P', handler.m_engine.GetPieceAt("e4"));
 
-      //tokens.clear();
-      //UCIParser::BreakIntoTokens("go movetime 2000", &tokens);
-      //EXPECT_TRUE(handler.handle_go(tokens));
-      //EXPECT_EQ('p', handler.m_engine.GetPieceAt("e5"));
+      tokens.clear();
+      UCIParser::BreakIntoTokens("go movetime 2000", &tokens);
+      EXPECT_TRUE(handler.handle_go(tokens));
+      //EXPECT_EQ('p', handler.m_engine.GetPieceAt("e7"));
 
-      //tokens.clear();
-      //UCIParser::BreakIntoTokens(
-      //   "position startpos moves e2e4 e7e5 g1f3", &tokens);
-      //EXPECT_TRUE(handler.handle_position(tokens));
+      tokens.clear();
+      UCIParser::BreakIntoTokens(
+         "position startpos moves e2e4 e7e5 g1f3", &tokens);
+      EXPECT_TRUE(handler.handle_position(tokens));
+   }
+
+   TEST(integration_tests, DISABLED_play_through_game_database)
+   {
+      // open the massive games file
+      std::fstream in_file(GAMES_FILE);
+      ASSERT_TRUE(in_file.good());
+
+      // read file line-by-line
+      // use ASSERTs so that we stop on first problem
+
+      std::string line;
+      size_t game = 1;
+      while (std::getline(in_file, line))
+      {
+         if (line.size() < 1 || line[0] == '[')
+            continue;
+
+         std::cout << "Processing game " << game << " of "
+            << GAMES_IN_FILE << "." << std::endl;
+
+         UCIHandler handler;
+         uci_tokens tokens;
+         UCIParser::BreakIntoTokens("position startpos moves " + line, &tokens);
+
+         ASSERT_GT(tokens.size(), 0);
+         ASSERT_TRUE(tokens[tokens.size() - 1] == "0-1"
+            || tokens[tokens.size() - 1] == "1-0"
+            || tokens[tokens.size() - 1] == "1/2-1/2");
+         tokens.pop_back();
+
+         ASSERT_TRUE(handler.handle_position(tokens)) << "Failed on " << line;
+
+         ++game;
+      }
+
+      in_file.close();
    }
 }
 
@@ -59,13 +101,13 @@ TEST(uciparser_tests, test_parse_move)
    EXPECT_EQ(3, move.end_rank);
    EXPECT_EQ(NO_PIECE, move.promotion_piece);
 
-   UCIParser::ParseMove("a7a8q", &move);
+   UCIParser::ParseMove("a7a8Q", &move);
 
    EXPECT_EQ(0, move.start_file);
    EXPECT_EQ(6, move.start_rank);
    EXPECT_EQ(0, move.end_file);
    EXPECT_EQ(7, move.end_rank);
-   EXPECT_EQ('q', move.promotion_piece);
+   EXPECT_EQ('Q', move.promotion_piece);
 }
 
 TEST(engine_tests, test_set_to_start_pos)
@@ -274,4 +316,19 @@ TEST(engine_tests, illegal_move_test_6)
    EXPECT_TRUE(engine.ApplyMove("d7d5"));
    EXPECT_TRUE(engine.ApplyMove("e4d5"));
    EXPECT_FALSE(engine.ApplyMove("e8e5"));
+}
+
+TEST(engine_tests, illegal_move_test_7)
+{
+   Engine engine;
+   EXPECT_TRUE(engine.ApplyMove("e2e4"));
+   EXPECT_TRUE(engine.ApplyMove("d7d5"));
+   EXPECT_TRUE(engine.ApplyMove("b1c3"));
+   EXPECT_TRUE(engine.ApplyMove("d5d4"));
+   EXPECT_TRUE(engine.ApplyMove("c3e2"));
+   EXPECT_TRUE(engine.ApplyMove("e7e5"));
+   EXPECT_TRUE(engine.ApplyMove("d2d3"));
+   EXPECT_TRUE(engine.ApplyMove("g8f6"));
+   EXPECT_TRUE(engine.ApplyMove("g1f3"));
+   EXPECT_TRUE(engine.ApplyMove("f8d6"));
 }

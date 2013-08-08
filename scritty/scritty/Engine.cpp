@@ -9,14 +9,14 @@ using namespace scritty;
 void Engine::SetToStartPos()
 {
    memcpy (m_position.m_board.m_squares,
-      "RP\0\0\0\0pR"
+      "RP\0\0\0\0pr"
       "NP\0\0\0\0pn"
       "BP\0\0\0\0pb"
       "QP\0\0\0\0pq"
       "KP\0\0\0\0pk"
       "BP\0\0\0\0pb"
       "NP\0\0\0\0pn"
-      "RP\0\0\0\0pR", 64);
+      "RP\0\0\0\0pr", 64);
 
    m_position.m_white_to_move = true;
    m_position.m_white_may_castle_short = true;
@@ -462,8 +462,13 @@ bool Engine::IsWhiteToMove() const
       }
       else // normal move
       {
-         if (move.end_file - move.start_file > 1
-            || move.end_rank - move.start_rank > 1)
+         char files_moved = (char)move.end_file - (char)move.start_file;
+         if (files_moved < 0)
+            files_moved = -files_moved;
+         char ranks_moved = (char)move.end_rank - (char)move.start_rank;
+         if (ranks_moved < 0)
+            ranks_moved = -ranks_moved;
+         if (files_moved > 1 || ranks_moved > 1)
             return false;
          if (position.m_board.m_squares[move.end_file][move.end_rank]
          != NO_PIECE && !IsOpponentsPiece(piece,
@@ -511,9 +516,13 @@ bool Engine::IsWhiteToMove() const
       }
       else // normal move
       {
-#error fix failing test here (and above for white)
-         if (move.end_file - move.start_file > 1
-            || move.end_rank - move.start_rank > 1)
+         char files_moved = (char)move.end_file - (char)move.start_file;
+         if (files_moved < 0)
+            files_moved = -files_moved;
+         char ranks_moved = (char)move.end_rank - (char)move.start_rank;
+         if (ranks_moved < 0)
+            ranks_moved = -ranks_moved;
+         if (files_moved > 1 || ranks_moved > 1)
             return false;
          if (position.m_board.m_squares[move.end_file][move.end_rank]
          != NO_PIECE && !IsOpponentsPiece(piece,
