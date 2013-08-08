@@ -7,6 +7,8 @@
 
 using namespace scritty;
 
+// TODO: add huge PGN database and test to check all moves for validity
+
 TEST(test_gtest, test_gtest)
 {
    EXPECT_TRUE(true) << "law of noncontradiction failed";
@@ -55,7 +57,7 @@ TEST(uciparser_tests, test_parse_move)
    EXPECT_EQ(1, move.start_rank);
    EXPECT_EQ(4, move.end_file);
    EXPECT_EQ(3, move.end_rank);
-   EXPECT_EQ('\0', move.promotion_piece);
+   EXPECT_EQ(NO_PIECE, move.promotion_piece);
 
    UCIParser::ParseMove("a7a8q", &move);
 
@@ -86,7 +88,7 @@ TEST(engine_tests, test_apply_move_e2e4)
    Engine engine;
 
    EXPECT_TRUE(engine.ApplyMove("e2e4"));
-   EXPECT_EQ('\0', engine.GetPieceAt("e2"));
+   EXPECT_EQ(NO_PIECE, engine.GetPieceAt("e2"));
    EXPECT_EQ('P', engine.GetPieceAt("e4"));
    EXPECT_FALSE(engine.IsWhiteToMove());
 }
@@ -229,7 +231,6 @@ TEST(engine_tests, illegal_move_test_4)
 
 TEST(engine_tests, illegal_move_test_5)
 {
-   // e2e4 d7d5 b1c3 b7b5 c3b5 c8f5 e4f5 d8d6 b5d6 e7d6 f1b5 c7c6 b5c6
    Engine engine;
    EXPECT_TRUE(engine.ApplyMove("e2e4"));
    EXPECT_TRUE(engine.ApplyMove("d7d5"));
@@ -244,8 +245,16 @@ TEST(engine_tests, illegal_move_test_5)
    EXPECT_TRUE(engine.ApplyMove("f1b5"));
    EXPECT_TRUE(engine.ApplyMove("c7c6"));
    EXPECT_TRUE(engine.ApplyMove("b5c6"));
-   EXPECT_EQ('\0', engine.GetPieceAt("d7"));
+   EXPECT_EQ(NO_PIECE, engine.GetPieceAt("d7"));
    EXPECT_FALSE(engine.ApplyMove("d6d7")); // illegal -- backward pawn move
+}
+
+TEST(engine_tests, king_move_test)
+{
+   Engine engine;
+   EXPECT_TRUE(engine.ApplyMove("e2e4"));
+   EXPECT_TRUE(engine.ApplyMove("d7d5"));
+   EXPECT_TRUE(engine.ApplyMove("f1e2"));
 }
 
 TEST(engine_tests, castle_test)
@@ -256,4 +265,13 @@ TEST(engine_tests, castle_test)
       "position startpos moves e2e4 d7d5 e4d5 b7b5 f1b5 b8d7 g1f3 f7f6 e1g1",
       &tokens);
    EXPECT_TRUE(handler.handle_position(tokens));
+}
+
+TEST(engine_tests, illegal_move_test_6)
+{
+   Engine engine;
+   EXPECT_TRUE(engine.ApplyMove("e2e4"));
+   EXPECT_TRUE(engine.ApplyMove("d7d5"));
+   EXPECT_TRUE(engine.ApplyMove("e4d5"));
+   EXPECT_FALSE(engine.ApplyMove("e8e5"));
 }

@@ -6,6 +6,8 @@
 #include <cstring>
 #include <string>
 
+#define NO_PIECE '\0'
+
 namespace scritty
 {
    struct Move
@@ -14,7 +16,7 @@ namespace scritty
       unsigned char start_rank; // 0 to 7
       unsigned char end_file;
       unsigned char end_rank;
-      char promotion_piece; // '\0' for none
+      char promotion_piece; // NO_PIECE for none
    };
 
    class Board
@@ -35,6 +37,8 @@ namespace scritty
       Position() {}
       Board m_board;
       bool m_white_to_move;
+      bool m_white_may_castle_short, m_white_may_castle_long;
+      bool m_black_may_castle_short, m_black_may_castle_long;
    };
 
    class Engine
@@ -59,7 +63,7 @@ namespace scritty
          const Position &position, const Move &move);
       static void ApplyKnownLegalMoveToPosition(const Move &move,
          Position *position);
-      static bool CanPieceBeCapturedOnNextMove(
+      static bool IsOpponentAttackingSquare(
          unsigned char file, unsigned char rank,
          const Position &position);
 

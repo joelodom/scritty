@@ -19,7 +19,10 @@ void Engine::SetToStartPos()
       "RP\0\0\0\0pR", 64);
 
    m_position.m_white_to_move = true;
-   // TODO: reset all other position stuff
+   m_position.m_white_may_castle_short = true;
+   m_position.m_white_may_castle_long = true;
+   m_position.m_black_may_castle_short = true;
+   m_position.m_black_may_castle_long = true;
 }
 
 Engine::Engine()
@@ -30,9 +33,77 @@ Engine::Engine()
 /*static*/ void Engine::ApplyKnownLegalMoveToPosition(const Move &move,
    Position *position)
 {
+   // move the piece
    position->m_board.m_squares[move.end_file][move.end_rank]
    = position->m_board.m_squares[move.start_file][move.start_rank];
-   position->m_board.m_squares[move.start_file][move.start_rank] = '\0';
+   position->m_board.m_squares[move.start_file][move.start_rank] = NO_PIECE;
+
+   // handle castle rules
+
+   if (move.start_rank == 0)
+   {
+      if (move.start_file == 0)
+      {
+         position->m_white_may_castle_long = false;
+      }
+      else if (move.start_file == 7)
+      {
+         position->m_white_may_castle_short = false;
+      }
+      else if (move.start_file == 4)
+      {
+         // possibly move rook
+         if (position->m_board.m_squares[move.end_file][move.end_rank] == 'K')
+         {
+            if (move.end_file == 2)
+            {
+               position->m_board.m_squares[0][0] = NO_PIECE;
+               position->m_board.m_squares[3][0] = 'R';
+            }
+            else if (move.end_file == 6)
+            {
+               position->m_board.m_squares[7][0] = NO_PIECE;
+               position->m_board.m_squares[5][0] = 'R';
+            }
+
+            position->m_white_may_castle_long = false;
+            position->m_white_may_castle_short = false;
+         }
+      }
+   }
+   else if (move.start_rank == 7)
+   {
+      if (move.start_file == 0)
+      {
+         position->m_black_may_castle_long = false;
+      }
+      else if (move.start_file == 7)
+      {
+         position->m_black_may_castle_short = false;
+      }
+      else if (move.start_file == 4)
+      {
+         // possibly move rook
+         if (position->m_board.m_squares[move.end_file][move.end_rank] == 'k')
+         {
+            if (move.end_file == 2)
+            {
+               position->m_board.m_squares[0][7] = NO_PIECE;
+               position->m_board.m_squares[3][7] = 'r';
+            }
+            else if (move.end_file == 6)
+            {
+               position->m_board.m_squares[7][7] = NO_PIECE;
+               position->m_board.m_squares[5][7] = 'r';
+            }
+
+            position->m_black_may_castle_long = false;
+            position->m_black_may_castle_short = false;
+         }
+      }
+   }
+
+   // switch sides
    position->m_white_to_move = !position->m_white_to_move;
 }
 
@@ -81,7 +152,7 @@ bool Engine::IsWhiteToMove() const
          for (unsigned char rank = move.start_rank + 1;
             rank <= move.end_rank; ++rank)
          {
-            if (position.m_board.m_squares[move.start_file][rank] != '\0')
+            if (position.m_board.m_squares[move.start_file][rank] != NO_PIECE)
               return IsOpponentsPiece(
               position.m_board.m_squares[move.start_file][move.start_rank],
               position.m_board.m_squares[move.end_file][rank])
@@ -93,7 +164,7 @@ bool Engine::IsWhiteToMove() const
          for (unsigned char rank = move.start_rank - 1;
             rank >= move.end_rank; --rank)
          {
-            if (position.m_board.m_squares[move.start_file][rank] != '\0')
+            if (position.m_board.m_squares[move.start_file][rank] != NO_PIECE)
               return IsOpponentsPiece(
               position.m_board.m_squares[move.start_file][move.start_rank],
               position.m_board.m_squares[move.end_file][rank])
@@ -111,7 +182,7 @@ bool Engine::IsWhiteToMove() const
          for (unsigned char file = move.start_file + 1;
             file <= move.end_file; ++file)
          {
-            if (position.m_board.m_squares[file][move.start_rank] != '\0')
+            if (position.m_board.m_squares[file][move.start_rank] != NO_PIECE)
               return IsOpponentsPiece(
               position.m_board.m_squares[move.start_file][move.start_rank],
               position.m_board.m_squares[file][move.end_rank])
@@ -123,7 +194,7 @@ bool Engine::IsWhiteToMove() const
          for (unsigned char file = move.start_file - 1;
             file >= move.end_file; --file)
          {
-            if (position.m_board.m_squares[file][move.start_rank] != '\0')
+            if (position.m_board.m_squares[file][move.start_rank] != NO_PIECE)
               return IsOpponentsPiece(
               position.m_board.m_squares[move.start_file][move.start_rank],
               position.m_board.m_squares[file][move.end_rank])
@@ -150,7 +221,7 @@ bool Engine::IsWhiteToMove() const
    {
       if (!IsOnBoard(file, rank))
          return false;
-      if (position.m_board.m_squares[file][rank] != '\0')
+      if (position.m_board.m_squares[file][rank] != NO_PIECE)
          return false;
       file += file_increment;
       rank += rank_increment;
@@ -158,7 +229,8 @@ bool Engine::IsWhiteToMove() const
 
    // we are at the end file and rank, so motion was legal and not blocked
 
-   return position.m_board.m_squares[file][rank] == '\0' || IsOpponentsPiece(
+   return position.m_board.m_squares[file][rank] == NO_PIECE
+      || IsOpponentsPiece(
       position.m_board.m_squares[move.start_file][move.start_rank],
       position.m_board.m_squares[file][rank]);
 }
@@ -193,8 +265,8 @@ bool Engine::IsWhiteToMove() const
       && move.end_file == move.start_file - 2))
    {
       // check that it is a valid empty square or capture
-      return position.m_board.m_squares[move.end_file][move.end_rank] == '\0'
-         || IsOpponentsPiece(
+      return position.m_board.m_squares[move.end_file][move.end_rank]
+      == NO_PIECE || IsOpponentsPiece(
          position.m_board.m_squares[move.start_file][move.start_rank],
          position.m_board.m_squares[move.end_file][move.end_rank]);
    }
@@ -202,22 +274,30 @@ bool Engine::IsWhiteToMove() const
    return false;
 }
 
-/*static*/ bool Engine::CanPieceBeCapturedOnNextMove(
+/*static*/ bool Engine::IsOpponentAttackingSquare(
    unsigned char file, unsigned char rank, const Position &position)
 {
    Move move;
    move.end_file = file;
    move.end_rank = rank;
+
+   // MUST switch back to obey const
+   const_cast<Position&>(position).m_white_to_move = !position.m_white_to_move;
    
    for (move.start_rank = 0; move.start_rank <= 7; ++move.start_rank)
    {
       for (move.start_file = 0; move.start_file <= 7; ++move.start_file)
       {
          if (IsMoveLegal(position, move))
+         {
+            const_cast<Position&>(position).m_white_to_move
+               = !position.m_white_to_move;
             return true;
+         }
       }
    }
 
+   const_cast<Position&>(position).m_white_to_move = !position.m_white_to_move;
    return false;
 }
 
@@ -232,7 +312,7 @@ bool Engine::IsWhiteToMove() const
    const char piece
       = position.m_board.m_squares[move.start_file][move.start_rank];
 
-   if ((piece == '\0')
+   if ((piece == NO_PIECE)
       || (piece < 'Z' && !position.m_white_to_move)
       || (piece > 'a' && position.m_white_to_move))
       return false;
@@ -258,8 +338,8 @@ bool Engine::IsWhiteToMove() const
          // capture
          if (move.end_rank != move.start_rank + 1)
             return false;
-         if (position.m_board.m_squares[move.end_file][move.end_rank] == '\0'
-            || !IsOpponentsPiece(piece,
+         if (position.m_board.m_squares[move.end_file][move.end_rank]
+         == NO_PIECE || !IsOpponentsPiece(piece,
             position.m_board.m_squares[move.end_file][move.end_rank]))
             return false;
          break;
@@ -270,7 +350,7 @@ bool Engine::IsWhiteToMove() const
          if (move.end_rank - move.start_rank > 2)
             return false;
          if (position.m_board.m_squares[move.end_file][move.start_rank + 1]
-         != '\0')
+         != NO_PIECE)
             return false; // blocked
       }
       else
@@ -281,7 +361,8 @@ bool Engine::IsWhiteToMove() const
       }
 
       if (move.start_file != move.end_file
-         || position.m_board.m_squares[move.end_file][move.end_rank] != '\0')
+         || position.m_board.m_squares[move.end_file][move.end_rank]
+      != NO_PIECE)
          return false;
 
       break;
@@ -292,8 +373,8 @@ bool Engine::IsWhiteToMove() const
          // capture
          if (move.end_rank != move.start_rank - 1)
             return false;
-         if (position.m_board.m_squares[move.end_file][move.end_rank] == '\0'
-            || !IsOpponentsPiece(piece,
+         if (position.m_board.m_squares[move.end_file][move.end_rank]
+         == NO_PIECE || !IsOpponentsPiece(piece,
             position.m_board.m_squares[move.end_file][move.end_rank]))
             return false;
          break;
@@ -304,7 +385,7 @@ bool Engine::IsWhiteToMove() const
          if (move.start_rank - move.end_rank > 2)
             return false;
          if (position.m_board.m_squares[move.end_file][move.start_rank - 1]
-         != '\0')
+         != NO_PIECE)
             return false; // blocked
       }
       else
@@ -315,7 +396,8 @@ bool Engine::IsWhiteToMove() const
       }
 
       if (move.start_file != move.end_file
-         || position.m_board.m_squares[move.end_file][move.end_rank] != '\0')
+         || position.m_board.m_squares[move.end_file][move.end_rank]
+      != NO_PIECE)
          return false;
 
       break;
@@ -335,13 +417,110 @@ bool Engine::IsWhiteToMove() const
          && !IsBishopMoveLegal(position, move))
          return false;
       break;
-   case 'N': // TODO
+   case 'N':
    case 'n':
       if (!IsKnightMoveLegal(position, move))
          return false;
       break;
-   case 'K': // TODO
+   case 'K':
+      if (move.start_file == 4 && move.start_rank == 0
+         && move.end_file == 6 && move.end_rank == 0) // castle short
+      {
+         if (!position.m_white_may_castle_short)
+            return false;
+
+         // check that there are no pieces at f1 or g1
+
+         if (position.m_board.m_squares[5][0] != NO_PIECE
+            || position.m_board.m_squares[6][0] != NO_PIECE)
+            return false;
+
+         // check that black does not attack e1 or f1
+
+         if (IsOpponentAttackingSquare(4, 0, position)
+            || IsOpponentAttackingSquare(5, 0, position))
+            return false;
+      }
+      else if (move.start_file == 4 && move.start_rank == 0
+         && move.end_file == 2 && move.end_rank == 0) // castle long
+      {
+         if (!position.m_white_may_castle_long)
+            return false;
+
+         // check that there are no pieces at b1, c1 or d1
+
+         if (position.m_board.m_squares[1][0] != NO_PIECE
+            || position.m_board.m_squares[2][0] != NO_PIECE
+            || position.m_board.m_squares[3][0] != NO_PIECE)
+            return false;
+
+         // check that black does not attack d1 or e1
+
+         if (IsOpponentAttackingSquare(3, 0, position)
+            || IsOpponentAttackingSquare(4, 0, position))
+            return false;
+      }
+      else // normal move
+      {
+         if (move.end_file - move.start_file > 1
+            || move.end_rank - move.start_rank > 1)
+            return false;
+         if (position.m_board.m_squares[move.end_file][move.end_rank]
+         != NO_PIECE && !IsOpponentsPiece(piece,
+            position.m_board.m_squares[move.end_file][move.end_rank]))
+            return false;
+      }
+      break;
    case 'k':
+      if (move.start_file == 4 && move.start_rank == 7
+         && move.end_file == 6 && move.end_rank == 7) // castle short
+      {
+         if (!position.m_black_may_castle_short)
+            return false;
+
+         // check that there are no pieces at f8 or g8
+
+         if (position.m_board.m_squares[5][7] != NO_PIECE
+            || position.m_board.m_squares[6][7] != NO_PIECE)
+            return false;
+
+         // check that white does not attack e8 or f8
+
+         if (IsOpponentAttackingSquare(4, 7, position)
+            || IsOpponentAttackingSquare(5, 7, position))
+            return false;
+      }
+      else if (move.start_file == 4 && move.start_rank == 7
+         && move.end_file == 2 && move.end_rank == 7) // castle long
+      {
+         if (!position.m_black_may_castle_long)
+            return false;
+
+         // check that there are no pieces at b8, c8 or d8
+
+         if (position.m_board.m_squares[1][7] != NO_PIECE
+            || position.m_board.m_squares[2][7] != NO_PIECE
+            || position.m_board.m_squares[3][7] != NO_PIECE)
+            return false;
+
+         // check that white does not attack d8 or e8
+
+         if (IsOpponentAttackingSquare(3, 7, position)
+            || IsOpponentAttackingSquare(4, 7, position))
+            return false;
+      }
+      else // normal move
+      {
+#error fix failing test here (and above for white)
+         if (move.end_file - move.start_file > 1
+            || move.end_rank - move.start_rank > 1)
+            return false;
+         if (position.m_board.m_squares[move.end_file][move.end_rank]
+         != NO_PIECE && !IsOpponentsPiece(piece,
+            position.m_board.m_squares[move.end_file][move.end_rank]))
+            return false;
+      }
+      break;
    default:
       return false; // ???
    }
@@ -350,6 +529,7 @@ bool Engine::IsWhiteToMove() const
 
    Position new_position(position);
    ApplyKnownLegalMoveToPosition(move, &new_position);
+   new_position.m_white_to_move = !new_position.m_white_to_move;
    char my_king = position.m_white_to_move ? 'K' : 'k';
 
    for (unsigned char rank = 0; rank <= 7; ++rank)
@@ -358,7 +538,7 @@ bool Engine::IsWhiteToMove() const
       {
          if (new_position.m_board.m_squares[file][rank] == my_king)
          {
-            if (CanPieceBeCapturedOnNextMove(file, rank, new_position))
+            if (IsOpponentAttackingSquare(file, rank, new_position))
                return false;
          }
       }
