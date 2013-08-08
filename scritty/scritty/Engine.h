@@ -7,6 +7,7 @@
 #include <string>
 
 #define NO_PIECE '\0'
+#define NO_EN_PASSANT 8
 
 namespace scritty
 {
@@ -39,6 +40,7 @@ namespace scritty
       bool m_white_to_move;
       bool m_white_may_castle_short, m_white_may_castle_long;
       bool m_black_may_castle_short, m_black_may_castle_long;
+      unsigned char en_passant_allowed_on;
    };
 
    class Engine

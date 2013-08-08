@@ -19,10 +19,13 @@ void Engine::SetToStartPos()
       "RP\0\0\0\0pr", 64);
 
    m_position.m_white_to_move = true;
+
    m_position.m_white_may_castle_short = true;
    m_position.m_white_may_castle_long = true;
    m_position.m_black_may_castle_short = true;
    m_position.m_black_may_castle_long = true;
+
+   m_position.en_passant_allowed_on = NO_EN_PASSANT;
 }
 
 Engine::Engine()
@@ -101,6 +104,27 @@ Engine::Engine()
             position->m_black_may_castle_short = false;
          }
       }
+   }
+
+   // handle en passant rules
+
+   if (move.start_rank == 1 && move.end_rank == 3
+      && position->m_board.m_squares[move.end_file][move.end_rank] == 'P')
+   {
+      // en passant capture by white
+      position->en_passant_allowed_on = move.start_file;
+      position->m_board.m_squares[move.end_file][4] = NO_PIECE;
+   }
+   else if (move.start_rank == 6 && move.end_rank == 4
+      && position->m_board.m_squares[move.end_file][move.end_rank] == 'p')
+   {
+      // en passant capture by black
+      position->en_passant_allowed_on = move.start_file;
+      position->m_board.m_squares[move.end_file][3] = NO_PIECE;
+   }
+   else
+   {
+      position->en_passant_allowed_on = NO_EN_PASSANT;
    }
 
    // switch sides
@@ -331,17 +355,24 @@ bool Engine::IsWhiteToMove() const
 
    switch (piece)
    {
-   case 'P': // TODO: en passant, promotion
+   case 'P': // TODO: promotion
       if (move.end_file == move.start_file - 1
          || move.end_file == move.start_file + 1)
       {
          // capture
+
          if (move.end_rank != move.start_rank + 1)
             return false;
+
          if (position.m_board.m_squares[move.end_file][move.end_rank]
          == NO_PIECE || !IsOpponentsPiece(piece,
             position.m_board.m_squares[move.end_file][move.end_rank]))
-            return false;
+         {
+            // handle en passant
+            if (move.end_rank != position.en_passant_allowed_on)
+               return false;
+         }
+
          break;
       }
 
@@ -371,12 +402,19 @@ bool Engine::IsWhiteToMove() const
          || move.end_file == move.start_file + 1)
       {
          // capture
+
          if (move.end_rank != move.start_rank - 1)
             return false;
+
          if (position.m_board.m_squares[move.end_file][move.end_rank]
          == NO_PIECE || !IsOpponentsPiece(piece,
             position.m_board.m_squares[move.end_file][move.end_rank]))
-            return false;
+         {
+            // handle en passant
+            if (move.end_rank != position.en_passant_allowed_on)
+               return false;
+         }
+
          break;
       }
 

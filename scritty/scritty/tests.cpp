@@ -41,7 +41,7 @@ namespace scritty // for FRIEND_TEST
       EXPECT_TRUE(handler.handle_position(tokens));
    }
 
-   TEST(integration_tests, DISABLED_play_through_game_database)
+   TEST(integration_tests, play_through_game_database)
    {
       // open the massive games file
       std::fstream in_file(GAMES_FILE);
@@ -332,3 +332,5 @@ TEST(engine_tests, illegal_move_test_7)
    EXPECT_TRUE(engine.ApplyMove("g1f3"));
    EXPECT_TRUE(engine.ApplyMove("f8d6"));
 }
+
+#error fix failing tests and add a test for en passant, making sure that the piece is removed
