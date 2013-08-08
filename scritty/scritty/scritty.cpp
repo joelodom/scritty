@@ -94,7 +94,7 @@ int main(int argc, const char *argv[])
 
 * if the engine receives a command which is not supposed to come, for example "stop" when the engine is
   not calculating, it should also just ignore it.
-  
+
 GUI to engine:
 --------------
 
@@ -135,7 +135,7 @@ These are all the command the engine gets from the interface.
 	Example:
 	   "register later"
 	   "register name Stefan MK code 4359874324"
-    
+
 * stop
 	stop calculating as soon as possible,
 	don't forget the "bestmove" and possibly the "ponder" token when finishing the search
@@ -161,7 +161,7 @@ Engine to GUI:
 	      TellGUI("copyprotection ok\n");
       else
          TellGUI("copyprotection error\n");
-         
+
 * registration
 	this is needed for engines that need a username and/or a code to function with all features.
 	Analog to the "copyprotection" command the engine can send "registration checking"
@@ -179,7 +179,7 @@ Engine to GUI:
 	and tell the user somehow that the engine is not registered.
 	This way the engine knows that the GUI can deal with the registration procedure and the user
 	will be informed that the engine is not properly registered.
-	      
+
 * info
 	the engine wants to send information to the GUI. This should be done whenever
    one of the info has changed.
@@ -268,7 +268,7 @@ GUI     engine
 // tell the engine to switch to UCI mode
 uci
 
-// engine identify  
+// engine identify
       id name Shredder
 		id author Stefan MK
 
@@ -325,14 +325,14 @@ go infinite
 
 
 		info depth 1 seldepth 0
-		info score cp 13  depth 1 nodes 13 time 15 pv f1b5 
+		info score cp 13  depth 1 nodes 13 time 15 pv f1b5
 		info depth 2 seldepth 2
 		info nps 15937
-		info score cp 14  depth 2 nodes 255 time 15 pv f1c4 f8c5 
+		info score cp 14  depth 2 nodes 255 time 15 pv f1c4 f8c5
 		info depth 2 seldepth 7 nodes 255
 		info depth 3 seldepth 7
 		info nps 26437
-		info score cp 20  depth 3 nodes 423 time 15 pv f1c4 g8f6 b1c3 
+		info score cp 20  depth 3 nodes 423 time 15 pv f1c4 g8f6 b1c3
 		info nps 41562
 		....
 
@@ -370,5 +370,13 @@ This is why the castle rights are specified with the letter of the castle rook's
 Upper case letters for white's and lower case letters for black's castling rights.
 Example: The normal chess position would be:
 rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w AHah -
+
+*/
+
+/* PARAMETERS TO MAKE SEARCHABLE VIA GENETIC ALGORITHM:
+
+ - Piece values based on square and game phase
+ - Square values (ability to attack square) based on square and game phase
+ - Game phase changes based on count of captured pieces
 
 */
