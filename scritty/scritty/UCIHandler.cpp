@@ -350,7 +350,7 @@ bool UCIHandler::handle_position(const uci_tokens &tokens)
       {
          if (!m_engine.ApplyMove(*it))
          {
-            Logger::LogMessage("ApplyMove failed.");
+            Logger::GetStream() << "ApplyMove failed on " << *it << std::endl;
             return false;
          }
       }

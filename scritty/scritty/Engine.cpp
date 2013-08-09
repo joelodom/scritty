@@ -197,7 +197,7 @@ bool Engine::IsWhiteToMove() const
       else
       {
          for (unsigned char rank = move.start_rank - 1;
-            rank >= move.end_rank; --rank)
+            (char)rank >= move.end_rank; --rank)
          {
             if (position.m_board.m_squares[move.start_file][rank] != NO_PIECE)
               return IsOpponentsPiece(
@@ -227,7 +227,7 @@ bool Engine::IsWhiteToMove() const
       else
       {
          for (unsigned char file = move.start_file - 1;
-            file >= move.end_file; --file)
+            (char)file >= move.end_file; --file)
          {
             if (position.m_board.m_squares[file][move.start_rank] != NO_PIECE)
               return IsOpponentsPiece(
