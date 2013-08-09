@@ -41,7 +41,7 @@ namespace scritty // for FRIEND_TEST
       EXPECT_TRUE(handler.handle_position(tokens));
    }
 
-   TEST(integration_tests, play_through_game_database)
+   TEST(integration_tests, DISABLED_play_through_game_database)
    {
       // open the massive games file
       std::fstream in_file(GAMES_FILE);
@@ -333,4 +333,33 @@ TEST(engine_tests, illegal_move_test_7)
    EXPECT_TRUE(engine.ApplyMove("f8d6"));
 }
 
-#error fix failing tests and add a test for en passant, making sure that the piece is removed
+TEST(engine_tests, en_passant_test)
+{
+   Engine engine;
+   EXPECT_TRUE(engine.ApplyMove("b1c3"));
+   EXPECT_TRUE(engine.ApplyMove("b7b6"));
+   EXPECT_TRUE(engine.ApplyMove("e2e4"));
+   EXPECT_TRUE(engine.ApplyMove("c8b7"));
+   EXPECT_TRUE(engine.ApplyMove("g1f3"));
+   EXPECT_TRUE(engine.ApplyMove("e7e6"));
+   EXPECT_TRUE(engine.ApplyMove("d2d4"));
+   EXPECT_TRUE(engine.ApplyMove("f8b4"));
+   EXPECT_TRUE(engine.ApplyMove("f1d3"));
+   EXPECT_TRUE(engine.ApplyMove("c7c5"));
+   EXPECT_TRUE(engine.ApplyMove("e1g1"));
+   EXPECT_TRUE(engine.ApplyMove("c5d4"));
+   EXPECT_TRUE(engine.ApplyMove("c3e2"));
+   EXPECT_TRUE(engine.ApplyMove("g8f6"));
+   EXPECT_TRUE(engine.ApplyMove("c1g5"));
+   EXPECT_TRUE(engine.ApplyMove("b4e7"));
+   EXPECT_TRUE(engine.ApplyMove("g5f6"));
+   EXPECT_TRUE(engine.ApplyMove("e7f6"));
+   EXPECT_TRUE(engine.ApplyMove("e2d4"));
+   EXPECT_TRUE(engine.ApplyMove("e8g8"));
+   EXPECT_TRUE(engine.ApplyMove("e4e5"));
+   EXPECT_TRUE(engine.ApplyMove("f6e7"));
+   EXPECT_TRUE(engine.ApplyMove("d4b5"));
+   EXPECT_TRUE(engine.ApplyMove("d7d5"));
+   EXPECT_TRUE(engine.ApplyMove("e5d6"));
+   EXPECT_EQ(NO_PIECE, engine.GetPieceAt("d5"));
+}

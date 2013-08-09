@@ -43,6 +43,8 @@ Engine::Engine()
 
    // handle castle rules
 
+   char piece = position->m_board.m_squares[move.end_file][move.end_rank];
+
    if (move.start_rank == 0)
    {
       if (move.start_file == 0)
@@ -56,7 +58,7 @@ Engine::Engine()
       else if (move.start_file == 4)
       {
          // possibly move rook
-         if (position->m_board.m_squares[move.end_file][move.end_rank] == 'K')
+         if (piece == 'K')
          {
             if (move.end_file == 2)
             {
@@ -87,7 +89,7 @@ Engine::Engine()
       else if (move.start_file == 4)
       {
          // possibly move rook
-         if (position->m_board.m_squares[move.end_file][move.end_rank] == 'k')
+         if (piece == 'k')
          {
             if (move.end_file == 2)
             {
@@ -108,19 +110,28 @@ Engine::Engine()
 
    // handle en passant rules
 
-   if (move.start_rank == 1 && move.end_rank == 3
-      && position->m_board.m_squares[move.end_file][move.end_rank] == 'P')
+   if (move.start_rank == 4 && piece == 'P'
+      && (move.end_file == move.start_file - 1
+      || move.end_file == move.start_file + 1)
+      && position->en_passant_allowed_on == move.end_file)
    {
-      // en passant capture by white
-      position->en_passant_allowed_on = move.start_file;
       position->m_board.m_squares[move.end_file][4] = NO_PIECE;
    }
-   else if (move.start_rank == 6 && move.end_rank == 4
-      && position->m_board.m_squares[move.end_file][move.end_rank] == 'p')
+   else if (move.start_rank == 3 && piece == 'p'
+      && (move.end_file == move.start_file - 1
+      || move.end_file == move.start_file + 1)
+      && position->en_passant_allowed_on == move.end_file)
    {
-      // en passant capture by black
-      position->en_passant_allowed_on = move.start_file;
       position->m_board.m_squares[move.end_file][3] = NO_PIECE;
+   }
+
+   if (move.start_rank == 1 && move.end_rank == 3 && piece == 'P')
+   {
+      position->en_passant_allowed_on = move.start_file;
+   }
+   else if (move.start_rank == 6 && move.end_rank == 4 && piece == 'p')
+   {
+      position->en_passant_allowed_on = move.start_file;
    }
    else
    {
@@ -147,7 +158,7 @@ bool Engine::ApplyMove(const std::string &str)
       return true;
    }
 
-   Logger::LogMessage("Illegal move.");
+   Logger::GetStream() << "Illegal move: " << str << std::endl;
    return false;
 }
 
@@ -369,7 +380,7 @@ bool Engine::IsWhiteToMove() const
             position.m_board.m_squares[move.end_file][move.end_rank]))
          {
             // handle en passant
-            if (move.end_rank != position.en_passant_allowed_on)
+            if (move.end_file != position.en_passant_allowed_on)
                return false;
          }
 
@@ -411,7 +422,7 @@ bool Engine::IsWhiteToMove() const
             position.m_board.m_squares[move.end_file][move.end_rank]))
          {
             // handle en passant
-            if (move.end_rank != position.en_passant_allowed_on)
+            if (move.end_file != position.en_passant_allowed_on)
                return false;
          }
 
