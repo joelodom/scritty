@@ -3,6 +3,7 @@
 #include "Engine.h"
 #include "UCIParser.h"
 #include "Logger.h"
+#include <iostream>
 
 using namespace scritty;
 
@@ -136,6 +137,16 @@ Engine::Engine()
    else
    {
       position->en_passant_allowed_on = NO_EN_PASSANT;
+   }
+
+   // handle promotion
+   if ((move.end_rank == 7 && piece == 'P')
+      || (move.end_rank == 0 && piece == 'p'))
+   {
+      // in some UCI output, promotion pieces are not cased as expected
+      position->m_board.m_squares[move.end_file][move.end_rank]
+      = position->m_white_to_move
+         ? ::toupper(move.promotion_piece) : ::tolower(move.promotion_piece);
    }
 
    // switch sides
@@ -315,6 +326,7 @@ bool Engine::IsWhiteToMove() const
    Move move;
    move.end_file = file;
    move.end_rank = rank;
+   move.promotion_piece = NO_PIECE;
 
    // MUST switch back to obey const
    const_cast<Position&>(position).m_white_to_move = !position.m_white_to_move;
@@ -366,7 +378,12 @@ bool Engine::IsWhiteToMove() const
 
    switch (piece)
    {
-   case 'P': // TODO: promotion
+   case 'P':
+      // PGN Extract always makes promotion pieces upper case, but UCI example
+      // shows one as lower case, so it shouldn't matter.  Also note that FIDE
+      // rules require a pawn to be exchanged for another piece.  Keeping a
+      // pawn on the last rank is not allowed.
+
       if (move.end_file == move.start_file - 1
          || move.end_file == move.start_file + 1)
       {
@@ -405,6 +422,10 @@ bool Engine::IsWhiteToMove() const
       if (move.start_file != move.end_file
          || position.m_board.m_squares[move.end_file][move.end_rank]
       != NO_PIECE)
+         return false;
+
+      // handle promotion
+      if (move.end_rank == 7 && move.promotion_piece == NO_PIECE)
          return false;
 
       break;
@@ -447,6 +468,10 @@ bool Engine::IsWhiteToMove() const
       if (move.start_file != move.end_file
          || position.m_board.m_squares[move.end_file][move.end_rank]
       != NO_PIECE)
+         return false;
+
+      // handle promotion
+      if (move.end_rank == 0 && move.promotion_piece == NO_PIECE)
          return false;
 
       break;
@@ -628,4 +653,28 @@ void Engine::GetBestMove(std::string *best)
    *best += move.start_rank + '1';
    *best += move.end_file + 'a';
    *best += move.end_rank + '1';
+
+   char piece = m_position.m_board.m_squares[move.start_file][move.start_rank];
+
+   // handle promotion
+   if (move.end_rank == 7 && piece == 'P')
+      move.promotion_piece = 'Q';
+   else if (move.end_rank == 0 && piece == 'p')
+      move.promotion_piece = 'q';
+   else
+      move.promotion_piece = NO_PIECE;
+}
+
+/*static*/ void Engine::WritePositionToStdout(const Position &position)
+{
+   for (unsigned char rank = 7; (char)rank >= 0; --rank)
+   {
+      for (unsigned char file = 0; file <= 7; ++file)
+      {
+         std::cout << position.m_board.m_squares[file][rank];
+      }
+      std::cout << std::endl;
+   }
+   std::cout << (position.m_white_to_move ? "White" : "Black") << " to move."
+      << std::endl;
 }

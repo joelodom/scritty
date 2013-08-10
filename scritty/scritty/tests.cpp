@@ -42,7 +42,7 @@ namespace scritty // for FRIEND_TEST
       EXPECT_TRUE(handler.handle_position(tokens));
    }
 
-   TEST(integration_tests, DISABLED_play_through_game_database)
+   TEST(integration_tests, play_through_game_database)
    {
       // open the massive games file
       std::fstream in_file(GAMES_FILE);
@@ -419,4 +419,70 @@ TEST(engine_tests, en_passant_test)
    EXPECT_TRUE(engine.ApplyMove("a4c2"));
    EXPECT_TRUE(engine.ApplyMove("g2g3"));
    EXPECT_TRUE(engine.ApplyMove("f5f4"));
+}
+
+TEST(engine_tests, failed_game_test)
+{
+   Engine engine;
+
+   EXPECT_TRUE(engine.ApplyMove("e2e4"));
+   EXPECT_TRUE(engine.ApplyMove("d7d5"));
+   EXPECT_TRUE(engine.ApplyMove("b1c3"));
+   EXPECT_TRUE(engine.ApplyMove("d5e4"));
+   EXPECT_TRUE(engine.ApplyMove("c3e2"));
+   EXPECT_TRUE(engine.ApplyMove("g8f6"));
+   EXPECT_TRUE(engine.ApplyMove("e2g3"));
+   EXPECT_TRUE(engine.ApplyMove("b7b6"));
+   EXPECT_TRUE(engine.ApplyMove("f1c4"));
+   EXPECT_TRUE(engine.ApplyMove("c8b7"));
+   EXPECT_TRUE(engine.ApplyMove("g1h3"));
+   EXPECT_TRUE(engine.ApplyMove("e7e6"));
+   EXPECT_TRUE(engine.ApplyMove("g3h5"));
+   EXPECT_TRUE(engine.ApplyMove("d8d4"));
+   EXPECT_TRUE(engine.ApplyMove("c4b3"));
+   EXPECT_TRUE(engine.ApplyMove("b8d7"));
+   EXPECT_TRUE(engine.ApplyMove("d1e2"));
+   EXPECT_TRUE(engine.ApplyMove("d7c5"));
+   EXPECT_TRUE(engine.ApplyMove("h5f6"));
+   EXPECT_TRUE(engine.ApplyMove("d4f6"));
+   EXPECT_TRUE(engine.ApplyMove("e1g1"));
+   EXPECT_TRUE(engine.ApplyMove("f8d6"));
+   EXPECT_TRUE(engine.ApplyMove("e2g4"));
+   EXPECT_TRUE(engine.ApplyMove("h7h6"));
+   EXPECT_TRUE(engine.ApplyMove("b3c4"));
+   EXPECT_TRUE(engine.ApplyMove("e8c8"));
+   EXPECT_TRUE(engine.ApplyMove("d2d3"));
+   EXPECT_TRUE(engine.ApplyMove("g7g5"));
+   EXPECT_TRUE(engine.ApplyMove("c1e3"));
+   EXPECT_TRUE(engine.ApplyMove("f6e5"));
+   EXPECT_TRUE(engine.ApplyMove("g2g3"));
+   EXPECT_TRUE(engine.ApplyMove("f7f5"));
+   EXPECT_TRUE(engine.ApplyMove("d3d4"));
+   EXPECT_TRUE(engine.ApplyMove("e5f6"));
+   EXPECT_TRUE(engine.ApplyMove("g4h5"));
+   EXPECT_TRUE(engine.ApplyMove("c5d7"));
+   EXPECT_TRUE(engine.ApplyMove("f1d1"));
+   EXPECT_TRUE(engine.ApplyMove("f5f4"));
+   EXPECT_TRUE(engine.ApplyMove("g3f4"));
+   EXPECT_TRUE(engine.ApplyMove("g5f4"));
+   EXPECT_TRUE(engine.ApplyMove("e3d2"));
+   EXPECT_TRUE(engine.ApplyMove("e4e3"));
+   EXPECT_TRUE(engine.ApplyMove("d2e1"));
+   EXPECT_TRUE(engine.ApplyMove("f6g7"));
+   EXPECT_TRUE(engine.ApplyMove("g1f1"));
+   EXPECT_TRUE(engine.ApplyMove("f4f3"));
+   EXPECT_TRUE(engine.ApplyMove("e1c3"));
+   EXPECT_TRUE(engine.ApplyMove("g7g2"));
+   EXPECT_TRUE(engine.ApplyMove("f1e1"));
+   EXPECT_TRUE(engine.ApplyMove("g2h1"));
+   EXPECT_TRUE(engine.ApplyMove("c4f1"));
+   EXPECT_TRUE(engine.ApplyMove("e3e2"));
+   EXPECT_TRUE(engine.ApplyMove("e1d2"));
+
+   EXPECT_FALSE(engine.IsWhiteToMove());
+   EXPECT_TRUE(engine.ApplyMove("e2d1Q"));
+
+   EXPECT_EQ('q', engine.GetPieceAt("d1"));
+   
+   EXPECT_TRUE(engine.ApplyMove("a1d1"));
 }

@@ -31,11 +31,7 @@ using namespace scritty;
    move->start_rank = s[1] - '1';
    move->end_file = s[2] - 'a';
    move->end_rank = s[3] - '1';
-
-   // PGN Extract always makes promotion pieces upper case
    move->promotion_piece = s.size() > 4 ? s[4] : NO_PIECE;
-   if (move->promotion_piece > 'a')
-      move->promotion_piece -= 'a';
 
    return true; // TODO: error checking
 }

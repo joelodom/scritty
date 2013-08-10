@@ -46,6 +46,8 @@ namespace scritty
    class Engine
    {
    public:
+      static void WritePositionToStdout(const Position &position);
+
       Engine();
       void SetToStartPos();
       bool ApplyMove(const std::string &str); // algebraic notation
