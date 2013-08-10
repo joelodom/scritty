@@ -5,6 +5,7 @@
 #include <iostream>
 #include "UCIParser.h"
 #include "gtest/gtest.h"
+#include "SearchingEngine.h"
 
 using namespace scritty;
 
@@ -20,7 +21,7 @@ int main(int argc, const char *argv[])
 {
    Logger::LogMessage("Starting Scritty...");
 
-   RandomEngine engine;
+   SearchingEngine engine;
    UCIHandler handler(&engine);
 
    /* REQUIREMENT

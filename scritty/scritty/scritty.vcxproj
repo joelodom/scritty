@@ -114,6 +114,7 @@
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="RandomEngine.cpp" />
     <ClCompile Include="scritty.cpp" />
+    <ClCompile Include="SearchingEngine.cpp" />
     <ClCompile Include="tests.cpp" />
     <ClCompile Include="UCIHandler.cpp" />
     <ClCompile Include="UCIParser.cpp" />
@@ -123,6 +124,7 @@
     <ClInclude Include="Logger.h" />
     <ClInclude Include="RandomEngine.h" />
     <ClInclude Include="scritty.h" />
+    <ClInclude Include="SearchingEngine.h" />
     <ClInclude Include="UCIHandler.h" />
     <ClInclude Include="UCIParser.h" />
   </ItemGroup>

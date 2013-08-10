@@ -683,10 +683,15 @@ void Move::ToString(std::string *str)
    const Position &position, Move *buf /*= nullptr*/)
 {
    // pass in null buffer to test if there are any legal moves (returns 0 or 1)
-   if (buf != nullptr)
-      throw std::string("TODO");
-
    // TODO: fix efficiency
+
+   char *white_promotion_pieces = "BNRQ";
+   char *black_promotion_pieces = "bnrq";
+   char *empty_string = "-";
+
+   size_t count = 0;
+
+   // castles implicitly checked
 
    Move move;
    for (move.start_file = 0; move.start_file <= 7; ++move.start_file)
@@ -695,16 +700,43 @@ void Move::ToString(std::string *str)
       {
          for (move.end_file = 0; move.end_file <= 7; ++move.end_file)
          {
-            for (move.end_rank = 0; move.end_rank <= 7; ++ move.end_rank)
+            for (move.end_rank = 0; move.end_rank <= 7; ++move.end_rank)
             {
-               if (IsMoveLegal(position, move))
-                  return 1;
+               char *promotion_pieces = empty_string;
+
+               if (move.end_rank == 7 &&
+                  position.m_board.m_squares[move.start_file][move.start_rank]
+               == 'P')
+               {
+                  promotion_pieces = white_promotion_pieces;
+               }
+               else if (move.end_rank == 0 &&
+                  position.m_board.m_squares[move.start_file][move.start_rank]
+               == 'p')
+               {
+                  promotion_pieces = black_promotion_pieces;
+               }
+
+               for (size_t i = 0; promotion_pieces[i] != '\0'; ++i)
+               {
+                  move.promotion_piece = promotion_pieces[i] == '-' ? NO_PIECE
+                     : promotion_pieces[i];
+
+                  if (IsMoveLegal(position, move))
+                  {
+                     if (buf == nullptr)
+                        return 1;
+                     buf[count++] = move;
+                     if (count > MAX_NUMBER_OF_LEGAL_MOVES) // safety check
+                        return 0;
+                  }
+               }
             }
          }
       }
    }
 
-   return 0;
+   return count;
 }
 
 Outcome Engine::GetOutcome() const
