@@ -10,7 +10,7 @@
 #define GAMES_FILE "C:\\Users\\Joel\\Google Drive\\chess_games_db" \
    "\\3965020games.uci"
 #define GAMES_IN_FILE 3965020
-#define MAX_GAMES_TO_PLAY 10
+#define MAX_GAMES_TO_PLAY 50
 
 using namespace scritty;
 
@@ -180,6 +180,7 @@ TEST(engine_tests, test_move_off_board)
 TEST(engine_tests, test_legal_rook_moves)
 {
    Engine engine;
+
    EXPECT_TRUE(engine.ApplyMove("a2a4"));
    EXPECT_TRUE(engine.ApplyMove("a7a5"));
    EXPECT_TRUE(engine.ApplyMove("a1a3"));
@@ -192,6 +193,7 @@ TEST(engine_tests, test_legal_rook_moves)
 TEST(engine_tests, test_blocked_rook)
 {
    Engine engine;
+
    EXPECT_TRUE(engine.ApplyMove("a2a4"));
    EXPECT_TRUE(engine.ApplyMove("a7a5"));
    EXPECT_FALSE(engine.ApplyMove("a1a5"));
@@ -200,6 +202,7 @@ TEST(engine_tests, test_blocked_rook)
 TEST(engine_tests, test_legal_bishop_moves)
 {
    Engine engine;
+
    EXPECT_TRUE(engine.ApplyMove("e2e4"));
    EXPECT_TRUE(engine.ApplyMove("e7e5"));
    EXPECT_TRUE(engine.ApplyMove("f1c4"));
@@ -210,6 +213,7 @@ TEST(engine_tests, test_legal_bishop_moves)
 TEST(engine_tests, test_legal_knight_move)
 {
    Engine engine;
+
    EXPECT_TRUE(engine.ApplyMove("e2e4"));
    EXPECT_TRUE(engine.ApplyMove("e7e5"));
    EXPECT_TRUE(engine.ApplyMove("g1f3"));
@@ -219,6 +223,7 @@ TEST(engine_tests, test_legal_knight_move)
 TEST(engine_tests, illegal_move_test_1)
 {
    Engine engine;
+
    EXPECT_TRUE(engine.ApplyMove("e2e3"));
    EXPECT_TRUE(engine.ApplyMove("d7d5"));
    EXPECT_TRUE(engine.ApplyMove("d2d4"));
@@ -228,6 +233,7 @@ TEST(engine_tests, illegal_move_test_1)
 TEST(engine_tests, illegal_move_test_2)
 {
    Engine engine;
+
    EXPECT_TRUE(engine.ApplyMove("e2e4"));
    EXPECT_TRUE(engine.ApplyMove("d7d5"));
    EXPECT_TRUE(engine.ApplyMove("d2d4"));
@@ -236,8 +242,8 @@ TEST(engine_tests, illegal_move_test_2)
 
 TEST(engine_tests, move_test_pawn_capture)
 {
-   // e2e4 d7d5 b1c3 b7b5 c3d5 c8f5 e4f5
    Engine engine;
+
    EXPECT_TRUE(engine.ApplyMove("e2e4"));
    EXPECT_TRUE(engine.ApplyMove("d7d5"));
    EXPECT_TRUE(engine.ApplyMove("b1c3"));
@@ -250,6 +256,7 @@ TEST(engine_tests, move_test_pawn_capture)
 TEST(engine_tests, illegal_move_test_3)
 {
    Engine engine;
+
    EXPECT_TRUE(engine.ApplyMove("e2e4"));
    EXPECT_TRUE(engine.ApplyMove("b7b5"));
    EXPECT_TRUE(engine.ApplyMove("f1b5"));
@@ -271,6 +278,7 @@ TEST(engine_tests, illegal_move_test_3)
 TEST(engine_tests, illegal_move_test_4)
 {
    Engine engine;
+
    EXPECT_TRUE(engine.ApplyMove("e2e4"));
    EXPECT_TRUE(engine.ApplyMove("d7d5"));
    EXPECT_TRUE(engine.ApplyMove("b1c3"));
@@ -280,6 +288,7 @@ TEST(engine_tests, illegal_move_test_4)
 TEST(engine_tests, illegal_move_test_5)
 {
    Engine engine;
+
    EXPECT_TRUE(engine.ApplyMove("e2e4"));
    EXPECT_TRUE(engine.ApplyMove("d7d5"));
    EXPECT_TRUE(engine.ApplyMove("b1c3"));
@@ -318,6 +327,7 @@ TEST(engine_tests, castle_test)
 TEST(engine_tests, illegal_move_test_6)
 {
    Engine engine;
+
    EXPECT_TRUE(engine.ApplyMove("e2e4"));
    EXPECT_TRUE(engine.ApplyMove("d7d5"));
    EXPECT_TRUE(engine.ApplyMove("e4d5"));
@@ -327,6 +337,7 @@ TEST(engine_tests, illegal_move_test_6)
 TEST(engine_tests, illegal_move_test_7)
 {
    Engine engine;
+
    EXPECT_TRUE(engine.ApplyMove("e2e4"));
    EXPECT_TRUE(engine.ApplyMove("d7d5"));
    EXPECT_TRUE(engine.ApplyMove("b1c3"));
@@ -482,15 +493,14 @@ TEST(engine_tests, failed_game_test)
 
    EXPECT_FALSE(engine.IsWhiteToMove());
    EXPECT_TRUE(engine.ApplyMove("e2d1Q"));
-
    EXPECT_EQ('q', engine.GetPieceAt("d1"));
-   
    EXPECT_TRUE(engine.ApplyMove("a1d1"));
 }
 
 TEST(engine_tests, illegal_move_test_8)
 {
    Engine engine;
+
    EXPECT_TRUE(engine.ApplyMove("a2a3"));
    EXPECT_TRUE(engine.ApplyMove("d7d5"));
    EXPECT_TRUE(engine.ApplyMove("g2g4"));
@@ -584,5 +594,168 @@ TEST(engine_tests, illegal_move_test_9)
    EXPECT_TRUE(engine.ApplyMove("e6f8"));
    EXPECT_TRUE(engine.ApplyMove("h6g4"));
    EXPECT_TRUE(engine.ApplyMove("f8g6"));
+
    EXPECT_FALSE(engine.ApplyMove("g4f2")); // leaves king in check
+}
+
+TEST(engine_tests, test_failed_promote)
+{
+   Engine engine;
+
+   EXPECT_TRUE(engine.ApplyMove("a2a3"));
+   EXPECT_TRUE(engine.ApplyMove("d7d5"));
+   EXPECT_TRUE(engine.ApplyMove("g2g4"));
+   EXPECT_TRUE(engine.ApplyMove("b7b5"));
+   EXPECT_TRUE(engine.ApplyMove("f1g2"));
+   EXPECT_TRUE(engine.ApplyMove("c8f5"));
+   EXPECT_TRUE(engine.ApplyMove("c2c3"));
+   EXPECT_TRUE(engine.ApplyMove("d8d6"));
+   EXPECT_TRUE(engine.ApplyMove("d1a4"));
+   EXPECT_TRUE(engine.ApplyMove("b5a4"));
+   EXPECT_TRUE(engine.ApplyMove("c3c4"));
+   EXPECT_TRUE(engine.ApplyMove("d6e5"));
+   EXPECT_TRUE(engine.ApplyMove("b2b3"));
+   EXPECT_TRUE(engine.ApplyMove("e5e6"));
+   EXPECT_TRUE(engine.ApplyMove("b3a4"));
+   EXPECT_TRUE(engine.ApplyMove("a7a5"));
+   EXPECT_TRUE(engine.ApplyMove("g2d5"));
+   EXPECT_TRUE(engine.ApplyMove("e6b6"));
+   EXPECT_TRUE(engine.ApplyMove("f2f4"));
+   EXPECT_TRUE(engine.ApplyMove("b6b3"));
+   EXPECT_TRUE(engine.ApplyMove("d5g2"));
+   EXPECT_TRUE(engine.ApplyMove("e7e6"));
+   EXPECT_TRUE(engine.ApplyMove("g1f3"));
+   EXPECT_TRUE(engine.ApplyMove("b3c4"));
+   EXPECT_TRUE(engine.ApplyMove("f3g5"));
+   EXPECT_TRUE(engine.ApplyMove("c4d3"));
+   EXPECT_TRUE(engine.ApplyMove("g2h3"));
+   EXPECT_TRUE(engine.ApplyMove("f8b4"));
+   EXPECT_TRUE(engine.ApplyMove("g4f5"));
+   EXPECT_TRUE(engine.ApplyMove("d3b1"));
+   EXPECT_TRUE(engine.ApplyMove("e2e4"));
+   EXPECT_TRUE(engine.ApplyMove("b1b2"));
+   EXPECT_TRUE(engine.ApplyMove("e1g1"));
+   EXPECT_TRUE(engine.ApplyMove("b8d7"));
+   EXPECT_TRUE(engine.ApplyMove("g5f7"));
+   EXPECT_TRUE(engine.ApplyMove("a8c8"));
+   EXPECT_TRUE(engine.ApplyMove("f7d8"));
+   EXPECT_TRUE(engine.ApplyMove("b2c3"));
+   EXPECT_TRUE(engine.ApplyMove("f1d1"));
+   EXPECT_TRUE(engine.ApplyMove("d7f8"));
+   EXPECT_TRUE(engine.ApplyMove("d2d4"));
+   EXPECT_TRUE(engine.ApplyMove("b4a3"));
+   EXPECT_TRUE(engine.ApplyMove("f5f6"));
+   EXPECT_TRUE(engine.ApplyMove("c3b2"));
+   EXPECT_TRUE(engine.ApplyMove("d8e6"));
+   EXPECT_TRUE(engine.ApplyMove("b2d2"));
+   EXPECT_TRUE(engine.ApplyMove("g1h1"));
+   EXPECT_TRUE(engine.ApplyMove("d2c1"));
+   EXPECT_TRUE(engine.ApplyMove("a1a2"));
+   EXPECT_TRUE(engine.ApplyMove("c1c6"));
+   EXPECT_TRUE(engine.ApplyMove("e6f8"));
+   EXPECT_TRUE(engine.ApplyMove("c8a8"));
+   EXPECT_TRUE(engine.ApplyMove("d1e1"));
+   EXPECT_TRUE(engine.ApplyMove("g7f6"));
+   EXPECT_TRUE(engine.ApplyMove("e1g1"));
+   EXPECT_TRUE(engine.ApplyMove("a8a6"));
+   EXPECT_TRUE(engine.ApplyMove("g1f1"));
+   EXPECT_TRUE(engine.ApplyMove("c6e6"));
+   EXPECT_TRUE(engine.ApplyMove("a2f2"));
+   EXPECT_TRUE(engine.ApplyMove("a6a8"));
+   EXPECT_TRUE(engine.ApplyMove("d4d5"));
+   EXPECT_TRUE(engine.ApplyMove("e6f5"));
+   EXPECT_TRUE(engine.ApplyMove("f8e6"));
+   EXPECT_TRUE(engine.ApplyMove("f5g5"));
+   EXPECT_TRUE(engine.ApplyMove("e6d4"));
+   EXPECT_TRUE(engine.ApplyMove("e8e7"));
+   EXPECT_TRUE(engine.ApplyMove("h3g4"));
+   EXPECT_TRUE(engine.ApplyMove("g5f5"));
+   EXPECT_TRUE(engine.ApplyMove("d4e6"));
+   EXPECT_TRUE(engine.ApplyMove("g8h6"));
+   EXPECT_TRUE(engine.ApplyMove("e6f8"));
+   EXPECT_TRUE(engine.ApplyMove("h6g4"));
+   EXPECT_TRUE(engine.ApplyMove("f8g6"));
+   EXPECT_TRUE(engine.ApplyMove("e7d6"));
+   EXPECT_TRUE(engine.ApplyMove("h2h4"));
+   EXPECT_TRUE(engine.ApplyMove("h8c8"));
+   EXPECT_TRUE(engine.ApplyMove("e4e5"));
+   EXPECT_TRUE(engine.ApplyMove("d6c5"));
+   EXPECT_TRUE(engine.ApplyMove("f2e2"));
+   EXPECT_TRUE(engine.ApplyMove("h7h6"));
+   EXPECT_TRUE(engine.ApplyMove("d5d6"));
+   EXPECT_TRUE(engine.ApplyMove("c8f8"));
+   EXPECT_TRUE(engine.ApplyMove("e2d2"));
+   EXPECT_TRUE(engine.ApplyMove("f5d3"));
+   EXPECT_TRUE(engine.ApplyMove("g6f8"));
+   EXPECT_TRUE(engine.ApplyMove("a8a6"));
+   EXPECT_TRUE(engine.ApplyMove("d2b2"));
+   EXPECT_TRUE(engine.ApplyMove("d3e4"));
+   EXPECT_TRUE(engine.ApplyMove("h1g1"));
+   EXPECT_TRUE(engine.ApplyMove("e4f3"));
+   EXPECT_TRUE(engine.ApplyMove("f1b1"));
+   EXPECT_TRUE(engine.ApplyMove("g4f2"));
+   EXPECT_TRUE(engine.ApplyMove("h4h5"));
+   EXPECT_TRUE(engine.ApplyMove("c5d4"));
+   EXPECT_TRUE(engine.ApplyMove("b2b5"));
+   EXPECT_TRUE(engine.ApplyMove("f2h3"));
+   EXPECT_TRUE(engine.ApplyMove("g1h2"));
+   EXPECT_TRUE(engine.ApplyMove("a6c6"));
+   EXPECT_TRUE(engine.ApplyMove("b1b2"));
+   EXPECT_TRUE(engine.ApplyMove("f3c3"));
+   EXPECT_TRUE(engine.ApplyMove("b5b6"));
+   EXPECT_TRUE(engine.ApplyMove("c3b3"));
+   EXPECT_TRUE(engine.ApplyMove("e5f6"));
+   EXPECT_TRUE(engine.ApplyMove("d4c3"));
+   EXPECT_TRUE(engine.ApplyMove("d6d7"));
+   EXPECT_TRUE(engine.ApplyMove("c3d4"));
+   EXPECT_TRUE(engine.ApplyMove("f8g6"));
+   EXPECT_TRUE(engine.ApplyMove("b3a2"));
+   EXPECT_TRUE(engine.ApplyMove("b6c6"));
+   EXPECT_TRUE(engine.ApplyMove("d4e3"));
+   EXPECT_TRUE(engine.ApplyMove("c6b6"));
+   EXPECT_TRUE(engine.ApplyMove("a2a1"));
+   EXPECT_TRUE(engine.ApplyMove("g6h4"));
+   EXPECT_TRUE(engine.ApplyMove("e3f4"));
+   EXPECT_TRUE(engine.ApplyMove("b6c6"));
+   EXPECT_TRUE(engine.ApplyMove("f4g4"));
+   EXPECT_TRUE(engine.ApplyMove("b2b1"));
+   EXPECT_TRUE(engine.ApplyMove("a1b1"));
+   EXPECT_TRUE(engine.ApplyMove("h2g2"));
+   EXPECT_TRUE(engine.ApplyMove("b1b5"));
+   EXPECT_TRUE(engine.ApplyMove("c6d6"));
+   EXPECT_TRUE(engine.ApplyMove("h3f4"));
+   EXPECT_TRUE(engine.ApplyMove("g2f2"));
+   EXPECT_TRUE(engine.ApplyMove("a3b4"));
+   EXPECT_TRUE(engine.ApplyMove("d6d1"));
+   EXPECT_TRUE(engine.ApplyMove("b4d6"));
+   EXPECT_TRUE(engine.ApplyMove("d1d2"));
+   EXPECT_TRUE(engine.ApplyMove("b5d3"));
+   EXPECT_TRUE(engine.ApplyMove("h4f3"));
+   EXPECT_TRUE(engine.ApplyMove("d3c3"));
+   EXPECT_TRUE(engine.ApplyMove("d2c2"));
+   EXPECT_TRUE(engine.ApplyMove("c3c2"));
+   EXPECT_TRUE(engine.ApplyMove("f2e3"));
+   EXPECT_TRUE(engine.ApplyMove("f4e6"));
+   EXPECT_TRUE(engine.ApplyMove("f6f7"));
+   EXPECT_TRUE(engine.ApplyMove("e6c5"));
+   EXPECT_TRUE(engine.ApplyMove("e3d4"));
+   EXPECT_TRUE(engine.ApplyMove("c2f5"));
+   EXPECT_TRUE(engine.ApplyMove("f3h4"));
+   EXPECT_TRUE(engine.ApplyMove("f5f4"));
+   EXPECT_TRUE(engine.ApplyMove("d4d5"));
+   EXPECT_TRUE(engine.ApplyMove("f4d2"));
+   EXPECT_TRUE(engine.ApplyMove("d5c6"));
+   EXPECT_TRUE(engine.ApplyMove("d6g3"));
+   EXPECT_TRUE(engine.ApplyMove("c6c5"));
+   EXPECT_TRUE(engine.ApplyMove("d2g2"));
+   EXPECT_TRUE(engine.ApplyMove("h4g2"));
+   EXPECT_TRUE(engine.ApplyMove("g4g5"));
+   EXPECT_TRUE(engine.ApplyMove("g2e3"));
+   EXPECT_TRUE(engine.ApplyMove("g5h4"));
+   EXPECT_TRUE(engine.ApplyMove("e3f1"));
+   EXPECT_TRUE(engine.ApplyMove("g3f4"));
+   EXPECT_TRUE(engine.ApplyMove("c5c4"));
+   EXPECT_TRUE(engine.ApplyMove("f4e5"));
+
+   EXPECT_FALSE(engine.ApplyMove("d7d8")); // failed to promote
 }

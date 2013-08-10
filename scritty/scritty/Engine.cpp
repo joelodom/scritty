@@ -642,6 +642,17 @@ char Engine::GetPieceAt(const std::string &square) const
    return m_position.m_board.m_squares[square[0] - 'a'][square[1] - '1'];
 }
 
+void Move::ToString(std::string *str)
+{
+   *str = start_file + 'a';
+   *str += start_rank + '1';
+   *str += end_file + 'a';
+   *str += end_rank + '1';
+
+   if (promotion_piece != NO_PIECE)
+      *str += promotion_piece;
+}
+
 void Engine::GetBestMove(std::string *best)
 {
    // possibly the smartest chess algorithm of all time
@@ -656,20 +667,18 @@ void Engine::GetBestMove(std::string *best)
       move.end_rank = rand() % 8;
    } while (!IsMoveLegal(m_position, move));
 
-   *best = move.start_file + 'a';
-   *best += move.start_rank + '1';
-   *best += move.end_file + 'a';
-   *best += move.end_rank + '1';
+   // handle promotion
 
    char piece = m_position.m_board.m_squares[move.start_file][move.start_rank];
 
-   // handle promotion
    if (move.end_rank == 7 && piece == 'P')
       move.promotion_piece = 'Q';
    else if (move.end_rank == 0 && piece == 'p')
       move.promotion_piece = 'q';
    else
       move.promotion_piece = NO_PIECE;
+
+   move.ToString(best);
 }
 
 /*static*/ void Engine::WritePositionToStdout(const Position &position)

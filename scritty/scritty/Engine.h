@@ -11,13 +11,16 @@
 
 namespace scritty
 {
-   struct Move
+   class Move
    {
+   public:
       unsigned char start_file; // 0 to 7
       unsigned char start_rank; // 0 to 7
       unsigned char end_file;
       unsigned char end_rank;
       char promotion_piece; // NO_PIECE for none
+
+      void ToString(std::string *str);
    };
 
    class Board
