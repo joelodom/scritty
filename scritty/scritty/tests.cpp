@@ -10,7 +10,7 @@
 #define GAMES_FILE "C:\\Users\\Joel\\Google Drive\\chess_games_db" \
    "\\3965020games.uci"
 #define GAMES_IN_FILE 3965020
-#define MAX_GAMES_TO_PLAY 1
+#define MAX_GAMES_TO_PLAY 10
 
 using namespace scritty;
 
@@ -505,4 +505,84 @@ TEST(engine_tests, illegal_move_test_8)
    EXPECT_TRUE(engine.ApplyMove("d6e5"));
    EXPECT_TRUE(engine.ApplyMove("b2b3"));
    EXPECT_FALSE(engine.ApplyMove("c7c8"));
+}
+
+TEST(engine_tests, illegal_move_test_9)
+{
+   Engine engine;
+
+   EXPECT_TRUE(engine.ApplyMove("a2a3"));
+   EXPECT_TRUE(engine.ApplyMove("d7d5"));
+   EXPECT_TRUE(engine.ApplyMove("g2g4"));
+   EXPECT_TRUE(engine.ApplyMove("b7b5"));
+   EXPECT_TRUE(engine.ApplyMove("f1g2"));
+   EXPECT_TRUE(engine.ApplyMove("c8f5"));
+   EXPECT_TRUE(engine.ApplyMove("c2c3"));
+   EXPECT_TRUE(engine.ApplyMove("d8d6"));
+   EXPECT_TRUE(engine.ApplyMove("d1a4"));
+   EXPECT_TRUE(engine.ApplyMove("b5a4"));
+   EXPECT_TRUE(engine.ApplyMove("c3c4"));
+   EXPECT_TRUE(engine.ApplyMove("d6e5"));
+   EXPECT_TRUE(engine.ApplyMove("b2b3"));
+   EXPECT_TRUE(engine.ApplyMove("e5e6"));
+   EXPECT_TRUE(engine.ApplyMove("b3a4"));
+   EXPECT_TRUE(engine.ApplyMove("a7a5"));
+   EXPECT_TRUE(engine.ApplyMove("g2d5"));
+   EXPECT_TRUE(engine.ApplyMove("e6b6"));
+   EXPECT_TRUE(engine.ApplyMove("f2f4"));
+   EXPECT_TRUE(engine.ApplyMove("b6b3"));
+   EXPECT_TRUE(engine.ApplyMove("d5g2"));
+   EXPECT_TRUE(engine.ApplyMove("e7e6"));
+   EXPECT_TRUE(engine.ApplyMove("g1f3"));
+   EXPECT_TRUE(engine.ApplyMove("b3c4"));
+   EXPECT_TRUE(engine.ApplyMove("f3g5"));
+   EXPECT_TRUE(engine.ApplyMove("c4d3"));
+   EXPECT_TRUE(engine.ApplyMove("g2h3"));
+   EXPECT_TRUE(engine.ApplyMove("f8b4"));
+   EXPECT_TRUE(engine.ApplyMove("g4f5"));
+   EXPECT_TRUE(engine.ApplyMove("d3b1"));
+   EXPECT_TRUE(engine.ApplyMove("e2e4"));
+   EXPECT_TRUE(engine.ApplyMove("b1b2"));
+   EXPECT_TRUE(engine.ApplyMove("e1g1"));
+   EXPECT_TRUE(engine.ApplyMove("b8d7"));
+   EXPECT_TRUE(engine.ApplyMove("g5f7"));
+   EXPECT_TRUE(engine.ApplyMove("a8c8"));
+   EXPECT_TRUE(engine.ApplyMove("f7d8"));
+   EXPECT_TRUE(engine.ApplyMove("b2c3"));
+   EXPECT_TRUE(engine.ApplyMove("f1d1"));
+   EXPECT_TRUE(engine.ApplyMove("d7f8"));
+   EXPECT_TRUE(engine.ApplyMove("d2d4"));
+   EXPECT_TRUE(engine.ApplyMove("b4a3"));
+   EXPECT_TRUE(engine.ApplyMove("f5f6"));
+   EXPECT_TRUE(engine.ApplyMove("c3b2"));
+   EXPECT_TRUE(engine.ApplyMove("d8e6"));
+   EXPECT_TRUE(engine.ApplyMove("b2d2"));
+   EXPECT_TRUE(engine.ApplyMove("g1h1"));
+   EXPECT_TRUE(engine.ApplyMove("d2c1"));
+   EXPECT_TRUE(engine.ApplyMove("a1a2"));
+   EXPECT_TRUE(engine.ApplyMove("c1c6"));
+   EXPECT_TRUE(engine.ApplyMove("e6f8"));
+   EXPECT_TRUE(engine.ApplyMove("c8a8"));
+   EXPECT_TRUE(engine.ApplyMove("d1e1"));
+   EXPECT_TRUE(engine.ApplyMove("g7f6"));
+   EXPECT_TRUE(engine.ApplyMove("e1g1"));
+   EXPECT_TRUE(engine.ApplyMove("a8a6"));
+   EXPECT_TRUE(engine.ApplyMove("g1f1"));
+   EXPECT_TRUE(engine.ApplyMove("c6e6"));
+   EXPECT_TRUE(engine.ApplyMove("a2f2"));
+   EXPECT_TRUE(engine.ApplyMove("a6a8"));
+   EXPECT_TRUE(engine.ApplyMove("d4d5"));
+   EXPECT_TRUE(engine.ApplyMove("e6f5"));
+   EXPECT_TRUE(engine.ApplyMove("f8e6"));
+   EXPECT_TRUE(engine.ApplyMove("f5g5"));
+   EXPECT_TRUE(engine.ApplyMove("e6d4"));
+   EXPECT_TRUE(engine.ApplyMove("e8e7"));
+   EXPECT_TRUE(engine.ApplyMove("h3g4"));
+   EXPECT_TRUE(engine.ApplyMove("g5f5"));
+   EXPECT_TRUE(engine.ApplyMove("d4e6"));
+   EXPECT_TRUE(engine.ApplyMove("g8h6"));
+   EXPECT_TRUE(engine.ApplyMove("e6f8"));
+   EXPECT_TRUE(engine.ApplyMove("h6g4"));
+   EXPECT_TRUE(engine.ApplyMove("f8g6"));
+   EXPECT_FALSE(engine.ApplyMove("g4f2")); // leaves king in check
 }

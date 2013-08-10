@@ -335,7 +335,8 @@ bool Engine::IsWhiteToMove() const
    {
       for (move.start_file = 0; move.start_file <= 7; ++move.start_file)
       {
-         if (IsMoveLegal(position, move))
+         // notice that we don't check to see if our king is in check
+         if (IsMoveLegal(position, move, false))
          {
             const_cast<Position&>(position).m_white_to_move
                = !position.m_white_to_move;
@@ -348,7 +349,8 @@ bool Engine::IsWhiteToMove() const
    return false;
 }
 
-/*static*/ bool Engine::IsMoveLegal(const Position &position, const Move &move)
+/*static*/ bool Engine::IsMoveLegal(
+   const Position &position, const Move &move, bool check_king /*= true*/)
 {
    // TODO: go to pre-calculated move lists like:
    // legal_moves[piece][start_file][start_rank][end_file][end_rank] is a null
@@ -612,19 +614,22 @@ bool Engine::IsWhiteToMove() const
 
    // is my king in check after the move?
 
-   Position new_position(position);
-   ApplyKnownLegalMoveToPosition(move, &new_position);
-   new_position.m_white_to_move = !new_position.m_white_to_move;
-   char my_king = position.m_white_to_move ? 'K' : 'k';
-
-   for (unsigned char rank = 0; rank <= 7; ++rank)
+   if (check_king)
    {
-      for (unsigned char file = 0; file <= 7; ++file)
+      Position new_position(position);
+      ApplyKnownLegalMoveToPosition(move, &new_position);
+      new_position.m_white_to_move = !new_position.m_white_to_move;
+      char my_king = position.m_white_to_move ? 'K' : 'k';
+
+      for (unsigned char rank = 0; rank <= 7; ++rank)
       {
-         if (new_position.m_board.m_squares[file][rank] == my_king)
+         for (unsigned char file = 0; file <= 7; ++file)
          {
-            if (IsOpponentAttackingSquare(file, rank, new_position))
-               return false;
+            if (new_position.m_board.m_squares[file][rank] == my_king)
+            {
+               if (IsOpponentAttackingSquare(file, rank, new_position))
+                  return false;
+            }
          }
       }
    }

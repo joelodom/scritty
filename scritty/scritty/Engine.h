@@ -56,7 +56,8 @@ namespace scritty
       void GetBestMove(std::string *best); // algebraic notation
 
    private:
-      static bool IsMoveLegal(const Position &position, const Move &move);
+      static bool IsMoveLegal(
+         const Position &position, const Move &move, bool check_king = true);
       static inline bool IsOpponentsPiece(char mine, char theirs);
       static inline bool IsOnBoard(unsigned char file, unsigned char rank);
       static inline bool IsRookMoveLegal(
