@@ -5,16 +5,18 @@
 
 #include <string>
 #include "UCIParser.h"
-#include "Engine.h"
+#include "RandomEngine.h"
 #include "gtest/gtest.h"
 
 namespace scritty
 {
    class UCIHandler
    {
-      FRIEND_TEST(integration_tests, shall_we_play_a_game);
-
    public:
+      UCIHandler(Engine* engine) : m_engine(engine)
+      {
+      }
+
       bool handle_uci(const uci_tokens &tokens);
       bool handle_isready(const uci_tokens &tokens);
       bool handle_quit(const uci_tokens &tokens);
@@ -23,7 +25,7 @@ namespace scritty
       bool handle_go(const uci_tokens &tokens);
 
    private:
-      Engine m_engine;
+      Engine* m_engine;
    };
 }
 

@@ -38,22 +38,16 @@ namespace scritty
 
    class Board
    {
-      friend class Engine;
-      friend class Position;
-
-   private:
+   public:
       Board() {}
       char m_squares[8][8];
    };
 
    class Position
    {
-      friend class Engine;
-
    public:
       Position() {}
 
-   private:
       Board m_board;
       bool m_white_to_move;
       bool m_white_may_castle_short, m_white_may_castle_long;
@@ -72,7 +66,7 @@ namespace scritty
       bool ApplyMove(const std::string &str); // algebraic notation
       char GetPieceAt(const std::string &square) const; // algebraic notation
       bool IsWhiteToMove() const;
-      void GetBestMove(std::string *best) const; // algebraic notation
+      virtual void GetBestMove(std::string *best) const = 0; // algebraic
       Outcome GetOutcome() const;
       void GetPosition(Position *position) const;
 
@@ -82,7 +76,7 @@ namespace scritty
       static size_t ListAllLegalMoves(
          const Position &position, Move *buf = nullptr);
 
-   private:
+   protected:
       static bool IsMoveLegal(
          const Position &position, const Move &move, bool check_king = true);
       static inline bool IsOpponentsPiece(char mine, char theirs);

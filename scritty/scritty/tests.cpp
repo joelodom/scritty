@@ -25,17 +25,18 @@ namespace scritty // for FRIEND_TEST
 {
    TEST(integration_tests, shall_we_play_a_game)
    {
-      UCIHandler handler;
+      RandomEngine engine;
+      UCIHandler handler(&engine);
 
       uci_tokens tokens;
       UCIParser::BreakIntoTokens("position startpos moves e2e4", &tokens);
       EXPECT_TRUE(handler.handle_position(tokens));
-      EXPECT_EQ('P', handler.m_engine.GetPieceAt("e4"));
+      EXPECT_EQ('P', engine.GetPieceAt("e4"));
 
       tokens.clear();
       UCIParser::BreakIntoTokens("go movetime 2000", &tokens);
       EXPECT_TRUE(handler.handle_go(tokens));
-      //EXPECT_EQ('p', handler.m_engine.GetPieceAt("e7"));
+      //EXPECT_EQ('p', engine.GetPieceAt("e7"));
 
       tokens.clear();
       UCIParser::BreakIntoTokens(
@@ -62,7 +63,8 @@ namespace scritty // for FRIEND_TEST
          std::cout << "Processing game " << game << " of "
             << GAMES_IN_FILE << "." << std::endl;
 
-         UCIHandler handler;
+         RandomEngine engine;
+         UCIHandler handler(&engine);
          uci_tokens tokens;
          UCIParser::BreakIntoTokens("position startpos moves " + line, &tokens);
 
@@ -119,7 +121,7 @@ TEST(uciparser_tests, test_parse_move)
 TEST(engine_tests, test_set_to_start_pos)
 {
    // implicit
-   Engine engine;
+   RandomEngine engine;
    EXPECT_EQ('P', engine.GetPieceAt("e2"));
    EXPECT_EQ('k', engine.GetPieceAt("e8"));
    EXPECT_TRUE(engine.IsWhiteToMove());
@@ -133,7 +135,7 @@ TEST(engine_tests, test_set_to_start_pos)
 
 TEST(engine_tests, test_apply_move_e2e4)
 {
-   Engine engine;
+   RandomEngine engine;
 
    EXPECT_TRUE(engine.ApplyMove("e2e4"));
    EXPECT_EQ(NO_PIECE, engine.GetPieceAt("e2"));
@@ -143,7 +145,7 @@ TEST(engine_tests, test_apply_move_e2e4)
 
 TEST(engine_tests, test_apply_move_wrong_side)
 {
-   Engine engine;
+   RandomEngine engine;
 
    EXPECT_FALSE(engine.ApplyMove("e7e5"));
    EXPECT_EQ('p', engine.GetPieceAt("e7"));
@@ -152,7 +154,7 @@ TEST(engine_tests, test_apply_move_wrong_side)
 
 TEST(engine_tests, test_move_pawn_two_after_first_move)
 {
-   Engine engine;
+   RandomEngine engine;
 
    EXPECT_TRUE(engine.ApplyMove("e2e4"));
    EXPECT_TRUE(engine.ApplyMove("e7e5"));
@@ -161,25 +163,25 @@ TEST(engine_tests, test_move_pawn_two_after_first_move)
 
 TEST(engine_tests, test_move_no_piece)
 {
-   Engine engine;
+   RandomEngine engine;
    EXPECT_FALSE(engine.ApplyMove("e3e4"));
 }
 
 TEST(engine_tests, test_move_same_square)
 {
-   Engine engine;
+   RandomEngine engine;
    EXPECT_FALSE(engine.ApplyMove("e2e2"));
 }
 
 TEST(engine_tests, test_move_off_board)
 {
-   Engine engine;
+   RandomEngine engine;
    EXPECT_FALSE(engine.ApplyMove("h1i1"));
 }
 
 TEST(engine_tests, test_legal_rook_moves)
 {
-   Engine engine;
+   RandomEngine engine;
 
    EXPECT_TRUE(engine.ApplyMove("a2a4"));
    EXPECT_TRUE(engine.ApplyMove("a7a5"));
@@ -192,7 +194,7 @@ TEST(engine_tests, test_legal_rook_moves)
 
 TEST(engine_tests, test_blocked_rook)
 {
-   Engine engine;
+   RandomEngine engine;
 
    EXPECT_TRUE(engine.ApplyMove("a2a4"));
    EXPECT_TRUE(engine.ApplyMove("a7a5"));
@@ -201,7 +203,7 @@ TEST(engine_tests, test_blocked_rook)
 
 TEST(engine_tests, test_legal_bishop_moves)
 {
-   Engine engine;
+   RandomEngine engine;
 
    EXPECT_TRUE(engine.ApplyMove("e2e4"));
    EXPECT_TRUE(engine.ApplyMove("e7e5"));
@@ -212,7 +214,7 @@ TEST(engine_tests, test_legal_bishop_moves)
 
 TEST(engine_tests, test_legal_knight_move)
 {
-   Engine engine;
+   RandomEngine engine;
 
    EXPECT_TRUE(engine.ApplyMove("e2e4"));
    EXPECT_TRUE(engine.ApplyMove("e7e5"));
@@ -222,7 +224,7 @@ TEST(engine_tests, test_legal_knight_move)
 
 TEST(engine_tests, illegal_move_test_1)
 {
-   Engine engine;
+   RandomEngine engine;
 
    EXPECT_TRUE(engine.ApplyMove("e2e3"));
    EXPECT_TRUE(engine.ApplyMove("d7d5"));
@@ -232,7 +234,7 @@ TEST(engine_tests, illegal_move_test_1)
 
 TEST(engine_tests, illegal_move_test_2)
 {
-   Engine engine;
+   RandomEngine engine;
 
    EXPECT_TRUE(engine.ApplyMove("e2e4"));
    EXPECT_TRUE(engine.ApplyMove("d7d5"));
@@ -242,7 +244,7 @@ TEST(engine_tests, illegal_move_test_2)
 
 TEST(engine_tests, move_test_pawn_capture)
 {
-   Engine engine;
+   RandomEngine engine;
 
    EXPECT_TRUE(engine.ApplyMove("e2e4"));
    EXPECT_TRUE(engine.ApplyMove("d7d5"));
@@ -255,7 +257,7 @@ TEST(engine_tests, move_test_pawn_capture)
 
 TEST(engine_tests, illegal_move_test_3)
 {
-   Engine engine;
+   RandomEngine engine;
 
    EXPECT_TRUE(engine.ApplyMove("e2e4"));
    EXPECT_TRUE(engine.ApplyMove("b7b5"));
@@ -277,7 +279,7 @@ TEST(engine_tests, illegal_move_test_3)
 
 TEST(engine_tests, illegal_move_test_4)
 {
-   Engine engine;
+   RandomEngine engine;
 
    EXPECT_TRUE(engine.ApplyMove("e2e4"));
    EXPECT_TRUE(engine.ApplyMove("d7d5"));
@@ -287,7 +289,7 @@ TEST(engine_tests, illegal_move_test_4)
 
 TEST(engine_tests, illegal_move_test_5)
 {
-   Engine engine;
+   RandomEngine engine;
 
    EXPECT_TRUE(engine.ApplyMove("e2e4"));
    EXPECT_TRUE(engine.ApplyMove("d7d5"));
@@ -308,7 +310,7 @@ TEST(engine_tests, illegal_move_test_5)
 
 TEST(engine_tests, king_move_test)
 {
-   Engine engine;
+   RandomEngine engine;
    EXPECT_TRUE(engine.ApplyMove("e2e4"));
    EXPECT_TRUE(engine.ApplyMove("d7d5"));
    EXPECT_TRUE(engine.ApplyMove("f1e2"));
@@ -316,7 +318,8 @@ TEST(engine_tests, king_move_test)
 
 TEST(engine_tests, castle_test)
 {
-   UCIHandler handler;
+   RandomEngine engine;
+   UCIHandler handler(&engine);
    uci_tokens tokens;
    UCIParser::BreakIntoTokens(
       "position startpos moves e2e4 d7d5 e4d5 b7b5 f1b5 b8d7 g1f3 f7f6 e1g1",
@@ -326,7 +329,7 @@ TEST(engine_tests, castle_test)
 
 TEST(engine_tests, illegal_move_test_6)
 {
-   Engine engine;
+   RandomEngine engine;
 
    EXPECT_TRUE(engine.ApplyMove("e2e4"));
    EXPECT_TRUE(engine.ApplyMove("d7d5"));
@@ -336,7 +339,7 @@ TEST(engine_tests, illegal_move_test_6)
 
 TEST(engine_tests, illegal_move_test_7)
 {
-   Engine engine;
+   RandomEngine engine;
 
    EXPECT_TRUE(engine.ApplyMove("e2e4"));
    EXPECT_TRUE(engine.ApplyMove("d7d5"));
@@ -352,7 +355,7 @@ TEST(engine_tests, illegal_move_test_7)
 
 TEST(engine_tests, en_passant_test)
 {
-   Engine engine;
+   RandomEngine engine;
 
    EXPECT_TRUE(engine.ApplyMove("b1c3"));
    EXPECT_TRUE(engine.ApplyMove("b7b6"));
@@ -435,7 +438,7 @@ TEST(engine_tests, en_passant_test)
 
 TEST(engine_tests, failed_game_test)
 {
-   Engine engine;
+   RandomEngine engine;
 
    EXPECT_TRUE(engine.ApplyMove("e2e4"));
    EXPECT_TRUE(engine.ApplyMove("d7d5"));
@@ -499,7 +502,7 @@ TEST(engine_tests, failed_game_test)
 
 TEST(engine_tests, illegal_move_test_8)
 {
-   Engine engine;
+   RandomEngine engine;
 
    EXPECT_TRUE(engine.ApplyMove("a2a3"));
    EXPECT_TRUE(engine.ApplyMove("d7d5"));
@@ -519,7 +522,7 @@ TEST(engine_tests, illegal_move_test_8)
 
 TEST(engine_tests, illegal_move_test_9)
 {
-   Engine engine;
+   RandomEngine engine;
 
    EXPECT_TRUE(engine.ApplyMove("a2a3"));
    EXPECT_TRUE(engine.ApplyMove("d7d5"));
@@ -600,7 +603,7 @@ TEST(engine_tests, illegal_move_test_9)
 
 TEST(engine_tests, test_failed_promote)
 {
-   Engine engine;
+   RandomEngine engine;
 
    EXPECT_TRUE(engine.ApplyMove("a2a3"));
    EXPECT_TRUE(engine.ApplyMove("d7d5"));
@@ -762,7 +765,7 @@ TEST(engine_tests, test_failed_promote)
 
 TEST(engine_tests, test_is_check)
 {
-   Engine engine;
+   RandomEngine engine;
    Position position;
 
    EXPECT_TRUE(engine.ApplyMove("f2f3"));
@@ -782,7 +785,7 @@ TEST(engine_tests, test_is_check)
 
 TEST(engine_tests, test_list_all_legal_moves)
 {
-   Engine engine;
+   RandomEngine engine;
    Position position;
    engine.GetPosition(&position);
    EXPECT_EQ(1, Engine::ListAllLegalMoves(position));
@@ -790,7 +793,7 @@ TEST(engine_tests, test_list_all_legal_moves)
 
 TEST(engine_tests, test_get_outcome)
 {
-   Engine engine;
+   RandomEngine engine;
    Position position;
 
    EXPECT_TRUE(engine.ApplyMove("f2f3"));

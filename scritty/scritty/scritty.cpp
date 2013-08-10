@@ -20,7 +20,8 @@ int main(int argc, const char *argv[])
 {
    Logger::LogMessage("Starting Scritty...");
 
-   UCIHandler handler;
+   RandomEngine engine;
+   UCIHandler handler(&engine);
 
    /* REQUIREMENT
 

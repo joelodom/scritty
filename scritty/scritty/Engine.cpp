@@ -660,34 +660,6 @@ void Move::ToString(std::string *str)
       *str += promotion_piece;
 }
 
-void Engine::GetBestMove(std::string *best) const
-{
-   // possibly the smartest chess algorithm of all time
-
-   Move move;
-
-   do
-   {
-      move.start_file = rand() % 8;
-      move.start_rank = rand() % 8;
-      move.end_file = rand() % 8;
-      move.end_rank = rand() % 8;
-   } while (!IsMoveLegal(m_position, move));
-
-   // handle promotion
-
-   char piece = m_position.m_board.m_squares[move.start_file][move.start_rank];
-
-   if (move.end_rank == 7 && piece == 'P')
-      move.promotion_piece = 'Q';
-   else if (move.end_rank == 0 && piece == 'p')
-      move.promotion_piece = 'q';
-   else
-      move.promotion_piece = NO_PIECE;
-
-   move.ToString(best);
-}
-
 /*static*/ void Engine::WritePositionToStdout(const Position &position)
 {
    for (unsigned char rank = 7; (char)rank >= 0; --rank)
@@ -737,17 +709,63 @@ void Engine::GetBestMove(std::string *best) const
 
 Outcome Engine::GetOutcome() const
 {
-   // TODO: various draw conditions
+   // check for checkmate or stalemate
 
    const size_t count = ListAllLegalMoves(m_position, nullptr);
 
    if (count == 0)
    {
+      // Stalemate - if the player on turn has no legal move but is not in
+      // check, this is stalemate and the game is automatically a draw.
       if (m_position.m_white_to_move)
          return IsCheck(m_position, 'K') ? OUTCOME_WIN_BLACK : OUTCOME_DRAW;
       else
          return IsCheck(m_position, 'k') ? OUTCOME_WIN_WHITE : OUTCOME_DRAW;
    }
+
+   // Threefold repetition - if an identical position has just occurred three
+   // times with the same player to move, or will occur after the player on turn
+   // makes his move, the player on move may claim a draw (to the arbiter). In
+   // such a case the draw is not automatic - a player must claim it if he wants
+   // the draw. When the position will occur for the third time after the
+   // player's intended next move, he writes the move on his scoresheet but does
+   // not make the move on the board and claims the draw. Article 9.2 states
+   // that a position is considered identical to another if the same player is
+   // on move, the same types of pieces of the same colors occupy the same
+   // squares, and the same moves are available to each player; in particular,
+   // each player has the same castling and en passant capturing rights. (A
+   // player may lose his right to castle; and an en passant capture is
+   // available only at the first opportunity.) If the claim is not made on the
+   // move in which the repetition occurs, the player forfeits the right to make
+   // the claim. Of course, the opportunity may present itself again.
+
+   // TODO: a threefold repetition must be claimed as a draw, consider
+   // how to handle
+
+   // The fifty-move rule - if in the previous fifty moves by each side,
+   // no pawn has moved and no capture has been made, a draw may be claimed by
+   // either player. Here again, the draw is not automatic and must be claimed
+   // if the player wants the draw. If the player whose turn it is to move has
+   // made only 49 such moves, he may write his next move on the scoresheet and
+   // claim a draw. As with the threefold repetition, the right to claim the
+   // draw is forfeited if it is not used on that move, but the opportunity may
+   // occur again.
+
+   // TODO: a fifty move draw must be claimed as a draw, consider how to handle
+
+   // Impossibility of checkmate - if a position arises in which neither player
+   // could possibly give checkmate by a series of legal moves, the game is a
+   // draw. This is usually because there is insufficient material left, but it
+   // is possible in other positions too. Combinations with insufficient
+   // material to checkmate are:
+   //   king versus king
+   //   king and bishop versus king
+   //   king and knight versus king
+   //   king and bishop versus king and bishop with the bishops on the same
+   //     colour. (Any number of additional bishops of either color on the same
+   //     color of square due to underpromotion do not affect the situation.)
+
+   // TODO: ...
 
    return OUTCOME_UNDECIDED;
 }
