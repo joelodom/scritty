@@ -379,5 +379,7 @@ rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w AHah -
  - Piece values based on square and game phase
  - Square values (ability to attack square) based on square and game phase
  - Game phase changes based on count of captured pieces
+ - Value of pins, maybe based on positional factors
+ - Value of a check (as it may lead to mate)
 
 */

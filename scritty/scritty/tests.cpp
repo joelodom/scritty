@@ -75,7 +75,7 @@ namespace scritty // for FRIEND_TEST
          if (!handler.handle_position(tokens))
          {
             Logger::GetStream() << "Failed game: " << line << std::endl;
-            GTEST_FAIL() << "Failed on " << line;
+            FAIL() << "Failed on " << line;
          }
 
          ++game;
@@ -758,4 +758,54 @@ TEST(engine_tests, test_failed_promote)
    EXPECT_TRUE(engine.ApplyMove("f4e5"));
 
    EXPECT_FALSE(engine.ApplyMove("d7d8")); // failed to promote
+}
+
+TEST(engine_tests, test_is_check)
+{
+   Engine engine;
+   Position position;
+
+   EXPECT_TRUE(engine.ApplyMove("f2f3"));
+   EXPECT_TRUE(engine.ApplyMove("e7e5"));
+   EXPECT_TRUE(engine.ApplyMove("g2g4"));
+
+   engine.GetPosition(&position);
+   EXPECT_FALSE(Engine::IsCheck(position, 'K'));
+   EXPECT_FALSE(Engine::IsCheck(position, 'k'));
+
+   EXPECT_TRUE(engine.ApplyMove("d8h4")); // mate
+
+   engine.GetPosition(&position);
+   EXPECT_TRUE(Engine::IsCheck(position, 'K'));
+   EXPECT_FALSE(Engine::IsCheck(position, 'k'));
+}
+
+TEST(engine_tests, test_list_all_legal_moves)
+{
+   Engine engine;
+   Position position;
+   engine.GetPosition(&position);
+   EXPECT_EQ(1, Engine::ListAllLegalMoves(position));
+}
+
+TEST(engine_tests, test_get_outcome)
+{
+   Engine engine;
+   Position position;
+
+   EXPECT_TRUE(engine.ApplyMove("f2f3"));
+   EXPECT_TRUE(engine.ApplyMove("e7e5"));
+   EXPECT_TRUE(engine.ApplyMove("g2g4"));
+
+   engine.GetPosition(&position);
+   EXPECT_FALSE(Engine::IsCheck(position, 'K'));
+   EXPECT_FALSE(Engine::IsCheck(position, 'k'));
+
+   EXPECT_TRUE(engine.ApplyMove("d8h4")); // mate
+
+   engine.GetPosition(&position);
+   EXPECT_TRUE(Engine::IsCheck(position, 'K'));
+   EXPECT_FALSE(Engine::IsCheck(position, 'k'));
+
+   EXPECT_EQ(OUTCOME_WIN_BLACK, engine.GetOutcome());
 }

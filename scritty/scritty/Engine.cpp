@@ -619,22 +619,29 @@ bool Engine::IsWhiteToMove() const
       Position new_position(position);
       ApplyKnownLegalMoveToPosition(move, &new_position);
       new_position.m_white_to_move = !new_position.m_white_to_move;
-      char my_king = position.m_white_to_move ? 'K' : 'k';
+      if (IsCheck(new_position, position.m_white_to_move ? 'K' : 'k'))
+         return false;
+   }
 
-      for (unsigned char rank = 0; rank <= 7; ++rank)
+   return true;
+}
+
+/*static*/ inline bool Engine::IsCheck(
+   const Position &position, const char which_king)
+{
+   for (unsigned char rank = 0; rank <= 7; ++rank)
+   {
+      for (unsigned char file = 0; file <= 7; ++file)
       {
-         for (unsigned char file = 0; file <= 7; ++file)
+         if (position.m_board.m_squares[file][rank] == which_king)
          {
-            if (new_position.m_board.m_squares[file][rank] == my_king)
-            {
-               if (IsOpponentAttackingSquare(file, rank, new_position))
-                  return false;
-            }
+            if (IsOpponentAttackingSquare(file, rank, position))
+               return true;
          }
       }
    }
 
-   return true;
+   return false;
 }
 
 char Engine::GetPieceAt(const std::string &square) const
@@ -653,7 +660,7 @@ void Move::ToString(std::string *str)
       *str += promotion_piece;
 }
 
-void Engine::GetBestMove(std::string *best)
+void Engine::GetBestMove(std::string *best) const
 {
    // possibly the smartest chess algorithm of all time
 
@@ -687,10 +694,66 @@ void Engine::GetBestMove(std::string *best)
    {
       for (unsigned char file = 0; file <= 7; ++file)
       {
-         std::cout << position.m_board.m_squares[file][rank];
+         if (position.m_board.m_squares[file][rank] == NO_PIECE)
+            std::cout << '.';
+         else
+            std::cout << position.m_board.m_squares[file][rank];
       }
+
       std::cout << std::endl;
    }
+
    std::cout << (position.m_white_to_move ? "White" : "Black") << " to move."
       << std::endl;
+}
+
+/*static*/ size_t Engine::ListAllLegalMoves(
+   const Position &position, Move *buf /*= nullptr*/)
+{
+   // pass in null buffer to test if there are any legal moves (returns 0 or 1)
+   if (buf != nullptr)
+      throw std::string("TODO");
+
+   // TODO: fix efficiency
+
+   Move move;
+   for (move.start_file = 0; move.start_file <= 7; ++move.start_file)
+   {
+      for (move.start_rank = 0; move.start_rank <= 7; ++move.start_rank)
+      {
+         for (move.end_file = 0; move.end_file <= 7; ++move.end_file)
+         {
+            for (move.end_rank = 0; move.end_rank <= 7; ++ move.end_rank)
+            {
+               if (IsMoveLegal(position, move))
+                  return 1;
+            }
+         }
+      }
+   }
+
+   return 0;
+}
+
+Outcome Engine::GetOutcome() const
+{
+   // TODO: various draw conditions
+
+   const size_t count = ListAllLegalMoves(m_position, nullptr);
+
+   if (count == 0)
+   {
+      if (m_position.m_white_to_move)
+         return IsCheck(m_position, 'K') ? OUTCOME_WIN_BLACK : OUTCOME_DRAW;
+      else
+         return IsCheck(m_position, 'k') ? OUTCOME_WIN_WHITE : OUTCOME_DRAW;
+   }
+
+   return OUTCOME_UNDECIDED;
+}
+
+void Engine::GetPosition(Position *position) const
+{
+   // makes a copy
+   *position = m_position;
 }

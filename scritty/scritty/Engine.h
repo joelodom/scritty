@@ -9,8 +9,21 @@
 #define NO_PIECE '\0'
 #define NO_EN_PASSANT 8
 
+// TODO: whittle this down with more thinking
+// 16 pieces times 63 squares plus 16 promotion squares times 4 promotion pieces
+// plus 4 castles
+#define MAX_NUMBER_OF_LEGAL_MOVES 16*63 + 16*4 + 4
+
 namespace scritty
 {
+   enum Outcome
+   {
+      OUTCOME_UNDECIDED,
+      OUTCOME_WIN_WHITE,
+      OUTCOME_WIN_BLACK,
+      OUTCOME_DRAW
+   };
+
    class Move
    {
    public:
@@ -37,8 +50,10 @@ namespace scritty
    {
       friend class Engine;
 
-   private:
+   public:
       Position() {}
+
+   private:
       Board m_board;
       bool m_white_to_move;
       bool m_white_may_castle_short, m_white_may_castle_long;
@@ -51,12 +66,21 @@ namespace scritty
    public:
       static void WritePositionToStdout(const Position &position);
 
+      // methods not guaranteed to be efficient
       Engine();
       void SetToStartPos();
       bool ApplyMove(const std::string &str); // algebraic notation
       char GetPieceAt(const std::string &square) const; // algebraic notation
       bool IsWhiteToMove() const;
-      void GetBestMove(std::string *best); // algebraic notation
+      void GetBestMove(std::string *best) const; // algebraic notation
+      Outcome GetOutcome() const;
+      void GetPosition(Position *position) const;
+
+      // these methods should be optimized
+      static inline bool IsCheck(
+         const Position &position, const char which_king);
+      static size_t ListAllLegalMoves(
+         const Position &position, Move *buf = nullptr);
 
    private:
       static bool IsMoveLegal(
