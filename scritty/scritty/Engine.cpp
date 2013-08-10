@@ -419,7 +419,8 @@ bool Engine::IsWhiteToMove() const
             return false;
       }
 
-      if (move.start_file != move.end_file
+      if (move.end_rank < move.start_rank
+         || move.start_file != move.end_file
          || position.m_board.m_squares[move.end_file][move.end_rank]
       != NO_PIECE)
          return false;
@@ -465,7 +466,8 @@ bool Engine::IsWhiteToMove() const
             return false;
       }
 
-      if (move.start_file != move.end_file
+      if (move.end_rank > move.start_rank
+         || move.start_file != move.end_file
          || position.m_board.m_squares[move.end_file][move.end_rank]
       != NO_PIECE)
          return false;

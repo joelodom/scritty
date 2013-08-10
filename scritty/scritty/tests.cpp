@@ -10,6 +10,7 @@
 #define GAMES_FILE "C:\\Users\\Joel\\Google Drive\\chess_games_db" \
    "\\3965020games.uci"
 #define GAMES_IN_FILE 3965020
+#define MAX_GAMES_TO_PLAY 1
 
 using namespace scritty;
 
@@ -53,7 +54,7 @@ namespace scritty // for FRIEND_TEST
 
       std::string line;
       size_t game = 1;
-      while (std::getline(in_file, line))
+      while (game <= MAX_GAMES_TO_PLAY && std::getline(in_file, line))
       {
          if (line.size() < 1 || line[0] == '[')
             continue;
@@ -485,4 +486,23 @@ TEST(engine_tests, failed_game_test)
    EXPECT_EQ('q', engine.GetPieceAt("d1"));
    
    EXPECT_TRUE(engine.ApplyMove("a1d1"));
+}
+
+TEST(engine_tests, illegal_move_test_8)
+{
+   Engine engine;
+   EXPECT_TRUE(engine.ApplyMove("a2a3"));
+   EXPECT_TRUE(engine.ApplyMove("d7d5"));
+   EXPECT_TRUE(engine.ApplyMove("g2g4"));
+   EXPECT_TRUE(engine.ApplyMove("b7b5"));
+   EXPECT_TRUE(engine.ApplyMove("f1g2"));
+   EXPECT_TRUE(engine.ApplyMove("c8f5"));
+   EXPECT_TRUE(engine.ApplyMove("c2c3"));
+   EXPECT_TRUE(engine.ApplyMove("d8d6"));
+   EXPECT_TRUE(engine.ApplyMove("d1a4"));
+   EXPECT_TRUE(engine.ApplyMove("b5a4"));
+   EXPECT_TRUE(engine.ApplyMove("c3c4"));
+   EXPECT_TRUE(engine.ApplyMove("d6e5"));
+   EXPECT_TRUE(engine.ApplyMove("b2b3"));
+   EXPECT_FALSE(engine.ApplyMove("c7c8"));
 }
