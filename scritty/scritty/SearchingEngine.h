@@ -4,12 +4,28 @@
 #define SCRITTY_SEARCHING_ENGINE_H
 
 #include "Engine.h"
+#include "GeneticTournament.h"
 
 #define SEARCH_DEPTH 4 // should always be even
 
+#define PARAMETER_NAME_0 "Pawn Value"
+#define PARAMETER_DEFAULT_0 1
+
+#define PARAMETER_NAME_1 "Bishop Value"
+#define PARAMETER_DEFAULT_1 3
+
+#define PARAMETER_NAME_2 "Knight Value"
+#define PARAMETER_DEFAULT_2 3
+
+#define PARAMETER_NAME_3 "Rook Value"
+#define PARAMETER_DEFAULT_3 5
+
+#define PARAMETER_NAME_4 "Queen Value"
+#define PARAMETER_DEFAULT_4 9
+
 namespace scritty
 {
-   class SearchingEngine : public Engine
+   class SearchingEngine : public Engine, public GeneticEngine
    {
    public:
       SearchingEngine();
@@ -18,9 +34,10 @@ namespace scritty
       virtual Outcome GetBestMove(std::string *best) const;
 
    private:
-      static double GetBestMove(
-         const Position &position, size_t plies, Move *best, Move *move_buffer);
-      static double EvaluatePosition(const Position &position); // centipawns
+      double GetBestMove(
+         const Position &position, size_t plies, Move *best, Move *move_buffer)
+         const;
+      double EvaluatePosition(const Position &position) const; // centipawns
    };
 }
 

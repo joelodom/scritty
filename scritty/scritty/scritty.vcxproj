@@ -111,6 +111,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\third-party\gtest-1.6.0\src\gtest-all.cc" />
     <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="GeneticTournament.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="RandomEngine.cpp" />
     <ClCompile Include="scritty.cpp" />
@@ -121,6 +122,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine.h" />
+    <ClInclude Include="GeneticTournament.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="RandomEngine.h" />
     <ClInclude Include="scritty.h" />

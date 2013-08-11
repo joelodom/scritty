@@ -6,6 +6,20 @@ using namespace scritty;
 
 SearchingEngine::SearchingEngine()
 {
+   m_parameters.push_back(PARAMETER_DEFAULT_0);
+   m_parameter_names.push_back(PARAMETER_NAME_0);
+
+   m_parameters.push_back(PARAMETER_DEFAULT_1);
+   m_parameter_names.push_back(PARAMETER_NAME_1);
+
+   m_parameters.push_back(PARAMETER_DEFAULT_2);
+   m_parameter_names.push_back(PARAMETER_NAME_2);
+
+   m_parameters.push_back(PARAMETER_DEFAULT_3);
+   m_parameter_names.push_back(PARAMETER_NAME_3);
+
+   m_parameters.push_back(PARAMETER_DEFAULT_4);
+   m_parameter_names.push_back(PARAMETER_NAME_4);
 }
 
 SearchingEngine::~SearchingEngine()
@@ -27,8 +41,8 @@ Outcome SearchingEngine::GetBestMove(std::string *best) const
    return OUTCOME_UNDECIDED; // don't ever give up
 }
 
-/*static*/ double SearchingEngine::GetBestMove(
-   const Position &position, size_t plies, Move *best, Move *move_buffer)
+double SearchingEngine::GetBestMove(
+   const Position &position, size_t plies, Move *best, Move *move_buffer) const
 {
    // one ply is one half-turn in chess
 
@@ -75,7 +89,7 @@ Outcome SearchingEngine::GetBestMove(std::string *best) const
    return best_evaluation;
 }
 
-/*static*/ double SearchingEngine::EvaluatePosition(const Position &position)
+double SearchingEngine::EvaluatePosition(const Position &position) const
 {
    double evaluation = 0.0;
 
@@ -86,30 +100,34 @@ Outcome SearchingEngine::GetBestMove(std::string *best) const
          switch (position.m_board.m_squares[file][rank])
          {
          case 'P':
-            evaluation += 1.0;
+            evaluation += m_parameters[0];
             break;
          case 'p':
-            evaluation -= 1.0;
+            evaluation -= m_parameters[0];
             break;
          case 'B':
-         case 'N':
-            evaluation += 3.0;
+            evaluation += m_parameters[1];
             break;
          case 'b':
+            evaluation -= m_parameters[1];
+            break;
+         case 'N':
+            evaluation += m_parameters[2];
+            break;
          case 'n':
-            evaluation -= 3.0;
+            evaluation -= m_parameters[2];
             break;
          case 'R':
-            evaluation += 5.0;
+            evaluation += m_parameters[3];
             break;
          case 'r':
-            evaluation -= 5.0;
+            evaluation -= m_parameters[3];
             break;
          case 'Q':
-            evaluation += 9.0;
+            evaluation += m_parameters[4];
             break;
          case 'q':
-            evaluation -= 9.0;
+            evaluation -= m_parameters[4];
             break;
          }
       }
