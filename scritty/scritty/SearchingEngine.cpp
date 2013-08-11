@@ -51,7 +51,8 @@ Outcome SearchingEngine::GetBestMove(std::string *best) const
          return -DBL_MAX;
       else
       {
-         best->promotion_piece = DRAW_PIECE;
+         if (best != nullptr)
+            best->promotion_piece = DRAW_PIECE;
          return 0.0;
       }
    }

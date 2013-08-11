@@ -815,7 +815,7 @@ TEST(engine_tests, test_get_outcome)
    EXPECT_EQ(OUTCOME_WIN_BLACK, engine.GetOutcome());
 }
 
-TEST(searching_engine_tests, test_get_best_move)
+TEST(searching_engine_tests, DISABLED_test_get_best_move)
 {
    SearchingEngine engine;
    
@@ -826,4 +826,26 @@ TEST(searching_engine_tests, test_get_best_move)
    engine.GetBestMove(&best);
 
    //EXPECT_STREQ("d4e5", best.c_str());
+}
+
+TEST(searching_engine_tests, debug_crash)
+{
+   SearchingEngine engine;
+   UCIHandler handler(&engine);
+
+   uci_tokens tokens;
+   UCIParser::BreakIntoTokens("position startpos moves e2e4 a7a5 f1c4 a5a4 "
+      "d1h5 e7e6 g1f3 a8a7 f3e5 g7g6 h5f3 d8f6 f3f6 g8f6 b1c3 a7a5 d2d4 f8b4 "
+      "e1g1 a4a3 b2b3 b4c3 a1b1 a5a7 c1e3 c7c5 d4c5 c3e5 c5c6 a7a5 b3b4 a5a4 "
+      "c4b5 e5h2 g1h2 f6g4 h2g3 g4e3 f2e3 a4a7 c6d7 c8d7 b5d7 b8d7 b1d1 a7a4 "
+      "c2c3 a4a7 c3c4 a7a4 d1d3 a4b4 d3a3 d7b6 a3b3 b4b3 a2b3 b6a8 f1a1 a8b6 "
+      "c4c5 f7f5 a1a8 b6a8 b3b4 a8c7 c5c6 b7c6 e4f5 e6f5 g3f4 c7d5 f4e5 d5b4 "
+      "e5d6 b4c2 d6c6 c2e3 g2g3 e3f1 g3g4 f5g4 c6d5 e8d7 d5d4 d7c6 d4e5 c6b5 "
+      "e5d6 b5a4 d6c6 a4a3 c6b5 a3a2 b5b4 a2a1 b4b3 a1b1 b3c3 b1a1 c3d3 a1a2 "
+      "d3e2", &tokens);
+   EXPECT_TRUE(handler.handle_position(tokens));
+
+   tokens.clear();
+   UCIParser::BreakIntoTokens("go movetime 10000", &tokens);
+   EXPECT_TRUE(handler.handle_go(tokens));
 }
