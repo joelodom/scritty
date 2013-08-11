@@ -69,8 +69,9 @@ namespace scritty
       Outcome GetOutcome() const;
       void GetPosition(Position *position) const;
 
-      // returns a draw outcome, if engine is offering a draw
+      // returns a draw outcome if engine is offering a draw
       // returns win for other side on resignation
+      // don't call if there are no valid moves
       virtual Outcome GetBestMove(std::string *best) const = 0; // algebraic
 
       // these methods should be optimized

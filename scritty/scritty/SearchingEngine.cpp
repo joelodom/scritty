@@ -23,15 +23,8 @@ Outcome SearchingEngine::GetBestMove(std::string *best) const
 
    delete[] move_buffer;
 
-   if (move.promotion_piece == DRAW_PIECE)
-      return OUTCOME_DRAW;
-   else if (evaluation == DBL_MAX)
-      return OUTCOME_WIN_WHITE;
-   else if (evaluation == -DBL_MAX)
-      return OUTCOME_WIN_BLACK;
-
    move.ToString(best);
-   return OUTCOME_UNDECIDED;
+   return OUTCOME_UNDECIDED; // don't ever give up
 }
 
 /*static*/ double SearchingEngine::GetBestMove(
@@ -50,11 +43,7 @@ Outcome SearchingEngine::GetBestMove(std::string *best) const
       else if (outcome == OUTCOME_WIN_BLACK)
          return -DBL_MAX;
       else
-      {
-         if (best != nullptr)
-            best->promotion_piece = DRAW_PIECE;
          return 0.0;
-      }
    }
 
    Move *best_move = move_buffer;

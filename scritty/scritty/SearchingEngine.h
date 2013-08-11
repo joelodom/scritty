@@ -6,7 +6,6 @@
 #include "Engine.h"
 
 #define SEARCH_DEPTH 4 // should always be even
-#define DRAW_PIECE 'd' // kind of a hack
 
 namespace scritty
 {

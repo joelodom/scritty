@@ -849,3 +849,23 @@ TEST(searching_engine_tests, debug_crash)
    UCIParser::BreakIntoTokens("go movetime 10000", &tokens);
    EXPECT_TRUE(handler.handle_go(tokens));
 }
+
+TEST(searching_engine_tests, debug_crash2)
+{
+   SearchingEngine engine;
+   UCIHandler handler(&engine);
+
+   uci_tokens tokens;
+   UCIParser::BreakIntoTokens("position startpos moves e2e4 a7a5 g1f3 a5a4 "
+      "f1c4 a8a5 e1g1 a5a7 d2d4 a7a5 b1c3 a5a7 c1f4 a4a3 b2b3 a7a5 d1d3 a5a7 "
+      "f1e1 a7a5 e4e5 a5a7 a1d1 a7a5 c4b5 a5a7 e5e6 f7e6 e1e6 b8c6 b5c6 b7c6 "
+      "e6e5 d7d5 f4g5 a7a5 d1e1 a5a7 g5e7 f8e7 e5e7 g8e7 f3g5 a7a5 d3f3 d8d7 "
+      "f3f7 e8d8 e1e7 d7e7 f7e7 d8e7 f2f4 a5a6 h2h3 c8f5 g2g4 f5c2 f4f5 a6a5 "
+      "g5e6 g7g6 c3e2 a5a7 e2f4 g6f5 g4f5 c2b1 f4h5 b1a2 f5f6 e7e6 g1f2 a2b3 "
+      "f2f3 b3d1 f3f4 d1h5 f4g5 a3a2 g5h6 a2a1q h6h5 a1d4 h5h6", &tokens);
+   EXPECT_TRUE(handler.handle_position(tokens));
+
+   tokens.clear();
+   UCIParser::BreakIntoTokens("go movetime 10000", &tokens);
+   EXPECT_TRUE(handler.handle_go(tokens));
+}
