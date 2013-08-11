@@ -16,7 +16,7 @@ namespace scritty
       virtual Outcome GetBestMove(std::string *best) const;
 
    private:
-      static Outcome GetBestMove(const Position &position, bool for_white,
+      static Outcome GetBestMove(const Position &position,
          size_t plies, Move *best, double *evaluation);
       static double EvaluatePosition(const Position &position); // centipawns
    };

@@ -6,6 +6,7 @@
 #include <fstream>
 #include "Logger.h"
 #include "scritty.h"
+#include "SearchingEngine.h"
 
 #define GAMES_FILE "C:\\Users\\Joel\\Google Drive\\chess_games_db" \
    "\\3965020games.uci"
@@ -812,4 +813,17 @@ TEST(engine_tests, test_get_outcome)
    EXPECT_FALSE(Engine::IsCheck(position, 'k'));
 
    EXPECT_EQ(OUTCOME_WIN_BLACK, engine.GetOutcome());
+}
+
+TEST(searching_engine_tests, test_get_best_move)
+{
+   SearchingEngine engine;
+   
+   EXPECT_TRUE(engine.ApplyMove("d2d4"));
+   EXPECT_TRUE(engine.ApplyMove("e7e5"));
+
+   std::string best;
+   engine.GetBestMove(&best);
+
+   //EXPECT_STREQ("d4e5", best.c_str());
 }
