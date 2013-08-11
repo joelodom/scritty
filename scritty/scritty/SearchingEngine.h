@@ -5,6 +5,9 @@
 
 #include "Engine.h"
 
+#define SEARCH_DEPTH 4 // should always be even
+#define DRAW_PIECE 'd' // kind of a hack
+
 namespace scritty
 {
    class SearchingEngine : public Engine
@@ -16,8 +19,8 @@ namespace scritty
       virtual Outcome GetBestMove(std::string *best) const;
 
    private:
-      static Outcome GetBestMove(const Position &position,
-         size_t plies, Move *best, double *evaluation);
+      static double GetBestMove(
+         const Position &position, size_t plies, Move *best, Move *move_buffer);
       static double EvaluatePosition(const Position &position); // centipawns
    };
 }
