@@ -4,9 +4,10 @@
 
 using namespace scritty;
 
-void RandomEngine::GetBestMove(std::string *best) const
+Outcome RandomEngine::GetBestMove(std::string *best) const
 {
    // possibly the smartest chess algorithm of all time
+   // (hangs if in mate or draw)
 
    Move move;
 
@@ -30,4 +31,6 @@ void RandomEngine::GetBestMove(std::string *best) const
       move.promotion_piece = NO_PIECE;
 
    move.ToString(best);
+
+   return OUTCOME_UNDECIDED;
 }

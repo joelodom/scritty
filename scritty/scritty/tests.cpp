@@ -1,11 +1,11 @@
 // Scritty is Copyright (c) 2013 by Joel Odom, Marietta, GA, All Rights Reserved
 
-#include "gtest/gtest.h"
 #include "UCIParser.h"
-#include "Engine.h"
+#include "RandomEngine.h"
 #include "UCIHandler.h"
 #include <fstream>
 #include "Logger.h"
+#include "scritty.h"
 
 #define GAMES_FILE "C:\\Users\\Joel\\Google Drive\\chess_games_db" \
    "\\3965020games.uci"
@@ -14,7 +14,8 @@
 
 using namespace scritty;
 
-// TODO: add huge PGN database and test to check all moves for validity
+/*static*/ bool ScrittyTestEnvironment::s_tests_were_run = false;
+/*static*/ _CrtMemState ScrittyTestEnvironment::s_mem_state;
 
 TEST(test_gtest, test_gtest)
 {

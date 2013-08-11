@@ -626,7 +626,7 @@ bool Engine::IsWhiteToMove() const
    return true;
 }
 
-/*static*/ inline bool Engine::IsCheck(
+/*static*/ bool Engine::IsCheck(
    const Position &position, const char which_king)
 {
    for (unsigned char rank = 0; rank <= 7; ++rank)
@@ -739,20 +739,20 @@ void Move::ToString(std::string *str)
    return count;
 }
 
-Outcome Engine::GetOutcome() const
+/*static*/ Outcome Engine::GetOutcome(const Position &position)
 {
    // check for checkmate or stalemate
 
-   const size_t count = ListAllLegalMoves(m_position, nullptr);
+   const size_t count = ListAllLegalMoves(position, nullptr);
 
    if (count == 0)
    {
       // Stalemate - if the player on turn has no legal move but is not in
       // check, this is stalemate and the game is automatically a draw.
-      if (m_position.m_white_to_move)
-         return IsCheck(m_position, 'K') ? OUTCOME_WIN_BLACK : OUTCOME_DRAW;
+      if (position.m_white_to_move)
+         return IsCheck(position, 'K') ? OUTCOME_WIN_BLACK : OUTCOME_DRAW;
       else
-         return IsCheck(m_position, 'k') ? OUTCOME_WIN_WHITE : OUTCOME_DRAW;
+         return IsCheck(position, 'k') ? OUTCOME_WIN_WHITE : OUTCOME_DRAW;
    }
 
    // Threefold repetition - if an identical position has just occurred three
@@ -800,6 +800,11 @@ Outcome Engine::GetOutcome() const
    // TODO: ...
 
    return OUTCOME_UNDECIDED;
+}
+
+Outcome Engine::GetOutcome() const
+{
+   return GetOutcome(m_position);
 }
 
 void Engine::GetPosition(Position *position) const

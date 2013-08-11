@@ -1,7 +1,7 @@
 // Scritty is Copyright (c) 2013 by Joel Odom, Marietta, GA, All Rights Reserved
 
-#ifndef SCRITTY_LOGGER
-#define SCRITTY_LOGGER
+#ifndef SCRITTY_LOGGER_H
+#define SCRITTY_LOGGER_H
 
 #include <string>
 
@@ -17,6 +17,7 @@ namespace scritty
       ~Logger();
 
    private:
+      void StartStream();
       void InternalLogMessage(const std::string &message);
 
       std::ofstream* m_out_stream;
@@ -25,4 +26,4 @@ namespace scritty
    };
 }
 
-#endif // #ifndef SCRITTY_LOGGER
+#endif // #ifndef SCRITTY_LOGGER_H

@@ -14,8 +14,12 @@ Logger::Logger() : m_out_stream(nullptr)
 
 Logger::~Logger()
 {
-   m_out_stream->close();
-   delete m_out_stream;
+   if (m_out_stream != nullptr)
+   {
+      m_out_stream->close();
+      delete m_out_stream;
+      m_out_stream = nullptr;
+   }
 }
 
 /*static*/ void Logger::LogMessage(const std::string &message)
@@ -25,10 +29,11 @@ Logger::~Logger()
 
 /*static*/ std::ostream& Logger::GetStream()
 {
+   s_instance.StartStream();
    return *s_instance.m_out_stream;
 }
 
-/*static*/ void Logger::InternalLogMessage(const std::string &message)
+/*static*/ void Logger::StartStream()
 {
    if (m_out_stream == nullptr)
    {
@@ -38,6 +43,10 @@ Logger::~Logger()
       m_out_stream = new std::ofstream(std::string(temp_path) + "scritty.log",
          std::ios_base::out | std::ios_base::app);
    }
+}
 
+void Logger::InternalLogMessage(const std::string &message)
+{
+   StartStream();
    *m_out_stream << message << std::endl;
 }

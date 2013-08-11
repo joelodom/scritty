@@ -6,6 +6,7 @@
 #include "UCIParser.h"
 #include "gtest/gtest.h"
 #include "SearchingEngine.h"
+#include "scritty.h"
 
 using namespace scritty;
 
@@ -19,64 +20,81 @@ using namespace scritty;
 
 int main(int argc, const char *argv[])
 {
-   Logger::LogMessage("Starting Scritty...");
-
-   SearchingEngine engine;
-   UCIHandler handler(&engine);
-
-   /* REQUIREMENT
-
-   * all communication is done via standard input and output with text
-   commands,
-
-   * The engine should boot and wait for input from the GUI,
-   the engine should wait for the "isready" or "setoption" command to set up
-   its internal parameters as the boot process
-   should be as quick as possible.
-
-   * all command strings the engine receives will end with '\n',
-   also all commands the GUI receives should end with '\n',
-   Note: '\n' can be 0x0d or 0x0a0d or any combination depending on your OS.
-   If you use Engine and GUI in the same OS this should be no problem if you
-   communicate in text mode, but be aware of this when for example
-   running a Linux engine in a Windows GUI.
-
-   */
-
-   std::string line;
-   while (std::getline(std::cin, line))
    {
-      Logger::GetStream() << "Received line: " << line << std::endl;
+      Logger::LogMessage("Starting Scritty...");
 
-      uci_tokens tokens;
-      UCIParser::BreakIntoTokens(line, &tokens);
+      _CrtMemCheckpoint(&ScrittyTestEnvironment::s_mem_state);
 
-      if (handler.handle_quit(tokens))
-         break;
+      SearchingEngine engine;
+      UCIHandler handler(&engine);
 
-      if (tokens[0] == "runtests")
+      /* REQUIREMENT
+
+      * all communication is done via standard input and output with text
+      commands,
+
+      * The engine should boot and wait for input from the GUI,
+      the engine should wait for the "isready" or "setoption" command to set up
+      its internal parameters as the boot process
+      should be as quick as possible.
+
+      * all command strings the engine receives will end with '\n',
+      also all commands the GUI receives should end with '\n',
+      Note: '\n' can be 0x0d or 0x0a0d or any combination depending on your OS.
+      If you use Engine and GUI in the same OS this should be no problem if you
+      communicate in text mode, but be aware of this when for example
+      running a Linux engine in a Windows GUI.
+
+      */
+
+      std::string line;
+      while (std::getline(std::cin, line))
       {
-         ::testing::InitGoogleTest(&argc, (char**)argv);
-         int rv = RUN_ALL_TESTS();
-         Logger::GetStream() << "Test results: " << rv << std::endl;
-         std::cout << "Test results: " << rv << std::endl;
+         Logger::GetStream() << "Received line: " << line << std::endl;
+
+         uci_tokens tokens;
+         UCIParser::BreakIntoTokens(line, &tokens);
+
+         if (handler.handle_quit(tokens))
+            break;
+
+         if (tokens[0] == "runtests")
+         {
+            if (ScrittyTestEnvironment::s_tests_were_run)
+            {
+               std::cout << "Google says you may only run tests once."
+                  << std::endl;
+            }
+            else
+            {
+               ::testing::InitGoogleTest(&argc, (char**)argv);
+               // gtest will delete new environment
+               ::testing::AddGlobalTestEnvironment(new ScrittyTestEnvironment);
+               int rv = RUN_ALL_TESTS();
+               ScrittyTestEnvironment::s_tests_were_run = true;
+               Logger::GetStream() << "Test results: " << rv << std::endl;
+               std::cout << "Test results: " << rv << std::endl;
+            }
+         }
+
+         // allow each command handler a chance to handle
+         if (!
+            (handler.handle_isready(tokens)
+            || handler.handle_uci(tokens)
+            || handler.handle_ucinewgame(tokens)
+            || handler.handle_position(tokens)
+            || handler.handle_go(tokens)
+            ))
+         {
+            Logger::GetStream() << "Failed to process line: "
+               << line << std::endl;
+         }
       }
 
-      // allow each command handler a chance to handle
-      if (!
-         (handler.handle_isready(tokens)
-         || handler.handle_uci(tokens)
-         || handler.handle_ucinewgame(tokens)
-         || handler.handle_position(tokens)
-         || handler.handle_go(tokens)
-         ))
-      {
-         Logger::GetStream() << "Failed to process line: " << line << std::endl;
-      }
+      Logger::GetStream() << "Exiting Scritty." << std::endl;
    }
 
-   Logger::GetStream() << "Exiting Scritty." << std::endl;
-
+   _CrtMemDumpAllObjectsSince(&ScrittyTestEnvironment::s_mem_state);
    return 0;
 }
 
@@ -380,7 +398,7 @@ rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w AHah -
 
  - Piece values based on square and game phase
  - Square values (ability to attack square) based on square and game phase
- - Game phase changes based on count of captured pieces
+ - Game phase changes based on count of captured pieces (probably cuts at 3, 10)
  - Value of pins, maybe based on positional factors
  - Value of a check (as it may lead to mate)
 

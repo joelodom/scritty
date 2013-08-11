@@ -66,12 +66,15 @@ namespace scritty
       bool ApplyMove(const std::string &str); // algebraic notation
       char GetPieceAt(const std::string &square) const; // algebraic notation
       bool IsWhiteToMove() const;
-      virtual void GetBestMove(std::string *best) const = 0; // algebraic
       Outcome GetOutcome() const;
       void GetPosition(Position *position) const;
 
+      // returns a draw outcome, if engine is offering a draw
+      // returns win for other side on resignation
+      virtual Outcome GetBestMove(std::string *best) const = 0; // algebraic
+
       // these methods should be optimized
-      static inline bool IsCheck(
+      static bool IsCheck(
          const Position &position, const char which_king);
       static size_t ListAllLegalMoves(
          const Position &position, Move *buf = nullptr);
@@ -92,6 +95,7 @@ namespace scritty
       static bool IsOpponentAttackingSquare(
          unsigned char file, unsigned char rank,
          const Position &position);
+      static Outcome GetOutcome(const Position &position);
 
       Position m_position;
    };

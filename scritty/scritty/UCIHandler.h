@@ -4,9 +4,8 @@
 #define SCRITTY_UCIHANDLER_H
 
 #include <string>
+#include "Engine.h"
 #include "UCIParser.h"
-#include "RandomEngine.h"
-#include "gtest/gtest.h"
 
 namespace scritty
 {

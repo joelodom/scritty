@@ -1,5 +1,8 @@
 // Scritty is Copyright (c) 2013 by Joel Odom, Marietta, GA, All Rights Reserved
 
+#ifndef SCRITTY_SEARCHING_ENGINE_H
+#define SCRITTY_SEARCHING_ENGINE_H
+
 #include "Engine.h"
 
 namespace scritty
@@ -10,10 +13,13 @@ namespace scritty
       SearchingEngine();
       ~SearchingEngine();
 
-      virtual void GetBestMove(std::string *best) const; // algebraic
+      virtual Outcome GetBestMove(std::string *best) const;
 
    private:
+      static Outcome GetBestMove(const Position &position, bool for_white,
+         size_t plies, Move *best, double *evaluation);
       static double EvaluatePosition(const Position &position); // centipawns
-      Move *m_move_buffer;
    };
 }
+
+#endif // #ifndef SCRITTY_SEARCHING_ENGINE_H
