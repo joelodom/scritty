@@ -3,14 +3,22 @@
 #include "GeneticTournament.h"
 #include <iostream>
 
-std::vector<std::string> * const GeneticEngine::GetParameterNames()
+using namespace scritty;
+
+void GeneticEngine::GetParameterName(size_t index, std::string *name) const
 {
-   return &m_parameter_names;
+   *name = m_parameters[index].first;
 }
 
-std::vector<double> * const GeneticEngine::GetParameters()
+double GeneticEngine::GetParameterValue(size_t index) const
 {
-   return &m_parameters;
+   return m_parameters[index].second;
+}
+
+void GeneticEngine::PrintParameters() const
+{
+   for (auto it = m_parameters.begin(); it != m_parameters.end(); ++it)
+      std::cout << it->first << ": " << it->second << std::endl;
 }
 
 void GeneticEngine::RandomizeParameters(double max_deviation)
@@ -19,34 +27,57 @@ void GeneticEngine::RandomizeParameters(double max_deviation)
    {
       const double PRECISION_MULTIPLIER = 10000.0;
       int a = (unsigned int)::abs(
-         m_parameters[i]*max_deviation*PRECISION_MULTIPLIER);
+         m_parameters[i].second*max_deviation*PRECISION_MULTIPLIER);
       int deviation = rand() % (2*a) - a;
-      m_parameters[i] += deviation / PRECISION_MULTIPLIER;
+      m_parameters[i].second += deviation / PRECISION_MULTIPLIER;
    }
 }
 
-void GeneticEngine::Breed(const GeneticEngine &mate, GeneticEngine *child) const
+/*static*/ void GeneticEngine::Breed(
+   const GeneticEngine &mate1, const GeneticEngine &mate2, GeneticEngine *child)
 {
-   if (mate.m_parameters.size() != m_parameters.size())
+   if (mate1.m_parameters.size() != mate2.m_parameters.size())
       return; // engines should really be same species
    
-   *child = *this; // copy myself
+   *child = mate1; // clone
 
-   for (size_t i = 0; i < m_parameters.size(); ++i)
+   for (size_t i = 0; i < mate1.m_parameters.size(); ++i)
    {
       if (rand() % 2 == 1)
-         child->m_parameters[i] = mate.m_parameters[i];
+         child->m_parameters[i] = mate2.m_parameters[i];
    }
+
+   child->RandomizeParameters(MAX_DEVIATION);
 }
 
-void GeneticTournament::Go()
+TestGeneticEngine::TestGeneticEngine()
 {
-   for (size_t round_number = 1;
-      round_number <= m_number_of_rounds; ++round_number)
-   {
-      std::cout << "Hosting round " << round_number
-         << " of " << m_number_of_rounds << "." << std::endl;
+   // initially all start out at 50.0
 
-//TODO #error working here....  need a games per round
+   for (size_t i = 0; i < 10; ++i)
+      m_parameters.push_back(std::pair<std::string, double>("", 50.0));
+}
+
+/*virtual*/ int TestGeneticEngine::Compare(
+   GeneticEngine *first, GeneticEngine *second) const
+{
+   // whichever has more parameters closest to 60.0 wins
+
+   int score_first = 0;
+   int score_second = 0;
+
+   for (size_t i = 0; i < 10; ++i)
+   {
+      double deviation_first = ::abs(60.0 - first->GetParameterValue(i));
+      double deviation_second = ::abs(60.0 - second->GetParameterValue(i));
+
+      if (deviation_first > deviation_second)
+         ++score_second;
+      else if (deviation_first < deviation_second)
+         ++score_first;
    }
+
+   if (score_first == score_second)
+      return 0;
+   return score_first > score_second ? 1 : 0;
 }

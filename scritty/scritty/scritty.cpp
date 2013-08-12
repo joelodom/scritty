@@ -78,6 +78,13 @@ int main(int argc, const char *argv[])
                std::cout << "Test results: " << rv << std::endl;
             }
          }
+         else if (tokens[0] == "learn")
+         {
+            SearchingEngine engine;
+            GeneticTournament<SearchingEngine> tournament(engine);
+            tournament.Go(&engine);
+            engine.PrintParameters();
+         }
 
          // allow each command handler a chance to handle
          if (!

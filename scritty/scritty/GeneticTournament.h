@@ -5,54 +5,131 @@
 
 #include <string>
 #include <vector>
+#include "Engine.h"
 
-class GeneticEngine
+namespace scritty
 {
-public:
-   std::vector<std::string> * const GetParameterNames();
-   std::vector<double> * const GetParameters();
+   // INTERESTING: seems to work better with fewer participants and more rounds
+   // INTERESTING: setting max_deviation too large gives poor results
 
-   // (0.01 for 1% max)
-   // multiple calls will randomize again
-   void RandomizeParameters(double max_deviation);
+#define PARTICIPANTS 10
+#define MAX_DEVIATION 0.01 // 1%
+#define ROUNDS 1000
 
-   void Breed(const GeneticEngine &mate, GeneticEngine *child) const;
-
-protected:
-   std::vector<std::string> m_parameter_names;
-   std::vector<double> m_parameters;
-};
-
-class GeneticTournament
-{
-public:
-   GeneticTournament(const GeneticEngine& prototype,
-      double max_deviation, // (0.01 for 1% max)
-      size_t number_per_round, // number of participants per round (EVEN!)
-      size_t number_to_survive, // number of top survivors to keep
-      size_t number_of_rounds)
-      : m_max_deviation(max_deviation),
-      m_number_per_round(number_per_round),
-      m_number_to_survive(number_to_survive),
-      m_number_of_rounds(number_of_rounds)
+   class GeneticEngine : public Engine
    {
-      // initially populate m_participants with slightly different prototypes
-      for (size_t i = 0; i < m_number_per_round; i++)
+   public:
+      void GetParameterName(size_t index, std::string *name) const;
+      double GetParameterValue(size_t index) const;
+      void PrintParameters() const;
+
+      // (0.01 for 1% max)
+      // multiple calls will randomize again
+      void RandomizeParameters(double max_deviation);
+
+      static void Breed(const GeneticEngine &mate1, const GeneticEngine &mate,
+         GeneticEngine *child);
+
+      virtual int Compare(GeneticEngine *first, // 1, 0 or -1
+         GeneticEngine *second) const = 0; // 1 = first wins
+
+   protected:
+      // name / value pair
+      std::vector<std::pair<std::string, double>> m_parameters;
+   };
+
+   class TestGeneticEngine : public GeneticEngine
+   {
+   public:
+      TestGeneticEngine();
+
+      virtual int Compare(GeneticEngine *first, GeneticEngine *second) const;
+
+      virtual Outcome GetBestMove(std::string *best) const
       {
-         GeneticEngine copy = prototype;
-         copy.RandomizeParameters(m_max_deviation);
-         m_participants.push_back(copy);
+         return OUTCOME_UNDECIDED;
       }
-   }
+   };
 
-   void Go();
+   template <class T>
+   class GeneticTournament
+   {
+   public:
+      // TODO: how to get this out of header???
 
-private:
-   std::vector<GeneticEngine> m_participants;
-   double m_max_deviation;
-   size_t m_number_per_round;
-   size_t m_number_to_survive;
-   size_t m_number_of_rounds;
-};
+      GeneticTournament(const T &prototype)
+      {
+         // initially populate m_participants with slightly different prototypes
+         for (size_t i = 0; i < PARTICIPANTS; i++)
+         {
+            T copy = prototype;
+            copy.RandomizeParameters(MAX_DEVIATION);
+            m_participants.push_back(copy);
+         }
+      }
+
+      void Go(T *winner)
+      {
+         // single elimination tournament where eliminated participants are
+         // replaced by children of winners at the end of each round
+
+         for (size_t round_number = 1; round_number <= ROUNDS; ++round_number)
+         {
+            std::cout << "Hosting round " << round_number
+               << " of " << ROUNDS << "." << std::endl;
+
+            std::vector<T> winners;
+
+            while (m_participants.size() > 1) // could leave one unpaired
+            {
+               std::cout << m_participants.size() / 2
+                  << " games remaining to play in this round." << std::endl;
+
+               // pair two random participants
+               size_t i = rand() % m_participants.size();
+               T first = m_participants[i];
+               m_participants.erase(m_participants.begin() + i);
+               i = rand() % m_participants.size();
+               T second = m_participants[i];
+               m_participants.erase(m_participants.begin() + i);
+
+               // eliminate the less worthy or keep both
+               int result = first.Compare(&first, &second);
+               if (result > -1)
+                  winners.push_back(first);
+               if (result < 1)
+                  winners.push_back(second);
+            }
+
+            // if this is the last round, choose a winner from the master race
+            if (round_number == ROUNDS)
+            {
+               *winner = winners[rand() % winners.size()];
+               return;
+            }
+
+            // add winners back to the participants for the next round
+            for (auto it = winners.begin(); it != winners.end(); ++it)
+               m_participants.push_back(*it);
+
+            // breed winners randomly and add children to participants
+            // except on last round
+
+            while (m_participants.size() < PARTICIPANTS)
+            {
+               // may breed a winner with self
+               T first = winners[rand() % winners.size()];
+               T second = winners[rand() % winners.size()];
+               T child;
+               GeneticEngine::Breed(first, second, &child);
+               m_participants.push_back(child);
+            }
+         }
+      }
+
+   private:
+      std::vector<T> m_participants;
+   };
+}
 
 #endif // #ifndef GENETIC_TOURNAMENT_H

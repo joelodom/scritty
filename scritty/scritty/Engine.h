@@ -79,6 +79,7 @@ namespace scritty
          const Position &position, const char which_king);
       static size_t ListAllLegalMoves(
          const Position &position, Move *buf = nullptr);
+      static Outcome GetOutcome(const Position &position);
 
    protected:
       static bool IsMoveLegal(
@@ -96,7 +97,6 @@ namespace scritty
       static bool IsOpponentAttackingSquare(
          unsigned char file, unsigned char rank,
          const Position &position);
-      static Outcome GetOutcome(const Position &position);
 
       Position m_position;
    };

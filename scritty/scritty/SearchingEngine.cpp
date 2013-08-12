@@ -1,25 +1,22 @@
 // Scritty is Copyright (c) 2013 by Joel Odom, Marietta, GA, All Rights Reserved
 
 #include "SearchingEngine.h"
+#include <iostream>
 
 using namespace scritty;
 
 SearchingEngine::SearchingEngine()
 {
-   m_parameters.push_back(PARAMETER_DEFAULT_0);
-   m_parameter_names.push_back(PARAMETER_NAME_0);
-
-   m_parameters.push_back(PARAMETER_DEFAULT_1);
-   m_parameter_names.push_back(PARAMETER_NAME_1);
-
-   m_parameters.push_back(PARAMETER_DEFAULT_2);
-   m_parameter_names.push_back(PARAMETER_NAME_2);
-
-   m_parameters.push_back(PARAMETER_DEFAULT_3);
-   m_parameter_names.push_back(PARAMETER_NAME_3);
-
-   m_parameters.push_back(PARAMETER_DEFAULT_4);
-   m_parameter_names.push_back(PARAMETER_NAME_4);
+   m_parameters.push_back(std::pair<std::string, double>(
+      PARAMETER_NAME_0, PARAMETER_DEFAULT_0));
+   m_parameters.push_back(std::pair<std::string, double>(
+      PARAMETER_NAME_1, PARAMETER_DEFAULT_1));
+   m_parameters.push_back(std::pair<std::string, double>(
+      PARAMETER_NAME_2, PARAMETER_DEFAULT_2));
+   m_parameters.push_back(std::pair<std::string, double>(
+      PARAMETER_NAME_3, PARAMETER_DEFAULT_3));
+   m_parameters.push_back(std::pair<std::string, double>(
+      PARAMETER_NAME_4, PARAMETER_DEFAULT_4));
 }
 
 SearchingEngine::~SearchingEngine()
@@ -100,38 +97,115 @@ double SearchingEngine::EvaluatePosition(const Position &position) const
          switch (position.m_board.m_squares[file][rank])
          {
          case 'P':
-            evaluation += m_parameters[0];
+            evaluation += m_parameters[0].second;
             break;
          case 'p':
-            evaluation -= m_parameters[0];
+            evaluation -= m_parameters[0].second;
             break;
          case 'B':
-            evaluation += m_parameters[1];
+            evaluation += m_parameters[1].second;
             break;
          case 'b':
-            evaluation -= m_parameters[1];
+            evaluation -= m_parameters[1].second;
             break;
          case 'N':
-            evaluation += m_parameters[2];
+            evaluation += m_parameters[2].second;
             break;
          case 'n':
-            evaluation -= m_parameters[2];
+            evaluation -= m_parameters[2].second;
             break;
          case 'R':
-            evaluation += m_parameters[3];
+            evaluation += m_parameters[3].second;
             break;
          case 'r':
-            evaluation -= m_parameters[3];
+            evaluation -= m_parameters[3].second;
             break;
          case 'Q':
-            evaluation += m_parameters[4];
+            evaluation += m_parameters[4].second;
             break;
          case 'q':
-            evaluation -= m_parameters[4];
+            evaluation -= m_parameters[4].second;
             break;
          }
       }
    }
 
    return evaluation;
+}
+
+/*virtual*/ int SearchingEngine::Compare(GeneticEngine *first,
+   GeneticEngine *second) const
+{
+   // choose sides
+
+   GeneticEngine *white, *black;
+
+   if (rand() % 2 == 0)
+   {
+      white = first;
+      black = second;
+   }
+   else
+   {
+      white = second;
+      black = first;
+   }
+
+   // shake hands
+
+   white->SetToStartPos();
+   black->SetToStartPos();
+
+   // play
+
+   Outcome outcome;
+   size_t moves = 1;
+
+   for (;;)
+   {
+      std::cout << "Move " << moves << std::endl;
+
+      // let white move
+      std::string white_move;
+      outcome = white->GetBestMove(&white_move);
+      if (outcome != OUTCOME_UNDECIDED)
+         break;
+
+      // check for win, loose or draw
+      Position position;
+      white->GetPosition(&position);
+      outcome = Engine::GetOutcome(position);
+      if (outcome != OUTCOME_UNDECIDED)
+         break;
+
+      // let black move
+      black->ApplyMove(white_move);
+      std::string black_move;
+      outcome = black->GetBestMove(&black_move);
+      if (outcome != OUTCOME_UNDECIDED)
+         break;
+
+      // check for win, loose or draw
+      black->GetPosition(&position);
+      outcome = Engine::GetOutcome(position);
+      if (outcome != OUTCOME_UNDECIDED)
+         break;
+
+      // possibly adjudicate a draw after too many moves
+      if (moves++ == 200)
+      {
+         outcome = OUTCOME_DRAW;
+         break;
+      }
+
+      white->ApplyMove(black_move);
+   }
+
+   // sign the score sheet
+
+   if (outcome == OUTCOME_DRAW)
+      return 0;
+   if (outcome == OUTCOME_WIN_WHITE)
+      return first == white ? 1 : 0;
+   return second == white ? 1 : 0;
 }

@@ -869,3 +869,11 @@ TEST(searching_engine_tests, debug_crash2)
    UCIParser::BreakIntoTokens("go movetime 10000", &tokens);
    EXPECT_TRUE(handler.handle_go(tokens));
 }
+
+TEST(genetic_tournament_tests, DISABLED_test_genetic_tournament)
+{
+   TestGeneticEngine engine;
+   GeneticTournament<TestGeneticEngine> tournament(engine);
+   tournament.Go(&engine);
+   EXPECT_NEAR(engine.GetParameterValue(0), 60.0, 1.0);
+}

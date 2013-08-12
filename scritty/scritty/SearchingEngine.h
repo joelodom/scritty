@@ -25,13 +25,15 @@
 
 namespace scritty
 {
-   class SearchingEngine : public Engine, public GeneticEngine
+   class SearchingEngine : public GeneticEngine
    {
    public:
       SearchingEngine();
       ~SearchingEngine();
 
       virtual Outcome GetBestMove(std::string *best) const;
+
+   virtual int Compare(GeneticEngine *first, GeneticEngine *second) const;
 
    private:
       double GetBestMove(
