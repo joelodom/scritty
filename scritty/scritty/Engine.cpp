@@ -852,17 +852,78 @@ void Move::ToString(std::string *str)
             }
 
             break;
-         default: // TODO: special case each piece
 
-            for (move.end_file = 0; move.end_file <= 7; ++move.end_file)
-            {
-               for (move.end_rank = 0; move.end_rank <= 7; ++move.end_rank)
-               {
-                  endpoints[endpoints_index++] = move.end_file;
-                  endpoints[endpoints_index++] = move.end_rank;
-                  endpoints[endpoints_index++] = NO_PIECE;
-               }
-            }
+         case 'B':
+         case 'b':
+
+            endpoints_index = PopulateBishopEndpoints(
+               move.start_file, move.start_rank, endpoints);
+            break;
+
+         case 'N':
+         case 'n':
+
+            endpoints_index = PopulateKnightEndpoints(
+               move.start_file, move.start_rank, endpoints);
+            break;
+
+         case 'R':
+         case 'r':
+
+            endpoints_index = PopulateRookEndpoints(
+               move.start_file, move.start_rank, endpoints);
+            break;
+
+         case 'Q':
+         case 'q':
+
+            endpoints_index = PopulateBishopEndpoints(
+               move.start_file, move.start_rank, endpoints);
+            endpoints_index += PopulateRookEndpoints(
+               move.start_file, move.start_rank, endpoints + endpoints_index);
+            break;
+
+         case 'K':
+         case 'k':
+
+            // okay to be off board
+
+            endpoints[endpoints_index++] = move.start_file + 1;
+            endpoints[endpoints_index++] = move.start_rank + 1;
+            endpoints[endpoints_index++] = NO_PIECE;
+
+            endpoints[endpoints_index++] = move.start_file + 1;
+            endpoints[endpoints_index++] = move.start_rank;
+            endpoints[endpoints_index++] = NO_PIECE;
+
+            endpoints[endpoints_index++] = move.start_file + 1;
+            endpoints[endpoints_index++] = move.start_rank - 1;
+            endpoints[endpoints_index++] = NO_PIECE;
+
+            endpoints[endpoints_index++] = move.start_file;
+            endpoints[endpoints_index++] = move.start_rank - 1;
+            endpoints[endpoints_index++] = NO_PIECE;
+
+            endpoints[endpoints_index++] = move.start_file - 1;
+            endpoints[endpoints_index++] = move.start_rank - 1;
+            endpoints[endpoints_index++] = NO_PIECE;
+
+            endpoints[endpoints_index++] = move.start_file - 1;
+            endpoints[endpoints_index++] = move.start_rank;
+            endpoints[endpoints_index++] = NO_PIECE;
+
+            endpoints[endpoints_index++] = move.start_file - 1;
+            endpoints[endpoints_index++] = move.start_rank + 1;
+            endpoints[endpoints_index++] = NO_PIECE;
+
+            endpoints[endpoints_index++] = move.start_file;
+            endpoints[endpoints_index++] = move.start_rank + 1;
+            endpoints[endpoints_index++] = NO_PIECE;
+
+            break;
+
+         default:
+            continue; // ???
          }
 
          endpoints[endpoints_index] = MAGIC_NUM;
@@ -886,6 +947,132 @@ void Move::ToString(std::string *str)
    }
 
    return count;
+}
+
+/*static*/ size_t Engine::PopulateBishopEndpoints(unsigned char start_file,
+   unsigned char start_rank, unsigned char *endpoints)
+{
+   size_t endpoints_index = 0;
+
+   char file = start_file + 1;
+   char rank = start_rank + 1;
+
+   while (file <= 7 && rank <= 7)
+   {
+      endpoints[endpoints_index++] = file++;
+      endpoints[endpoints_index++] = rank++;
+      endpoints[endpoints_index++] = NO_PIECE;
+   }
+
+   file = start_file + 1;
+   rank = start_rank - 1;
+
+   while (file <= 7 && rank >= 0)
+   {
+      endpoints[endpoints_index++] = file++;
+      endpoints[endpoints_index++] = rank--;
+      endpoints[endpoints_index++] = NO_PIECE;
+   }
+
+   file = start_file - 1;
+   rank = start_rank - 1;
+
+   while (file >= 0 && rank >= 0)
+   {
+      endpoints[endpoints_index++] = file--;
+      endpoints[endpoints_index++] = rank--;
+      endpoints[endpoints_index++] = NO_PIECE;
+   }
+
+   file = start_file - 1;
+   rank = start_rank + 1;
+
+   while (file >= 0 && rank <= 7)
+   {
+      endpoints[endpoints_index++] = file--;
+      endpoints[endpoints_index++] = rank++;
+      endpoints[endpoints_index++] = NO_PIECE;
+   }
+
+   return endpoints_index;
+}
+
+/*static*/ size_t Engine::PopulateRookEndpoints(unsigned char start_file,
+   unsigned char start_rank, unsigned char *endpoints)
+{
+   size_t endpoints_index = 0;
+
+   for (char rank = start_rank + 1; rank <= 7; ++rank)
+   {
+      endpoints[endpoints_index++] = start_file;
+      endpoints[endpoints_index++] = rank;
+      endpoints[endpoints_index++] = NO_PIECE;
+   }
+
+   for (char rank = start_rank - 1; rank >= 0; --rank)
+   {
+      endpoints[endpoints_index++] = start_file;
+      endpoints[endpoints_index++] = rank;
+      endpoints[endpoints_index++] = NO_PIECE;
+   }
+
+   for (char file = start_file + 1; file <= 7; ++file)
+   {
+      endpoints[endpoints_index++] = file;
+      endpoints[endpoints_index++] = start_rank;
+      endpoints[endpoints_index++] = NO_PIECE;
+   }
+
+   for (char file = start_file - 1; file >= 0; --file)
+   {
+      endpoints[endpoints_index++] = file;
+      endpoints[endpoints_index++] = start_rank;
+      endpoints[endpoints_index++] = NO_PIECE;
+   }
+
+   return endpoints_index;
+}
+
+/*static*/ size_t Engine::PopulateKnightEndpoints(unsigned char start_file,
+   unsigned char start_rank, unsigned char *endpoints)
+{
+   // okay for some endpoints to be off board
+
+   size_t endpoints_index = 0;
+
+   endpoints[endpoints_index++] = start_file + 1;
+   endpoints[endpoints_index++] = start_rank + 2;
+   endpoints[endpoints_index++] = NO_PIECE;
+
+   endpoints[endpoints_index++] = start_file + 2;
+   endpoints[endpoints_index++] = start_rank + 1;
+   endpoints[endpoints_index++] = NO_PIECE;
+
+   endpoints[endpoints_index++] = start_file + 2;
+   endpoints[endpoints_index++] = start_rank - 1;
+   endpoints[endpoints_index++] = NO_PIECE;
+
+   endpoints[endpoints_index++] = start_file + 1;
+   endpoints[endpoints_index++] = start_rank - 2;
+   endpoints[endpoints_index++] = NO_PIECE;
+
+   endpoints[endpoints_index++] = start_file - 1;
+   endpoints[endpoints_index++] = start_rank - 2;
+   endpoints[endpoints_index++] = NO_PIECE;
+
+   endpoints[endpoints_index++] = start_file - 2;
+   endpoints[endpoints_index++] = start_rank - 1;
+   endpoints[endpoints_index++] = NO_PIECE;
+
+   endpoints[endpoints_index++] = start_file - 2;
+   endpoints[endpoints_index++] = start_rank + 1;
+   endpoints[endpoints_index++] = NO_PIECE;
+
+   endpoints[endpoints_index++] = start_file - 1;
+   endpoints[endpoints_index++] = start_rank + 2;
+   endpoints[endpoints_index++] = NO_PIECE;
+
+   return endpoints_index;
 }
 
 /*static*/ Outcome Engine::GetOutcome(const Position &position)

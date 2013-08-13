@@ -97,6 +97,12 @@ namespace scritty
       static bool IsOpponentAttackingSquare(
          unsigned char file, unsigned char rank,
          const Position &position);
+      static size_t PopulateBishopEndpoints(unsigned char start_file,
+         unsigned char start_rank, unsigned char *endpoints);
+      static size_t PopulateKnightEndpoints(unsigned char start_file,
+         unsigned char start_rank, unsigned char *endpoints);
+      static size_t PopulateRookEndpoints(unsigned char start_file,
+         unsigned char start_rank, unsigned char *endpoints);
 
       Position m_position;
    };
