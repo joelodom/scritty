@@ -818,7 +818,7 @@ TEST(engine_tests, test_get_outcome)
 TEST(searching_engine_tests, DISABLED_test_get_best_move)
 {
    SearchingEngine engine;
-   
+
    EXPECT_TRUE(engine.ApplyMove("d2d4"));
    EXPECT_TRUE(engine.ApplyMove("e7e5"));
 
@@ -877,3 +877,5 @@ TEST(genetic_tournament_tests, DISABLED_test_genetic_tournament)
    tournament.Go(&engine);
    EXPECT_NEAR(engine.GetParameterValue(0), 60.0, 1.0);
 }
+
+//#error TODO: make tests for legal moves functions by counting numbers returned

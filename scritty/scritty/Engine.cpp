@@ -178,11 +178,6 @@ bool Engine::IsWhiteToMove() const
    return m_position.m_white_to_move;
 }
 
-/*static*/ inline bool Engine::IsOnBoard(unsigned char file, unsigned char rank)
-{
-   return rank <= 7 && rank >= 0 && file <= 7 && file >= 0;
-}
-
 /*static*/ inline bool Engine::IsOpponentsPiece(char mine, char theirs)
 {
    return (mine < 'Z' && theirs > 'a') || (mine > 'a' && theirs < 'Z');
@@ -265,7 +260,7 @@ bool Engine::IsWhiteToMove() const
 
    while (file != move.end_file || rank != move.end_rank)
    {
-      if (!IsOnBoard(file, rank))
+      if (file > 7 || file < 0 || rank > 7 || rank < 0)
          return false;
       if (position.m_board.m_squares[file][rank] != NO_PIECE)
          return false;
@@ -358,7 +353,7 @@ bool Engine::IsWhiteToMove() const
 
    // is the new position on the board?
 
-   if (!IsOnBoard(move.end_file, move.end_rank))
+   if (move.end_file > 7 || move.end_rank > 7)
       return false;
 
    // is this the correct player to move and is there a piece there?
@@ -689,15 +684,20 @@ void Move::ToString(std::string *str)
    unsigned char endpoints[8*8*4 + 1]; // f1, r1, promotion1, f2, ..., MAGIC_NUM
    Move move;
 
-   // castles implicitly checked
-
    for (move.start_file = 0; move.start_file <= 7; ++move.start_file)
    {
       for (move.start_rank = 0; move.start_rank <= 7; ++move.start_rank)
       {
          size_t endpoints_index = 0;
 
-         switch (position.m_board.m_squares[move.start_file][move.start_rank])
+         char piece
+            = position.m_board.m_squares[move.start_file][move.start_rank];
+
+         if ((piece > 'a' && position.m_white_to_move)
+            || (piece < 'Z' && !position.m_white_to_move))
+            continue;
+
+         switch (piece)
          {
          case NO_PIECE:
             continue;
@@ -919,6 +919,8 @@ void Move::ToString(std::string *str)
             endpoints[endpoints_index++] = move.start_file;
             endpoints[endpoints_index++] = move.start_rank + 1;
             endpoints[endpoints_index++] = NO_PIECE;
+
+#error            // TODO: castles!!!!
 
             break;
 
