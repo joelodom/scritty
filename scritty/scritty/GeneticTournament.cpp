@@ -47,7 +47,7 @@ void GeneticEngine::RandomizeParameters(double max_deviation)
          child->m_parameters[i] = mate2.m_parameters[i];
    }
 
-   child->RandomizeParameters(MAX_DEVIATION);
+   child->RandomizeParameters(MAX_INCREMENTAL_DEVIATION);
 }
 
 TestGeneticEngine::TestGeneticEngine()

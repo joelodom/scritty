@@ -13,7 +13,8 @@ namespace scritty
    // INTERESTING: setting max_deviation too large gives poor results
 
 #define PARTICIPANTS 10
-#define MAX_DEVIATION 0.01 // 1%
+#define MAX_INITIAL_DEVIATION 1.0 // 100%!
+#define MAX_INCREMENTAL_DEVIATION 0.01 // 1%
 #define ROUNDS 1000
 
    class GeneticEngine : public Engine
@@ -59,11 +60,12 @@ namespace scritty
 
       GeneticTournament(const T &prototype)
       {
-         // initially populate m_participants with slightly different prototypes
+         // initially populate m_participants
+         // for initial diversity allow a much wider deviation to start
          for (size_t i = 0; i < PARTICIPANTS; i++)
          {
             T copy = prototype;
-            copy.RandomizeParameters(MAX_DEVIATION);
+            copy.RandomizeParameters(MAX_INITIAL_DEVIATION);
             m_participants.push_back(copy);
          }
       }

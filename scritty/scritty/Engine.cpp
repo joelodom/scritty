@@ -356,6 +356,11 @@ bool Engine::IsWhiteToMove() const
    // legal_moves[piece][start_file][start_rank][end_file][end_rank] is a null
    // terminated list of squares to check for interposing pieces
 
+   // is the new position on the board?
+
+   if (!IsOnBoard(move.end_file, move.end_rank))
+      return false;
+
    // is this the correct player to move and is there a piece there?
 
    const char piece
@@ -369,11 +374,6 @@ bool Engine::IsWhiteToMove() const
    // did the piece actually move?
 
    if (move.start_file == move.end_file && move.start_rank == move.end_rank)
-      return false;
-
-   // is the new position on the board?
-
-   if (!IsOnBoard(move.end_file, move.end_rank))
       return false;
 
    // is this a valid motion for the particular piece type?
@@ -683,54 +683,203 @@ void Move::ToString(std::string *str)
    const Position &position, Move *buf /*= nullptr*/)
 {
    // pass in null buffer to test if there are any legal moves (returns 0 or 1)
-   // TODO: fix efficiency
 
-   char *white_promotion_pieces = "BNRQ";
-   char *black_promotion_pieces = "bnrq";
-   char *empty_string = "-";
-
+   const size_t MAGIC_NUM = 100;
    size_t count = 0;
+   unsigned char endpoints[8*8*4 + 1]; // f1, r1, promotion1, f2, ..., MAGIC_NUM
+   Move move;
 
    // castles implicitly checked
 
-   Move move;
    for (move.start_file = 0; move.start_file <= 7; ++move.start_file)
    {
       for (move.start_rank = 0; move.start_rank <= 7; ++move.start_rank)
       {
-         for (move.end_file = 0; move.end_file <= 7; ++move.end_file)
+         size_t endpoints_index = 0;
+
+         switch (position.m_board.m_squares[move.start_file][move.start_rank])
          {
-            for (move.end_rank = 0; move.end_rank <= 7; ++move.end_rank)
+         case NO_PIECE:
+            continue;
+
+         case 'P':
+
+            if (move.start_rank < 6)
             {
-               char *promotion_pieces = empty_string;
+               endpoints[endpoints_index++] = move.start_file;
+               endpoints[endpoints_index++] = move.start_rank + 1;
+               endpoints[endpoints_index++] = NO_PIECE;
 
-               if (move.end_rank == 7 &&
-                  position.m_board.m_squares[move.start_file][move.start_rank]
-               == 'P')
-               {
-                  promotion_pieces = white_promotion_pieces;
-               }
-               else if (move.end_rank == 0 &&
-                  position.m_board.m_squares[move.start_file][move.start_rank]
-               == 'p')
-               {
-                  promotion_pieces = black_promotion_pieces;
-               }
+               endpoints[endpoints_index++] = move.start_file - 1;
+               endpoints[endpoints_index++] = move.start_rank + 1;
+               endpoints[endpoints_index++] = NO_PIECE;
 
-               for (size_t i = 0; promotion_pieces[i] != '\0'; ++i)
-               {
-                  move.promotion_piece = promotion_pieces[i] == '-' ? NO_PIECE
-                     : promotion_pieces[i];
+               endpoints[endpoints_index++] = move.start_file + 1;
+               endpoints[endpoints_index++] = move.start_rank + 1;
+               endpoints[endpoints_index++] = NO_PIECE;
 
-                  if (IsMoveLegal(position, move))
-                  {
-                     if (buf == nullptr)
-                        return 1;
-                     buf[count++] = move;
-                     if (count > MAX_NUMBER_OF_LEGAL_MOVES) // safety check
-                        return 0;
-                  }
+               if (move.start_rank == 1)
+               {
+                  endpoints[endpoints_index++] = move.start_file;
+                  endpoints[endpoints_index++] = move.start_rank + 2;
+                  endpoints[endpoints_index++] = NO_PIECE;
                }
+            }
+            else
+            {
+               endpoints[endpoints_index++] = move.start_file;
+               endpoints[endpoints_index++] = move.start_rank + 1;
+               endpoints[endpoints_index++] = 'B';
+
+               endpoints[endpoints_index++] = move.start_file - 1;
+               endpoints[endpoints_index++] = move.start_rank + 1;
+               endpoints[endpoints_index++] = 'B';
+
+               endpoints[endpoints_index++] = move.start_file + 1;
+               endpoints[endpoints_index++] = move.start_rank + 1;
+               endpoints[endpoints_index++] = 'B';
+
+               endpoints[endpoints_index++] = move.start_file;
+               endpoints[endpoints_index++] = move.start_rank + 1;
+               endpoints[endpoints_index++] = 'N';
+
+               endpoints[endpoints_index++] = move.start_file - 1;
+               endpoints[endpoints_index++] = move.start_rank + 1;
+               endpoints[endpoints_index++] = 'N';
+
+               endpoints[endpoints_index++] = move.start_file + 1;
+               endpoints[endpoints_index++] = move.start_rank + 1;
+               endpoints[endpoints_index++] = 'N';
+
+               endpoints[endpoints_index++] = move.start_file;
+               endpoints[endpoints_index++] = move.start_rank + 1;
+               endpoints[endpoints_index++] = 'R';
+
+               endpoints[endpoints_index++] = move.start_file - 1;
+               endpoints[endpoints_index++] = move.start_rank + 1;
+               endpoints[endpoints_index++] = 'R';
+
+               endpoints[endpoints_index++] = move.start_file + 1;
+               endpoints[endpoints_index++] = move.start_rank + 1;
+               endpoints[endpoints_index++] = 'R';
+
+               endpoints[endpoints_index++] = move.start_file;
+               endpoints[endpoints_index++] = move.start_rank + 1;
+               endpoints[endpoints_index++] = 'Q';
+
+               endpoints[endpoints_index++] = move.start_file - 1;
+               endpoints[endpoints_index++] = move.start_rank + 1;
+               endpoints[endpoints_index++] = 'Q';
+
+               endpoints[endpoints_index++] = move.start_file + 1;
+               endpoints[endpoints_index++] = move.start_rank + 1;
+               endpoints[endpoints_index++] = 'Q';
+            }
+
+            break;
+         case 'p':
+
+            if (move.start_rank > 1)
+            {
+               endpoints[endpoints_index++] = move.start_file;
+               endpoints[endpoints_index++] = move.start_rank - 1;
+               endpoints[endpoints_index++] = NO_PIECE;
+
+               endpoints[endpoints_index++] = move.start_file - 1;
+               endpoints[endpoints_index++] = move.start_rank - 1;
+               endpoints[endpoints_index++] = NO_PIECE;
+
+               endpoints[endpoints_index++] = move.start_file + 1;
+               endpoints[endpoints_index++] = move.start_rank - 1;
+               endpoints[endpoints_index++] = NO_PIECE;
+
+               if (move.start_rank == 1)
+               {
+                  endpoints[endpoints_index++] = move.start_file;
+                  endpoints[endpoints_index++] = move.start_rank - 2;
+                  endpoints[endpoints_index++] = NO_PIECE;
+               }
+            }
+            else
+            {
+               endpoints[endpoints_index++] = move.start_file;
+               endpoints[endpoints_index++] = move.start_rank - 1;
+               endpoints[endpoints_index++] = 'b';
+
+               endpoints[endpoints_index++] = move.start_file - 1;
+               endpoints[endpoints_index++] = move.start_rank - 1;
+               endpoints[endpoints_index++] = 'b';
+
+               endpoints[endpoints_index++] = move.start_file + 1;
+               endpoints[endpoints_index++] = move.start_rank - 1;
+               endpoints[endpoints_index++] = 'b';
+
+               endpoints[endpoints_index++] = move.start_file;
+               endpoints[endpoints_index++] = move.start_rank - 1;
+               endpoints[endpoints_index++] = 'n';
+
+               endpoints[endpoints_index++] = move.start_file - 1;
+               endpoints[endpoints_index++] = move.start_rank - 1;
+               endpoints[endpoints_index++] = 'n';
+
+               endpoints[endpoints_index++] = move.start_file + 1;
+               endpoints[endpoints_index++] = move.start_rank - 1;
+               endpoints[endpoints_index++] = 'n';
+
+               endpoints[endpoints_index++] = move.start_file;
+               endpoints[endpoints_index++] = move.start_rank - 1;
+               endpoints[endpoints_index++] = 'r';
+
+               endpoints[endpoints_index++] = move.start_file - 1;
+               endpoints[endpoints_index++] = move.start_rank - 1;
+               endpoints[endpoints_index++] = 'r';
+
+               endpoints[endpoints_index++] = move.start_file + 1;
+               endpoints[endpoints_index++] = move.start_rank - 1;
+               endpoints[endpoints_index++] = 'r';
+
+               endpoints[endpoints_index++] = move.start_file;
+               endpoints[endpoints_index++] = move.start_rank - 1;
+               endpoints[endpoints_index++] = 'q';
+
+               endpoints[endpoints_index++] = move.start_file - 1;
+               endpoints[endpoints_index++] = move.start_rank - 1;
+               endpoints[endpoints_index++] = 'q';
+
+               endpoints[endpoints_index++] = move.start_file + 1;
+               endpoints[endpoints_index++] = move.start_rank - 1;
+               endpoints[endpoints_index++] = 'q';
+            }
+
+            break;
+         default: // TODO: special case each piece
+
+            for (move.end_file = 0; move.end_file <= 7; ++move.end_file)
+            {
+               for (move.end_rank = 0; move.end_rank <= 7; ++move.end_rank)
+               {
+                  endpoints[endpoints_index++] = move.end_file;
+                  endpoints[endpoints_index++] = move.end_rank;
+                  endpoints[endpoints_index++] = NO_PIECE;
+               }
+            }
+         }
+
+         endpoints[endpoints_index] = MAGIC_NUM;
+
+         for (endpoints_index = 0; endpoints[endpoints_index] != MAGIC_NUM; )
+         {
+            move.end_file = endpoints[endpoints_index++];
+            move.end_rank = endpoints[endpoints_index++];
+            move.promotion_piece = endpoints[endpoints_index++];
+
+            if (IsMoveLegal(position, move))
+            {
+               if (buf == nullptr)
+                  return 1;
+               buf[count++] = move;
+               if (count > MAX_NUMBER_OF_LEGAL_MOVES) // safety check
+                  return 0;
             }
          }
       }

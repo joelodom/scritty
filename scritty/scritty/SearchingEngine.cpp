@@ -25,15 +25,12 @@ SearchingEngine::~SearchingEngine()
 
 Outcome SearchingEngine::GetBestMove(std::string *best) const
 {
+   Move move;
    // the move buffer for all depths is allocated once for performance
    Move *move_buffer = new Move[SEARCH_DEPTH*MAX_NUMBER_OF_LEGAL_MOVES];
-
-   Move move;
    double evaluation = GetBestMove(
       m_position, SEARCH_DEPTH, &move, move_buffer);
-
    delete[] move_buffer;
-
    move.ToString(best);
    return OUTCOME_UNDECIDED; // don't ever give up
 }
@@ -204,8 +201,17 @@ double SearchingEngine::EvaluatePosition(const Position &position) const
    // sign the score sheet
 
    if (outcome == OUTCOME_DRAW)
+   {
+      std::cout << "1/2-1/2" << std::endl;
       return 0;
+   }
+
    if (outcome == OUTCOME_WIN_WHITE)
+   {
+      std::cout << "1-0" << std::endl;
       return first == white ? 1 : 0;
+   }
+
+   std::cout << "0-1" << std::endl;
    return second == white ? 1 : 0;
 }
