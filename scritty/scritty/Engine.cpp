@@ -325,7 +325,7 @@ bool Engine::IsWhiteToMove() const
 
    // MUST switch back to obey const
    const_cast<Position&>(position).m_white_to_move = !position.m_white_to_move;
-   
+
    for (move.start_rank = 0; move.start_rank <= 7; ++move.start_rank)
    {
       for (move.start_file = 0; move.start_file <= 7; ++move.start_file)
@@ -394,7 +394,8 @@ bool Engine::IsWhiteToMove() const
             position.m_board.m_squares[move.end_file][move.end_rank]))
          {
             // handle en passant
-            if (move.end_file != position.en_passant_allowed_on)
+            if (move.start_rank != 4
+               || move.end_file != position.en_passant_allowed_on)
                return false;
          }
 
@@ -441,7 +442,8 @@ bool Engine::IsWhiteToMove() const
             position.m_board.m_squares[move.end_file][move.end_rank]))
          {
             // handle en passant
-            if (move.end_file != position.en_passant_allowed_on)
+            if (move.start_rank != 3
+               || move.end_file != position.en_passant_allowed_on)
                return false;
          }
 
@@ -693,15 +695,13 @@ void Move::ToString(std::string *str)
          char piece
             = position.m_board.m_squares[move.start_file][move.start_rank];
 
-         if ((piece > 'a' && position.m_white_to_move)
+         if ((piece == NO_PIECE)
+            || (piece > 'a' && position.m_white_to_move)
             || (piece < 'Z' && !position.m_white_to_move))
             continue;
 
          switch (piece)
          {
-         case NO_PIECE:
-            continue;
-
          case 'P':
 
             if (move.start_rank < 6)
@@ -793,7 +793,7 @@ void Move::ToString(std::string *str)
                endpoints[endpoints_index++] = move.start_rank - 1;
                endpoints[endpoints_index++] = NO_PIECE;
 
-               if (move.start_rank == 1)
+               if (move.start_rank == 6)
                {
                   endpoints[endpoints_index++] = move.start_file;
                   endpoints[endpoints_index++] = move.start_rank - 2;
@@ -920,7 +920,15 @@ void Move::ToString(std::string *str)
             endpoints[endpoints_index++] = move.start_rank + 1;
             endpoints[endpoints_index++] = NO_PIECE;
 
-#error            // TODO: castles!!!!
+            // add castle possibilities
+
+            endpoints[endpoints_index++] = move.start_file - 2;
+            endpoints[endpoints_index++] = move.start_rank;
+            endpoints[endpoints_index++] = NO_PIECE;
+
+            endpoints[endpoints_index++] = move.start_file - 2;
+            endpoints[endpoints_index++] = move.start_rank;
+            endpoints[endpoints_index++] = NO_PIECE;
 
             break;
 

@@ -412,3 +412,12 @@ rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w AHah -
  - Value of a check (as it may lead to mate)
 
 */
+
+/* OTHER IDEAS:
+
+ - Have different engines that can all search at the same time.  One engine
+ cares only about looking very deep with a fast evaluation function.  Another
+ engine cares about extreme position.  The final engine could wrap multiple
+ engines in multiple threads and then compare their outputs.
+
+*/

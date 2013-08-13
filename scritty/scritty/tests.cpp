@@ -878,4 +878,33 @@ TEST(genetic_tournament_tests, DISABLED_test_genetic_tournament)
    EXPECT_NEAR(engine.GetParameterValue(0), 60.0, 1.0);
 }
 
-//#error TODO: make tests for legal moves functions by counting numbers returned
+TEST(engine_tests, illegal_move_test_10)
+{
+   RandomEngine engine;
+   EXPECT_TRUE(engine.ApplyMove("a2a4"));
+   EXPECT_FALSE(engine.ApplyMove("b7a6"));
+}
+
+TEST(engine_tests, list_all_legal_moves_test)
+{
+   RandomEngine engine;
+   Move *move_buffer = new Move[MAX_NUMBER_OF_LEGAL_MOVES];
+   Position position;
+
+   engine.SetToStartPos();
+
+   engine.GetPosition(&position);
+   EXPECT_EQ(20, Engine::ListAllLegalMoves(position, move_buffer));
+   EXPECT_TRUE(engine.ApplyMove("a2a4"));
+
+   engine.GetPosition(&position);
+   EXPECT_EQ(20, Engine::ListAllLegalMoves(position, move_buffer));
+   EXPECT_TRUE(engine.ApplyMove("d7d6"));
+
+   engine.GetPosition(&position);
+   EXPECT_EQ(21, Engine::ListAllLegalMoves(position, move_buffer));
+
+#error these tests have been valuable..  continue working a game here for all pieces
+
+   delete[] move_buffer;
+}
