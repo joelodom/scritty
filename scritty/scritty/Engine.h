@@ -93,14 +93,17 @@ namespace scritty
          const Position &position, const Move &move);
       static void ApplyKnownLegalMoveToPosition(const Move &move,
          Position *position);
-      static bool IsOpponentAttackingSquare(
+      static bool IsAttackingSquare(bool white,
          unsigned char file, unsigned char rank,
          const Position &position);
-      static size_t PopulateBishopEndpoints(unsigned char start_file,
+      static size_t PopulateBishopEndpoints(const Position &position,
+         unsigned char start_file,
          unsigned char start_rank, unsigned char *endpoints);
-      static size_t PopulateKnightEndpoints(unsigned char start_file,
+      static size_t PopulateKnightEndpoints(
+         unsigned char start_file,
          unsigned char start_rank, unsigned char *endpoints);
-      static size_t PopulateRookEndpoints(unsigned char start_file,
+      static size_t PopulateRookEndpoints(const Position &position,
+         unsigned char start_file,
          unsigned char start_rank, unsigned char *endpoints);
 
       Position m_position;

@@ -8,21 +8,6 @@
 
 #define SEARCH_DEPTH 4 // should always be even
 
-#define PARAMETER_NAME_0 "Pawn Value"
-#define PARAMETER_DEFAULT_0 1
-
-#define PARAMETER_NAME_1 "Bishop Value"
-#define PARAMETER_DEFAULT_1 3
-
-#define PARAMETER_NAME_2 "Knight Value"
-#define PARAMETER_DEFAULT_2 3
-
-#define PARAMETER_NAME_3 "Rook Value"
-#define PARAMETER_DEFAULT_3 5
-
-#define PARAMETER_NAME_4 "Queen Value"
-#define PARAMETER_DEFAULT_4 9
-
 namespace scritty
 {
    class SearchingEngine : public GeneticEngine

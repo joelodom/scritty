@@ -8,15 +8,17 @@ using namespace scritty;
 SearchingEngine::SearchingEngine()
 {
    m_parameters.push_back(std::pair<std::string, double>(
-      PARAMETER_NAME_0, PARAMETER_DEFAULT_0));
+      "Pawn Value", 1.0));
    m_parameters.push_back(std::pair<std::string, double>(
-      PARAMETER_NAME_1, PARAMETER_DEFAULT_1));
+      "Bishop Value", 3.0));
    m_parameters.push_back(std::pair<std::string, double>(
-      PARAMETER_NAME_2, PARAMETER_DEFAULT_2));
+      "Knight Value", 3.0));
    m_parameters.push_back(std::pair<std::string, double>(
-      PARAMETER_NAME_3, PARAMETER_DEFAULT_3));
+      "Rook Value", 5.0));
    m_parameters.push_back(std::pair<std::string, double>(
-      PARAMETER_NAME_4, PARAMETER_DEFAULT_4));
+      "Queen Value", 9.0));
+   //m_parameters.push_back(std::pair<std::string, double>(
+   //   "Square Control Value", 0.03));
 }
 
 SearchingEngine::~SearchingEngine()
