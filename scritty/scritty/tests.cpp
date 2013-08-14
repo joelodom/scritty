@@ -904,7 +904,37 @@ TEST(engine_tests, list_all_legal_moves_test)
    engine.GetPosition(&position);
    EXPECT_EQ(21, Engine::ListAllLegalMoves(position, move_buffer));
 
-#error these tests have been valuable..  continue working a game here for all pieces
+   engine.SetToStartPos();
+
+   EXPECT_TRUE(engine.ApplyMove("a2a3"));
+   engine.GetPosition(&position);
+   EXPECT_EQ(20, Engine::ListAllLegalMoves(position, move_buffer));
+
+   EXPECT_TRUE(engine.ApplyMove("f7f6"));
+   engine.GetPosition(&position);
+   EXPECT_EQ(19, Engine::ListAllLegalMoves(position, move_buffer));
+
+   EXPECT_TRUE(engine.ApplyMove("g2g3"));
+   engine.GetPosition(&position);
+   EXPECT_EQ(19, Engine::ListAllLegalMoves(position, move_buffer));
+
+   EXPECT_TRUE(engine.ApplyMove("c7c6"));
+   engine.GetPosition(&position);
+   EXPECT_EQ(20, Engine::ListAllLegalMoves(position, move_buffer));
+
+   EXPECT_TRUE(engine.ApplyMove("f1g2"));
+   engine.GetPosition(&position);
+   EXPECT_EQ(20, Engine::ListAllLegalMoves(position, move_buffer));
+
+   engine.SetToStartPos();
+
+   EXPECT_TRUE(engine.ApplyMove("g1f3"));
+   EXPECT_TRUE(engine.ApplyMove("a7a6"));
+   EXPECT_TRUE(engine.ApplyMove("g2g3"));
+   EXPECT_TRUE(engine.ApplyMove("a6a5"));
+   EXPECT_TRUE(engine.ApplyMove("f1h3"));
+   EXPECT_TRUE(engine.ApplyMove("a5a4"));
+   EXPECT_EQ(20, Engine::ListAllLegalMoves(position, move_buffer));
 
    delete[] move_buffer;
 }
