@@ -931,7 +931,7 @@ void Move::ToString(std::string *str)
          case 'N':
          case 'n':
 
-            endpoints_index = PopulateKnightEndpoints(
+            endpoints_index = PopulateKnightEndpoints(position,
                move.start_file, move.start_rank, endpoints);
             break;
 
@@ -945,49 +945,15 @@ void Move::ToString(std::string *str)
          case 'Q':
          case 'q':
 
-            endpoints_index = PopulateBishopEndpoints(
+            endpoints_index = PopulateQueenEndpoints(
                position, move.start_file, move.start_rank, endpoints);
-            endpoints_index += PopulateRookEndpoints(
-               position, move.start_file, move.start_rank,
-               endpoints + endpoints_index);
             break;
 
          case 'K':
          case 'k':
 
-            // okay to be off board
-
-            endpoints[endpoints_index++] = move.start_file + 1;
-            endpoints[endpoints_index++] = move.start_rank + 1;
-            endpoints[endpoints_index++] = NO_PIECE;
-
-            endpoints[endpoints_index++] = move.start_file + 1;
-            endpoints[endpoints_index++] = move.start_rank;
-            endpoints[endpoints_index++] = NO_PIECE;
-
-            endpoints[endpoints_index++] = move.start_file + 1;
-            endpoints[endpoints_index++] = move.start_rank - 1;
-            endpoints[endpoints_index++] = NO_PIECE;
-
-            endpoints[endpoints_index++] = move.start_file;
-            endpoints[endpoints_index++] = move.start_rank - 1;
-            endpoints[endpoints_index++] = NO_PIECE;
-
-            endpoints[endpoints_index++] = move.start_file - 1;
-            endpoints[endpoints_index++] = move.start_rank - 1;
-            endpoints[endpoints_index++] = NO_PIECE;
-
-            endpoints[endpoints_index++] = move.start_file - 1;
-            endpoints[endpoints_index++] = move.start_rank;
-            endpoints[endpoints_index++] = NO_PIECE;
-
-            endpoints[endpoints_index++] = move.start_file - 1;
-            endpoints[endpoints_index++] = move.start_rank + 1;
-            endpoints[endpoints_index++] = NO_PIECE;
-
-            endpoints[endpoints_index++] = move.start_file;
-            endpoints[endpoints_index++] = move.start_rank + 1;
-            endpoints[endpoints_index++] = NO_PIECE;
+            endpoints_index = PopulateKingEndpoints(
+               position, move.start_file, move.start_rank, endpoints);
 
             // add castle possibilities
 
@@ -1029,6 +995,46 @@ void Move::ToString(std::string *str)
    return count;
 }
 
+/*static*/ size_t Engine::PopulateQueenEndpoints(const Position &position,
+   unsigned char start_file, unsigned char start_rank, unsigned char *endpoints)
+{
+   size_t endpoints_index = PopulateBishopEndpoints(
+      position, start_file, start_rank, endpoints);
+   endpoints_index += PopulateRookEndpoints(
+      position, start_file, start_rank,
+      endpoints + endpoints_index);
+   return endpoints_index;
+}
+
+/*static*/ size_t Engine::PopulateKingEndpoints(const Position &position,
+   unsigned char start_file, unsigned char start_rank, unsigned char *endpoints)
+{
+   // DOES NOT THINK ABOUT CASTLE
+
+   size_t endpoints_index = 0;
+
+   for (char i = -1; i <= 1; ++i)
+      for (char j = -1; j <= 1; ++j)
+      {
+         if (i == 0 && j == 0)
+            continue;
+
+         unsigned char file = start_file + i;
+         if (file > 7)
+            continue;
+
+         unsigned char rank = start_rank + j;
+         if (rank > 7)
+            continue;
+
+         endpoints[endpoints_index++] = file;
+         endpoints[endpoints_index++] = rank;
+         endpoints[endpoints_index++] = NO_PIECE;
+      }
+
+   return endpoints_index;
+}
+
 /*static*/ size_t Engine::PopulateBishopEndpoints(const Position &position,
    unsigned char start_file, unsigned char start_rank, unsigned char *endpoints)
 {
@@ -1037,13 +1043,28 @@ void Move::ToString(std::string *str)
    char file = start_file + 1;
    char rank = start_rank + 1;
 
+   char start_piece = position.m_board.m_squares[start_file][start_rank];
+
    while (file <= 7 && rank <= 7)
    {
-      endpoints[endpoints_index++] = file++;
-      endpoints[endpoints_index++] = rank++;
-      endpoints[endpoints_index++] = NO_PIECE;
-      if (position.m_board.m_squares[file][rank] != NO_PIECE)
-         break; // allows one piece to be present on purpose
+      if (position.m_board.m_squares[file][rank] == NO_PIECE)
+      {
+         endpoints[endpoints_index++] = file++;
+         endpoints[endpoints_index++] = rank++;
+         endpoints[endpoints_index++] = NO_PIECE;
+      }
+      else
+      {
+         if (IsOpponentsPiece(start_piece,
+            position.m_board.m_squares[file][rank]))
+         {
+            endpoints[endpoints_index++] = file++;
+            endpoints[endpoints_index++] = rank++;
+            endpoints[endpoints_index++] = NO_PIECE;
+         }
+
+         break;
+      }
    }
 
    file = start_file + 1;
@@ -1051,11 +1072,24 @@ void Move::ToString(std::string *str)
 
    while (file <= 7 && rank >= 0)
    {
-      endpoints[endpoints_index++] = file++;
-      endpoints[endpoints_index++] = rank--;
-      endpoints[endpoints_index++] = NO_PIECE;
-      if (position.m_board.m_squares[file][rank] != NO_PIECE)
-         break; // allows one piece to be present on purpose
+      if (position.m_board.m_squares[file][rank] == NO_PIECE)
+      {
+         endpoints[endpoints_index++] = file++;
+         endpoints[endpoints_index++] = rank--;
+         endpoints[endpoints_index++] = NO_PIECE;
+      }
+      else
+      {
+         if (IsOpponentsPiece(start_piece,
+            position.m_board.m_squares[file][rank]))
+         {
+            endpoints[endpoints_index++] = file++;
+            endpoints[endpoints_index++] = rank--;
+            endpoints[endpoints_index++] = NO_PIECE;
+         }
+
+         break;
+      }
    }
 
    file = start_file - 1;
@@ -1063,11 +1097,24 @@ void Move::ToString(std::string *str)
 
    while (file >= 0 && rank >= 0)
    {
-      endpoints[endpoints_index++] = file--;
-      endpoints[endpoints_index++] = rank--;
-      endpoints[endpoints_index++] = NO_PIECE;
-      if (position.m_board.m_squares[file][rank] != NO_PIECE)
-         break; // allows one piece to be present on purpose
+      if (position.m_board.m_squares[file][rank] == NO_PIECE)
+      {
+         endpoints[endpoints_index++] = file--;
+         endpoints[endpoints_index++] = rank--;
+         endpoints[endpoints_index++] = NO_PIECE;
+      }
+      else
+      {
+         if (IsOpponentsPiece(start_piece,
+            position.m_board.m_squares[file][rank]))
+         {
+            endpoints[endpoints_index++] = file--;
+            endpoints[endpoints_index++] = rank--;
+            endpoints[endpoints_index++] = NO_PIECE;
+         }
+
+         break;
+      }
    }
 
    file = start_file - 1;
@@ -1075,11 +1122,24 @@ void Move::ToString(std::string *str)
 
    while (file >= 0 && rank <= 7)
    {
-      endpoints[endpoints_index++] = file--;
-      endpoints[endpoints_index++] = rank++;
-      endpoints[endpoints_index++] = NO_PIECE;
-      if (position.m_board.m_squares[file][rank] != NO_PIECE)
-         break; // allows one piece to be present on purpose
+      if (position.m_board.m_squares[file][rank] == NO_PIECE)
+      {
+         endpoints[endpoints_index++] = file--;
+         endpoints[endpoints_index++] = rank++;
+         endpoints[endpoints_index++] = NO_PIECE;
+      }
+      else
+      {
+         if (IsOpponentsPiece(start_piece,
+            position.m_board.m_squares[file][rank]))
+         {
+            endpoints[endpoints_index++] = file--;
+            endpoints[endpoints_index++] = rank++;
+            endpoints[endpoints_index++] = NO_PIECE;
+         }
+
+         break;
+      }
    }
 
    return endpoints_index;
@@ -1090,83 +1150,203 @@ void Move::ToString(std::string *str)
 {
    size_t endpoints_index = 0;
 
+   char start_piece = position.m_board.m_squares[start_file][start_rank];
+
    for (char rank = start_rank + 1; rank <= 7; ++rank)
    {
-      endpoints[endpoints_index++] = start_file;
-      endpoints[endpoints_index++] = rank;
-      endpoints[endpoints_index++] = NO_PIECE;
-      if (position.m_board.m_squares[start_file][rank] != NO_PIECE)
-         break; // allows one piece to be present on purpose
+      if (position.m_board.m_squares[start_file][rank] == NO_PIECE)
+      {
+         endpoints[endpoints_index++] = start_file;
+         endpoints[endpoints_index++] = rank;
+         endpoints[endpoints_index++] = NO_PIECE;
+      }
+      else
+      {
+         if (IsOpponentsPiece(start_piece,
+            position.m_board.m_squares[start_file][rank]))
+         {
+            endpoints[endpoints_index++] = start_file;
+            endpoints[endpoints_index++] = rank;
+            endpoints[endpoints_index++] = NO_PIECE;
+         }
+
+         break;
+      }
    }
 
    for (char rank = start_rank - 1; rank >= 0; --rank)
    {
-      endpoints[endpoints_index++] = start_file;
-      endpoints[endpoints_index++] = rank;
-      endpoints[endpoints_index++] = NO_PIECE;
-      if (position.m_board.m_squares[start_file][rank] != NO_PIECE)
-         break; // allows one piece to be present on purpose
+      if (position.m_board.m_squares[start_file][rank] == NO_PIECE)
+      {
+         endpoints[endpoints_index++] = start_file;
+         endpoints[endpoints_index++] = rank;
+         endpoints[endpoints_index++] = NO_PIECE;
+      }
+      else
+      {
+         if (IsOpponentsPiece(start_piece,
+            position.m_board.m_squares[start_file][rank]))
+         {
+            endpoints[endpoints_index++] = start_file;
+            endpoints[endpoints_index++] = rank;
+            endpoints[endpoints_index++] = NO_PIECE;
+         }
+
+         break;
+      }
    }
 
    for (char file = start_file + 1; file <= 7; ++file)
    {
-      endpoints[endpoints_index++] = file;
-      endpoints[endpoints_index++] = start_rank;
-      endpoints[endpoints_index++] = NO_PIECE;
-      if (position.m_board.m_squares[file][start_rank] != NO_PIECE)
-         break; // allows one piece to be present on purpose
+      if (position.m_board.m_squares[file][start_rank] == NO_PIECE)
+      {
+         endpoints[endpoints_index++] = file;
+         endpoints[endpoints_index++] = start_rank;
+         endpoints[endpoints_index++] = NO_PIECE;
+      }
+      else
+      {
+         if (IsOpponentsPiece(start_piece,
+            position.m_board.m_squares[file][start_rank]))
+         {
+            endpoints[endpoints_index++] = file;
+            endpoints[endpoints_index++] = start_rank;
+            endpoints[endpoints_index++] = NO_PIECE;
+         }
+
+         break;
+      }
    }
 
    for (char file = start_file - 1; file >= 0; --file)
    {
-      endpoints[endpoints_index++] = file;
-      endpoints[endpoints_index++] = start_rank;
-      endpoints[endpoints_index++] = NO_PIECE;
-      if (position.m_board.m_squares[file][start_rank] != NO_PIECE)
-         break; // allows one piece to be present on purpose
+      if (position.m_board.m_squares[file][start_rank] == NO_PIECE)
+      {
+         endpoints[endpoints_index++] = file;
+         endpoints[endpoints_index++] = start_rank;
+         endpoints[endpoints_index++] = NO_PIECE;
+      }
+      else
+      {
+         if (IsOpponentsPiece(start_piece,
+            position.m_board.m_squares[file][start_rank]))
+         {
+            endpoints[endpoints_index++] = file;
+            endpoints[endpoints_index++] = start_rank;
+            endpoints[endpoints_index++] = NO_PIECE;
+         }
+
+         break;
+      }
    }
 
    return endpoints_index;
 }
 
-/*static*/ size_t Engine::PopulateKnightEndpoints(
+/*static*/ size_t Engine::PopulateKnightEndpoints(const Position &position,
    unsigned char start_file, unsigned char start_rank, unsigned char *endpoints)
 {
    // okay for some endpoints to be off board
 
    size_t endpoints_index = 0;
 
-   endpoints[endpoints_index++] = start_file + 1;
-   endpoints[endpoints_index++] = start_rank + 2;
-   endpoints[endpoints_index++] = NO_PIECE;
+   char start_piece = position.m_board.m_squares[start_file][start_rank];
 
-   endpoints[endpoints_index++] = start_file + 2;
-   endpoints[endpoints_index++] = start_rank + 1;
-   endpoints[endpoints_index++] = NO_PIECE;
+   unsigned char file = start_file + 1;
+   unsigned char rank = start_rank + 2;
 
-   endpoints[endpoints_index++] = start_file + 2;
-   endpoints[endpoints_index++] = start_rank - 1;
-   endpoints[endpoints_index++] = NO_PIECE;
+   if (file <= 7 && rank <= 7
+      && position.m_board.m_squares[file][rank] == NO_PIECE
+      || IsOpponentsPiece(start_piece, position.m_board.m_squares[file][rank]))
+   {
+      endpoints[endpoints_index++] = file;
+      endpoints[endpoints_index++] = rank;
+      endpoints[endpoints_index++] = NO_PIECE;
+   }
 
-   endpoints[endpoints_index++] = start_file + 1;
-   endpoints[endpoints_index++] = start_rank - 2;
-   endpoints[endpoints_index++] = NO_PIECE;
+   file = start_file + 2;
+   rank = start_rank + 1;
 
-   endpoints[endpoints_index++] = start_file - 1;
-   endpoints[endpoints_index++] = start_rank - 2;
-   endpoints[endpoints_index++] = NO_PIECE;
+   if (file <= 7 && rank <= 7
+      && position.m_board.m_squares[file][rank] == NO_PIECE
+      || IsOpponentsPiece(start_piece, position.m_board.m_squares[file][rank]))
+   {
+      endpoints[endpoints_index++] = file;
+      endpoints[endpoints_index++] = rank;
+      endpoints[endpoints_index++] = NO_PIECE;
+   }
 
-   endpoints[endpoints_index++] = start_file - 2;
-   endpoints[endpoints_index++] = start_rank - 1;
-   endpoints[endpoints_index++] = NO_PIECE;
+   file = start_file + 2;
+   rank = start_rank - 1;
 
-   endpoints[endpoints_index++] = start_file - 2;
-   endpoints[endpoints_index++] = start_rank + 1;
-   endpoints[endpoints_index++] = NO_PIECE;
+   if (file <= 7 && rank <= 7
+      && position.m_board.m_squares[file][rank] == NO_PIECE
+      || IsOpponentsPiece(start_piece, position.m_board.m_squares[file][rank]))
+   {
+      endpoints[endpoints_index++] = file;
+      endpoints[endpoints_index++] = rank;
+      endpoints[endpoints_index++] = NO_PIECE;
+   }
 
-   endpoints[endpoints_index++] = start_file - 1;
-   endpoints[endpoints_index++] = start_rank + 2;
-   endpoints[endpoints_index++] = NO_PIECE;
+   file = start_file + 1;
+   rank = start_rank - 2;
+
+   if (file <= 7 && rank <= 7
+      && position.m_board.m_squares[file][rank] == NO_PIECE
+      || IsOpponentsPiece(start_piece, position.m_board.m_squares[file][rank]))
+   {
+      endpoints[endpoints_index++] = file;
+      endpoints[endpoints_index++] = rank;
+      endpoints[endpoints_index++] = NO_PIECE;
+   }
+
+   file = start_file - 1;
+   rank = start_rank - 2;
+
+   if (file <= 7 && rank <= 7
+      && position.m_board.m_squares[file][rank] == NO_PIECE
+      || IsOpponentsPiece(start_piece, position.m_board.m_squares[file][rank]))
+   {
+      endpoints[endpoints_index++] = file;
+      endpoints[endpoints_index++] = rank;
+      endpoints[endpoints_index++] = NO_PIECE;
+   }
+
+   file = start_file - 2;
+   rank = start_rank - 1;
+
+   if (file <= 7 && rank <= 7
+      && position.m_board.m_squares[file][rank] == NO_PIECE
+      || IsOpponentsPiece(start_piece, position.m_board.m_squares[file][rank]))
+   {
+      endpoints[endpoints_index++] = file;
+      endpoints[endpoints_index++] = rank;
+      endpoints[endpoints_index++] = NO_PIECE;
+   }
+
+   file = start_file - 2;
+   rank = start_rank + 1;
+
+   if (file <= 7 && rank <= 7
+      && position.m_board.m_squares[file][rank] == NO_PIECE
+      || IsOpponentsPiece(start_piece, position.m_board.m_squares[file][rank]))
+   {
+      endpoints[endpoints_index++] = file;
+      endpoints[endpoints_index++] = rank;
+      endpoints[endpoints_index++] = NO_PIECE;
+   }
+
+   file = start_file - 1;
+   rank = start_rank + 2;
+
+   if (file <= 7 && rank <= 7
+      && position.m_board.m_squares[file][rank] == NO_PIECE
+      || IsOpponentsPiece(start_piece, position.m_board.m_squares[file][rank]))
+   {
+      endpoints[endpoints_index++] = file;
+      endpoints[endpoints_index++] = rank;
+      endpoints[endpoints_index++] = NO_PIECE;
+   }
 
    return endpoints_index;
 }

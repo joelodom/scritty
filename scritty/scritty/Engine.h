@@ -99,10 +99,16 @@ namespace scritty
       static size_t PopulateBishopEndpoints(const Position &position,
          unsigned char start_file,
          unsigned char start_rank, unsigned char *endpoints);
-      static size_t PopulateKnightEndpoints(
+      static size_t PopulateKnightEndpoints(const Position &position,
          unsigned char start_file,
          unsigned char start_rank, unsigned char *endpoints);
       static size_t PopulateRookEndpoints(const Position &position,
+         unsigned char start_file,
+         unsigned char start_rank, unsigned char *endpoints);
+      static size_t PopulateQueenEndpoints(const Position &position,
+         unsigned char start_file,
+         unsigned char start_rank, unsigned char *endpoints);
+      static size_t PopulateKingEndpoints(const Position &position,
          unsigned char start_file,
          unsigned char start_rank, unsigned char *endpoints);
 
