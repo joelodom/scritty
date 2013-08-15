@@ -28,22 +28,31 @@ SearchingEngine::~SearchingEngine()
 
 Outcome SearchingEngine::GetBestMove(std::string *best) const
 {
-   Move move;
    // the move buffer for all depths is allocated once for performance
-   Move *move_buffer = new Move[SEARCH_DEPTH*MAX_NUMBER_OF_LEGAL_MOVES];
-   double evaluation = GetBestMove(
-      m_position, SEARCH_DEPTH, &move, move_buffer);
+   Move *move_buffer = new Move[MAX_SEARCH_DEPTH*MAX_NUMBER_OF_LEGAL_MOVES];
+   Move move;
+
+   double evaluation = GetBestMove(m_position, MAX_SEARCH_DEPTH,
+      -DBL_MAX, DBL_MAX, m_position.m_white_to_move, &move, move_buffer);
+
    delete[] move_buffer;
    move.ToString(best);
+
    return OUTCOME_UNDECIDED; // don't ever give up
 }
 
-double SearchingEngine::GetBestMove(
-   const Position &position, size_t plies, Move *best, Move *move_buffer) const
+double SearchingEngine::GetBestMove(const Position &position,
+   size_t current_depth, double alpha, double beta, bool maximize,
+   Move *best, Move *move_buffer) const
 {
-   // one ply is one half-turn in chess
+   // if this is beyond max depth, just evaluate the position
+   if (current_depth == 0)
+      return EvaluatePosition(position);
 
+   // get all legal moves
    size_t num_moves = ListAllLegalMoves(position, move_buffer);
+
+   // if this is a terminal node, return the value of the outcome
 
    if (num_moves == 0)
    {
@@ -57,33 +66,54 @@ double SearchingEngine::GetBestMove(
          return 0.0;
    }
 
-   Move *best_move = move_buffer;
-   double best_evaluation = position.m_white_to_move ? -DBL_MAX : DBL_MAX;
+   // alpha-beta pruning minimax search
 
-   for (size_t i = 0; i < num_moves; ++i)
+   if (maximize)
    {
-      Position new_position = position;
-      Engine::ApplyKnownLegalMoveToPosition(move_buffer[i], &new_position);
-
-      // TODO: account for outcomes
-
-      double new_position_evaluation = plies == 1
-         ? new_position_evaluation = EvaluatePosition(new_position)
-         : GetBestMove(new_position, plies - 1, nullptr,
-         move_buffer + MAX_NUMBER_OF_LEGAL_MOVES);
-
-      if (position.m_white_to_move ? new_position_evaluation > best_evaluation
-         : new_position_evaluation < best_evaluation)
+      for (size_t i = 0; i < num_moves; ++i)
       {
-         best_move = move_buffer + i;
-         best_evaluation = new_position_evaluation;
+         Position new_position = position;
+         Engine::ApplyKnownLegalMoveToPosition(move_buffer[i], &new_position);
+
+         double evaluation = GetBestMove(new_position, current_depth - 1, alpha,
+            beta, !maximize, nullptr, move_buffer + MAX_NUMBER_OF_LEGAL_MOVES);
+
+         if (evaluation > alpha)
+         {
+            alpha = evaluation; // reassignment of formal parameter intentional
+            if (best != nullptr)
+               *best = move_buffer[i];
+         }
+
+         if (alpha >= beta)
+            return alpha;
       }
+
+      return alpha;
    }
+   else
+   {
+      for (size_t i = 0; i < num_moves; ++i)
+      {
+         Position new_position = position;
+         Engine::ApplyKnownLegalMoveToPosition(move_buffer[i], &new_position);
 
-   if (best != nullptr)
-      *best = *best_move;
+         double evaluation = GetBestMove(new_position, current_depth - 1, alpha,
+            beta, !maximize, nullptr, move_buffer + MAX_NUMBER_OF_LEGAL_MOVES);
 
-   return best_evaluation;
+         if (evaluation < beta)
+         {
+            beta = evaluation; // reassignment of formal parameter intentional
+            if (best != nullptr)
+               *best = move_buffer[i];
+         }
+
+         if (beta <= alpha)
+            return beta;
+      }
+
+      return beta;
+   }
 }
 
 double SearchingEngine::EvaluatePosition(const Position &position) const

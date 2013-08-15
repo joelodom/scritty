@@ -70,7 +70,7 @@ namespace scritty
          }
       }
 
-      void Go(T *winner)
+      void Go(T *winner) // TODO: larger deviations at first, narrowing down???
       {
          // single elimination tournament where eliminated participants are
          // replaced by children of winners at the end of each round

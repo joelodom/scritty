@@ -6,7 +6,7 @@
 #include "Engine.h"
 #include "GeneticTournament.h"
 
-#define SEARCH_DEPTH 4 // should always be even
+#define MAX_SEARCH_DEPTH 5
 
 namespace scritty
 {
@@ -18,12 +18,12 @@ namespace scritty
 
       virtual Outcome GetBestMove(std::string *best) const;
 
-   virtual int Compare(GeneticEngine *first, GeneticEngine *second) const;
+      virtual int Compare(GeneticEngine *first, GeneticEngine *second) const;
 
    private:
-      double GetBestMove(
-         const Position &position, size_t plies, Move *best, Move *move_buffer)
-         const;
+      double GetBestMove(const Position &position,
+         size_t current_depth, double alpha, double beta, bool maximize,
+         Move *best, Move *move_buffer) const;
       double EvaluatePosition(const Position &position) const; // centipawns
    };
 }

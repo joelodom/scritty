@@ -415,6 +415,10 @@ rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w AHah -
 
 /* OTHER IDEAS:
 
+ - Instead of using move numbers for phase of game, have a polynomial that
+ determines square values where polynomial is weights on y-axis and
+ 32 - <pieces captured> for x-axis.
+
  - Have different engines that can all search at the same time.  One engine
  cares only about looking very deep with a fast evaluation function.  Another
  engine cares about extreme position.  The final engine could wrap multiple
