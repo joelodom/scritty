@@ -665,6 +665,29 @@ void Move::ToString(std::string *str)
       *str += promotion_piece;
 }
 
+bool Move::operator==(const Move &other) const
+{
+   return start_file == other.start_file
+      && start_rank == other.start_rank
+      && end_file == other.end_file
+      && end_rank == other.end_rank
+      && promotion_piece == other.promotion_piece;
+}
+
+Move& Move::operator=(const Move &rhs)
+{
+   if (this != &rhs)
+   {
+      start_file = rhs.start_file;
+      start_rank = rhs.start_rank;
+      end_file = rhs.end_file;
+      end_rank = rhs.end_rank;
+      promotion_piece = rhs.promotion_piece;
+   }
+
+   return *this;
+}
+
 /*static*/ void Engine::WritePositionToStdout(const Position &position)
 {
    for (unsigned char rank = 7; (char)rank >= 0; --rank)

@@ -30,9 +30,14 @@ Outcome SearchingEngine::GetBestMove(std::string *best) const
 {
    // the move buffer for all depths is allocated once for performance
    Move *move_buffer = new Move[MAX_SEARCH_DEPTH*MAX_NUMBER_OF_LEGAL_MOVES];
-   Move move;
+   Move move, suggestion;
 
-   double evaluation = GetBestMove(m_position, MAX_SEARCH_DEPTH,
+   // first pass
+   GetBestMove(m_position, nullptr, FIRST_PASS_SEARCH_DEPTH,
+      -DBL_MAX, DBL_MAX, m_position.m_white_to_move, &suggestion, move_buffer);
+
+   // final pass
+   double evaluation = GetBestMove(m_position, &suggestion, MAX_SEARCH_DEPTH,
       -DBL_MAX, DBL_MAX, m_position.m_white_to_move, &move, move_buffer);
 
    delete[] move_buffer;
@@ -42,6 +47,7 @@ Outcome SearchingEngine::GetBestMove(std::string *best) const
 }
 
 double SearchingEngine::GetBestMove(const Position &position,
+   const Move *suggestion,
    size_t current_depth, double alpha, double beta, bool maximize,
    Move *best, Move *move_buffer) const
 {
@@ -66,6 +72,21 @@ double SearchingEngine::GetBestMove(const Position &position,
          return 0.0;
    }
 
+   // algorithm is most efficient when best moves evaluated first
+
+   if (suggestion != nullptr)
+   {
+      for (size_t i = 1; i < num_moves; ++i)
+      {
+         if (move_buffer[i] == *suggestion)
+         {
+            move_buffer[i] = *move_buffer;
+            *move_buffer = *suggestion;
+            break;
+         }
+      }
+   }
+
    // alpha-beta pruning minimax search
 
    if (maximize)
@@ -75,7 +96,8 @@ double SearchingEngine::GetBestMove(const Position &position,
          Position new_position = position;
          Engine::ApplyKnownLegalMoveToPosition(move_buffer[i], &new_position);
 
-         double evaluation = GetBestMove(new_position, current_depth - 1, alpha,
+         double evaluation = GetBestMove(new_position, nullptr,
+            current_depth - 1, alpha,
             beta, !maximize, nullptr, move_buffer + MAX_NUMBER_OF_LEGAL_MOVES);
 
          if (evaluation > alpha)
@@ -98,7 +120,8 @@ double SearchingEngine::GetBestMove(const Position &position,
          Position new_position = position;
          Engine::ApplyKnownLegalMoveToPosition(move_buffer[i], &new_position);
 
-         double evaluation = GetBestMove(new_position, current_depth - 1, alpha,
+         double evaluation = GetBestMove(new_position, nullptr,
+            current_depth - 1, alpha,
             beta, !maximize, nullptr, move_buffer + MAX_NUMBER_OF_LEGAL_MOVES);
 
          if (evaluation < beta)

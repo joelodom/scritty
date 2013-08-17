@@ -34,6 +34,8 @@ namespace scritty
       char promotion_piece; // NO_PIECE for none
 
       void ToString(std::string *str);
+      bool operator==(const Move &other) const;
+      Move& operator=(const Move &rhs);
    };
 
    class Board
