@@ -33,28 +33,25 @@ void Position::RollBackOneMove()
 {
    // there must be a move to roll back!
 
-   {
-      Position &previous = *m_chain->rbegin();
+   Position *previous = m_chain + *m_chain_length - 1;
 
-      m_white_to_move = previous.m_white_to_move;
-      m_white_may_castle_short = previous.m_white_may_castle_short;
-      m_white_may_castle_long = previous.m_white_may_castle_long;
-      m_black_may_castle_short = previous.m_black_may_castle_short;
-      m_black_may_castle_long = previous.m_black_may_castle_long;
-      m_en_passant_allowed_on = previous.m_en_passant_allowed_on;
+   m_white_to_move = previous->m_white_to_move;
+   m_white_may_castle_short = previous->m_white_may_castle_short;
+   m_white_may_castle_long = previous->m_white_may_castle_long;
+   m_black_may_castle_short = previous->m_black_may_castle_short;
+   m_black_may_castle_long = previous->m_black_may_castle_long;
+   m_en_passant_allowed_on = previous->m_en_passant_allowed_on;
 
-      memcpy(m_board.m_squares, previous.m_board.m_squares,
-         sizeof(previous.m_board.m_squares));
-   }
+   memcpy(m_board.m_squares, previous->m_board.m_squares,
+      sizeof(previous->m_board.m_squares));
 
-   // pop one off the move chain
-   m_chain->pop_back();
+   --(*m_chain_length);
 }
 
 void Position::ApplyKnownLegalMove(const Move &move)
 {
    // save position (for various draw rules)
-   m_chain->push_back(*this);
+   m_chain[(*m_chain_length)++] = *this; // copy to chain
 
    // move the piece
    m_board.m_squares[move.end_file][move.end_rank]
@@ -1464,10 +1461,9 @@ bool Position::IsADraw() const
    // the claim. Of course, the opportunity may present itself again.
 
    size_t identical_count = 0;
-   for (auto it = m_chain->begin();
-      it != m_chain->end(); ++it)
+   for (size_t i = 0; i < *m_chain_length; ++i)
    {
-      if (*this == *it)
+      if (*this == m_chain[i])
       {
          if (identical_count == 1)
             return true; // either side may claim a draw

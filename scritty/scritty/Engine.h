@@ -5,7 +5,6 @@
 
 #include <cstring>
 #include <string>
-#include <vector>
 
 #define NO_PIECE '\0'
 #define NO_EN_PASSANT 100
@@ -14,6 +13,8 @@
 // 16 pieces times 63 squares plus 16 promotion squares times 4 promotion pieces
 // plus 4 castles
 #define MAX_NUMBER_OF_LEGAL_MOVES (16*63 + 16*4 + 4)
+
+#define MAX_POSITION_CHAIN_LEN 1000 // 500 moves TODO: allow reallocation for mo
 
 namespace scritty
 {
@@ -49,10 +50,14 @@ namespace scritty
    class Position
    {
    public:
-      Position(std::vector<Position> *chain) : m_chain(chain)
+      Position() {}
+
+      Position(Position *chain, size_t *chain_length) : m_chain(chain),
+         m_chain_length(chain_length)
       {
          // only create the vector of past positions for the very first
          // position in the chain
+         *m_chain_length = 0;
       }
 
       Position (const Position &to_copy)
@@ -62,15 +67,15 @@ namespace scritty
          m_black_may_castle_short(to_copy.m_black_may_castle_short),
          m_black_may_castle_long(to_copy.m_black_may_castle_long),
          m_en_passant_allowed_on(to_copy.m_en_passant_allowed_on),
-         m_chain(to_copy.m_chain)
+         m_chain(to_copy.m_chain), m_chain_length(to_copy.m_chain_length)
       {
+         // doesn't copy chain deeply
          memcpy(m_board.m_squares, to_copy.m_board.m_squares,
             sizeof(to_copy.m_board.m_squares));
       }
 
       ~Position()
       {
-         // TODO: fix leak
       }
 
       Board m_board;
@@ -85,7 +90,8 @@ namespace scritty
       bool IsADraw() const;
 
    private:
-      std::vector<Position> *m_chain;
+      Position *m_chain;
+      size_t *m_chain_length;
    };
 
    class Engine
@@ -93,8 +99,9 @@ namespace scritty
    public:
       Engine()
       {
-         m_position_chain = new std::vector<Position>;
-         m_position = new Position(m_position_chain);
+         m_position_chain = new Position[MAX_POSITION_CHAIN_LEN];
+         m_position_chain_length = new size_t;
+         m_position = new Position(m_position_chain, m_position_chain_length);
          SetToStartPos();
       }
 
@@ -102,7 +109,8 @@ namespace scritty
       {
          // TODO: fix leaks
          //delete m_position;
-         //delete m_position_chain;
+         //delete[] m_position_chain;
+         //delete m_position_chain_length;
       }
 
       static void WritePositionToStdout(const Position &position);
@@ -157,7 +165,8 @@ namespace scritty
          unsigned char start_rank, unsigned char *endpoints);
 
       Position *m_position;
-      std::vector<Position> *m_position_chain;
+      Position *m_position_chain;
+      size_t *m_position_chain_length;
 
    private:
       Engine (const Engine &); // copy disallowed
