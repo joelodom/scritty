@@ -5,7 +5,7 @@
 
 using namespace scritty;
 
-SearchingEngine::SearchingEngine()
+SearchingEngine::SearchingEngine() : GeneticEngine()
 {
    m_parameters.push_back(std::pair<std::string, double>(
       "Pawn Value", 1.00));
@@ -22,10 +22,6 @@ SearchingEngine::SearchingEngine()
       "Square Control Value", 0.03));
 }
 
-SearchingEngine::~SearchingEngine()
-{
-}
-
 Outcome SearchingEngine::GetBestMove(std::string *best) const
 {
    // the move buffer for all depths is allocated once for performance
@@ -33,12 +29,12 @@ Outcome SearchingEngine::GetBestMove(std::string *best) const
    Move move, suggestion;
 
    // first pass
-   GetBestMove(m_position, nullptr, FIRST_PASS_SEARCH_DEPTH,
-      -DBL_MAX, DBL_MAX, m_position.m_white_to_move, &suggestion, move_buffer);
+   GetBestMove(*m_position, nullptr, FIRST_PASS_SEARCH_DEPTH,
+      -DBL_MAX, DBL_MAX, m_position->m_white_to_move, &suggestion, move_buffer);
 
    // final pass
-   double evaluation = GetBestMove(m_position, &suggestion, MAX_SEARCH_DEPTH,
-      -DBL_MAX, DBL_MAX, m_position.m_white_to_move, &move, move_buffer);
+   double evaluation = GetBestMove(*m_position, &suggestion, MAX_SEARCH_DEPTH,
+      -DBL_MAX, DBL_MAX, m_position->m_white_to_move, &move, move_buffer);
 
    delete[] move_buffer;
    move.ToString(best);
@@ -93,12 +89,14 @@ double SearchingEngine::GetBestMove(const Position &position,
    {
       for (size_t i = 0; i < num_moves; ++i)
       {
-         Position new_position = position;
-         Engine::ApplyKnownLegalMoveToPosition(move_buffer[i], &new_position);
+         Position& must_roll_back = const_cast<Position&>(position);
+         must_roll_back.ApplyKnownLegalMove(move_buffer[i]);
 
-         double evaluation = GetBestMove(new_position, nullptr,
+         double evaluation = GetBestMove(must_roll_back, nullptr,
             current_depth - 1, alpha,
             beta, !maximize, nullptr, move_buffer + MAX_NUMBER_OF_LEGAL_MOVES);
+
+         must_roll_back.RollBackOneMove();
 
          if (evaluation > alpha)
          {
@@ -117,12 +115,14 @@ double SearchingEngine::GetBestMove(const Position &position,
    {
       for (size_t i = 0; i < num_moves; ++i)
       {
-         Position new_position = position;
-         Engine::ApplyKnownLegalMoveToPosition(move_buffer[i], &new_position);
+         Position& must_roll_back = const_cast<Position&>(position);
+         must_roll_back.ApplyKnownLegalMove(move_buffer[i]);
 
-         double evaluation = GetBestMove(new_position, nullptr,
+         double evaluation = GetBestMove(must_roll_back, nullptr,
             current_depth - 1, alpha,
             beta, !maximize, nullptr, move_buffer + MAX_NUMBER_OF_LEGAL_MOVES);
+
+         must_roll_back.RollBackOneMove();
 
          if (evaluation < beta)
          {
@@ -141,6 +141,9 @@ double SearchingEngine::GetBestMove(const Position &position,
 
 double SearchingEngine::EvaluatePosition(const Position &position) const
 {
+   if (position.IsADraw())
+      return 0.0;
+
    double evaluation = 0.0;
    unsigned char endpoints[8*8*4 + 1]; // f1, r1, promotion1, f2, ..., MAGIC_NUM
 
@@ -256,8 +259,7 @@ double SearchingEngine::EvaluatePosition(const Position &position) const
          break;
 
       // check for win, loose or draw
-      Position position;
-      white->GetPosition(&position);
+      Position position = white->GetPosition();
       outcome = Engine::GetOutcome(position);
       if (outcome != OUTCOME_UNDECIDED)
          break;
@@ -270,7 +272,7 @@ double SearchingEngine::EvaluatePosition(const Position &position) const
          break;
 
       // check for win, loose or draw
-      black->GetPosition(&position);
+      position = black->GetPosition();
       outcome = Engine::GetOutcome(position);
       if (outcome != OUTCOME_UNDECIDED)
          break;

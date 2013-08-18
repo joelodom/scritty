@@ -7,7 +7,7 @@
 #include "GeneticTournament.h"
 
 #define FIRST_PASS_SEARCH_DEPTH 4
-#define MAX_SEARCH_DEPTH 6
+#define MAX_SEARCH_DEPTH 5
 
 namespace scritty
 {
@@ -15,7 +15,6 @@ namespace scritty
    {
    public:
       SearchingEngine();
-      ~SearchingEngine();
 
       virtual Outcome GetBestMove(std::string *best) const;
 

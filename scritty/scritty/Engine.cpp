@@ -9,7 +9,7 @@ using namespace scritty;
 
 void Engine::SetToStartPos()
 {
-   memcpy (m_position.m_board.m_squares,
+   memcpy (m_position->m_board.m_squares,
       "RP\0\0\0\0pr"
       "NP\0\0\0\0pn"
       "BP\0\0\0\0pb"
@@ -17,44 +17,63 @@ void Engine::SetToStartPos()
       "KP\0\0\0\0pk"
       "BP\0\0\0\0pb"
       "NP\0\0\0\0pn"
-      "RP\0\0\0\0pr", 64);
+      "RP\0\0\0\0pr", sizeof(m_position->m_board.m_squares));
 
-   m_position.m_white_to_move = true;
+   m_position->m_white_to_move = true;
 
-   m_position.m_white_may_castle_short = true;
-   m_position.m_white_may_castle_long = true;
-   m_position.m_black_may_castle_short = true;
-   m_position.m_black_may_castle_long = true;
+   m_position->m_white_may_castle_short = true;
+   m_position->m_white_may_castle_long = true;
+   m_position->m_black_may_castle_short = true;
+   m_position->m_black_may_castle_long = true;
 
-   m_position.en_passant_allowed_on = NO_EN_PASSANT;
+   m_position->m_en_passant_allowed_on = NO_EN_PASSANT;
 }
 
-Engine::Engine()
+void Position::RollBackOneMove()
 {
-   SetToStartPos();
+   // there must be a move to roll back!
+
+   {
+      Position &previous = *m_chain->rbegin();
+
+      m_white_to_move = previous.m_white_to_move;
+      m_white_may_castle_short = previous.m_white_may_castle_short;
+      m_white_may_castle_long = previous.m_white_may_castle_long;
+      m_black_may_castle_short = previous.m_black_may_castle_short;
+      m_black_may_castle_long = previous.m_black_may_castle_long;
+      m_en_passant_allowed_on = previous.m_en_passant_allowed_on;
+
+      memcpy(m_board.m_squares, previous.m_board.m_squares,
+         sizeof(previous.m_board.m_squares));
+   }
+
+   // pop one off the move chain
+   m_chain->pop_back();
 }
 
-/*static*/ void Engine::ApplyKnownLegalMoveToPosition(const Move &move,
-   Position *position)
+void Position::ApplyKnownLegalMove(const Move &move)
 {
+   // save position (for various draw rules)
+   m_chain->push_back(*this);
+
    // move the piece
-   position->m_board.m_squares[move.end_file][move.end_rank]
-   = position->m_board.m_squares[move.start_file][move.start_rank];
-   position->m_board.m_squares[move.start_file][move.start_rank] = NO_PIECE;
+   m_board.m_squares[move.end_file][move.end_rank]
+   = m_board.m_squares[move.start_file][move.start_rank];
+   m_board.m_squares[move.start_file][move.start_rank] = NO_PIECE;
 
    // handle castle rules
 
-   char piece = position->m_board.m_squares[move.end_file][move.end_rank];
+   char piece = m_board.m_squares[move.end_file][move.end_rank];
 
    if (move.start_rank == 0)
    {
       if (move.start_file == 0)
       {
-         position->m_white_may_castle_long = false;
+         m_white_may_castle_long = false;
       }
       else if (move.start_file == 7)
       {
-         position->m_white_may_castle_short = false;
+         m_white_may_castle_short = false;
       }
       else if (move.start_file == 4)
       {
@@ -63,17 +82,17 @@ Engine::Engine()
          {
             if (move.end_file == 2)
             {
-               position->m_board.m_squares[0][0] = NO_PIECE;
-               position->m_board.m_squares[3][0] = 'R';
+               m_board.m_squares[0][0] = NO_PIECE;
+               m_board.m_squares[3][0] = 'R';
             }
             else if (move.end_file == 6)
             {
-               position->m_board.m_squares[7][0] = NO_PIECE;
-               position->m_board.m_squares[5][0] = 'R';
+               m_board.m_squares[7][0] = NO_PIECE;
+               m_board.m_squares[5][0] = 'R';
             }
 
-            position->m_white_may_castle_long = false;
-            position->m_white_may_castle_short = false;
+            m_white_may_castle_long = false;
+            m_white_may_castle_short = false;
          }
       }
    }
@@ -81,11 +100,11 @@ Engine::Engine()
    {
       if (move.start_file == 0)
       {
-         position->m_black_may_castle_long = false;
+         m_black_may_castle_long = false;
       }
       else if (move.start_file == 7)
       {
-         position->m_black_may_castle_short = false;
+         m_black_may_castle_short = false;
       }
       else if (move.start_file == 4)
       {
@@ -94,17 +113,17 @@ Engine::Engine()
          {
             if (move.end_file == 2)
             {
-               position->m_board.m_squares[0][7] = NO_PIECE;
-               position->m_board.m_squares[3][7] = 'r';
+               m_board.m_squares[0][7] = NO_PIECE;
+               m_board.m_squares[3][7] = 'r';
             }
             else if (move.end_file == 6)
             {
-               position->m_board.m_squares[7][7] = NO_PIECE;
-               position->m_board.m_squares[5][7] = 'r';
+               m_board.m_squares[7][7] = NO_PIECE;
+               m_board.m_squares[5][7] = 'r';
             }
 
-            position->m_black_may_castle_long = false;
-            position->m_black_may_castle_short = false;
+            m_black_may_castle_long = false;
+            m_black_may_castle_short = false;
          }
       }
    }
@@ -114,29 +133,29 @@ Engine::Engine()
    if (move.start_rank == 4 && piece == 'P'
       && (move.end_file == move.start_file - 1
       || move.end_file == move.start_file + 1)
-      && position->en_passant_allowed_on == move.end_file)
+      && m_en_passant_allowed_on == move.end_file)
    {
-      position->m_board.m_squares[move.end_file][4] = NO_PIECE;
+      m_board.m_squares[move.end_file][4] = NO_PIECE;
    }
    else if (move.start_rank == 3 && piece == 'p'
       && (move.end_file == move.start_file - 1
       || move.end_file == move.start_file + 1)
-      && position->en_passant_allowed_on == move.end_file)
+      && m_en_passant_allowed_on == move.end_file)
    {
-      position->m_board.m_squares[move.end_file][3] = NO_PIECE;
+      m_board.m_squares[move.end_file][3] = NO_PIECE;
    }
 
    if (move.start_rank == 1 && move.end_rank == 3 && piece == 'P')
    {
-      position->en_passant_allowed_on = move.start_file;
+      m_en_passant_allowed_on = move.start_file;
    }
    else if (move.start_rank == 6 && move.end_rank == 4 && piece == 'p')
    {
-      position->en_passant_allowed_on = move.start_file;
+      m_en_passant_allowed_on = move.start_file;
    }
    else
    {
-      position->en_passant_allowed_on = NO_EN_PASSANT;
+      m_en_passant_allowed_on = NO_EN_PASSANT;
    }
 
    // handle promotion
@@ -144,13 +163,13 @@ Engine::Engine()
       || (move.end_rank == 0 && piece == 'p'))
    {
       // in some UCI output, promotion pieces are not cased as expected
-      position->m_board.m_squares[move.end_file][move.end_rank]
-      = position->m_white_to_move
+      m_board.m_squares[move.end_file][move.end_rank]
+      = m_white_to_move
          ? ::toupper(move.promotion_piece) : ::tolower(move.promotion_piece);
    }
 
    // switch sides
-   position->m_white_to_move = !position->m_white_to_move;
+   m_white_to_move = !m_white_to_move;
 }
 
 bool Engine::ApplyMove(const std::string &str)
@@ -163,9 +182,9 @@ bool Engine::ApplyMove(const std::string &str)
       return false;
    }
 
-   if (IsMoveLegal(m_position, move))
+   if (IsMoveLegal(*m_position, move))
    {
-      ApplyKnownLegalMoveToPosition(move, &m_position);
+      m_position->ApplyKnownLegalMove(move);
       return true;
    }
 
@@ -175,7 +194,7 @@ bool Engine::ApplyMove(const std::string &str)
 
 bool Engine::IsWhiteToMove() const
 {
-   return m_position.m_white_to_move;
+   return m_position->m_white_to_move;
 }
 
 /*static*/ inline bool Engine::IsOpponentsPiece(char mine, char theirs)
@@ -404,7 +423,7 @@ bool Engine::IsWhiteToMove() const
          {
             // handle en passant
             if (move.start_rank != 4
-               || move.end_file != position.en_passant_allowed_on)
+               || move.end_file != position.m_en_passant_allowed_on)
                return false;
          }
 
@@ -452,7 +471,7 @@ bool Engine::IsWhiteToMove() const
          {
             // handle en passant
             if (move.start_rank != 3
-               || move.end_file != position.en_passant_allowed_on)
+               || move.end_file != position.m_en_passant_allowed_on)
                return false;
          }
 
@@ -623,10 +642,13 @@ bool Engine::IsWhiteToMove() const
 
    if (check_king)
    {
-      Position new_position(position);
-      ApplyKnownLegalMoveToPosition(move, &new_position);
-      new_position.m_white_to_move = !new_position.m_white_to_move;
-      if (IsCheck(new_position, position.m_white_to_move ? 'K' : 'k'))
+      Position& must_roll_back = const_cast<Position&>(position);
+      must_roll_back.ApplyKnownLegalMove(move);
+      must_roll_back.m_white_to_move = !must_roll_back.m_white_to_move;
+      bool is_check = IsCheck(
+         must_roll_back, position.m_white_to_move ? 'K' : 'k');
+      must_roll_back.RollBackOneMove();
+      if (is_check)
          return false;
    }
 
@@ -651,7 +673,7 @@ bool Engine::IsWhiteToMove() const
 
 char Engine::GetPieceAt(const std::string &square) const
 {
-   return m_position.m_board.m_squares[square[0] - 'a'][square[1] - '1'];
+   return m_position->m_board.m_squares[square[0] - 'a'][square[1] - '1'];
 }
 
 void Move::ToString(std::string *str)
@@ -1390,6 +1412,41 @@ Move& Move::operator=(const Move &rhs)
          return IsCheck(position, 'k') ? OUTCOME_WIN_WHITE : OUTCOME_DRAW;
    }
 
+   // TODO: decide which draw situations to check for here
+   // See SearchingEngine's evaluation for checking for draw conditions
+   // Arena automatically draws on threefold repetition, even if not claimed
+
+   return OUTCOME_UNDECIDED;
+}
+
+Outcome Engine::GetOutcome() const
+{
+   return GetOutcome(*m_position);
+}
+
+const Position & Engine::GetPosition() const
+{
+   return *m_position;
+}
+
+bool Position::operator==(const Position &other) const
+{
+   // used to compare for threefold repetition
+   if (m_white_to_move != other.m_white_to_move
+      || m_white_may_castle_short != other.m_white_may_castle_short
+      || m_white_may_castle_long != other.m_white_may_castle_long
+      || m_black_may_castle_short != other.m_black_may_castle_short
+      || m_black_may_castle_long != other.m_black_may_castle_long
+      || m_en_passant_allowed_on != other.m_en_passant_allowed_on)
+      return false;
+   return memcmp(m_board.m_squares, other.m_board.m_squares,
+      sizeof(m_board.m_squares)) == 0;
+}
+
+bool Position::IsADraw() const
+{
+   // alse returns true for situations where either side may claim a draw
+
    // Threefold repetition - if an identical position has just occurred three
    // times with the same player to move, or will occur after the player on turn
    // makes his move, the player on move may claim a draw (to the arbiter). In
@@ -1406,8 +1463,17 @@ Move& Move::operator=(const Move &rhs)
    // move in which the repetition occurs, the player forfeits the right to make
    // the claim. Of course, the opportunity may present itself again.
 
-   // TODO: a threefold repetition must be claimed as a draw, consider
-   // how to handle
+   size_t identical_count = 0;
+   for (auto it = m_chain->begin();
+      it != m_chain->end(); ++it)
+   {
+      if (*this == *it)
+      {
+         if (identical_count == 1)
+            return true; // either side may claim a draw
+         ++identical_count;
+      }
+   }
 
    // The fifty-move rule - if in the previous fifty moves by each side,
    // no pawn has moved and no capture has been made, a draw may be claimed by
@@ -1418,7 +1484,7 @@ Move& Move::operator=(const Move &rhs)
    // draw is forfeited if it is not used on that move, but the opportunity may
    // occur again.
 
-   // TODO: a fifty move draw must be claimed as a draw, consider how to handle
+   // TODO
 
    // Impossibility of checkmate - if a position arises in which neither player
    // could possibly give checkmate by a series of legal moves, the game is a
@@ -1432,18 +1498,7 @@ Move& Move::operator=(const Move &rhs)
    //     colour. (Any number of additional bishops of either color on the same
    //     color of square due to underpromotion do not affect the situation.)
 
-   // TODO: ...
+   // TODO
 
-   return OUTCOME_UNDECIDED;
-}
-
-Outcome Engine::GetOutcome() const
-{
-   return GetOutcome(m_position);
-}
-
-void Engine::GetPosition(Position *position) const
-{
-   // makes a copy
-   *position = m_position;
+   return false;
 }

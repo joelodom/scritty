@@ -20,6 +20,16 @@ namespace scritty
    class GeneticEngine : public Engine
    {
    public:
+      GeneticEngine() : Engine()
+      {
+      }
+
+      GeneticEngine(const GeneticEngine &to_copy)
+      {
+         m_parameters.assign(
+            to_copy.m_parameters.begin(), to_copy.m_parameters.end());
+      }
+
       void GetParameterName(size_t index, std::string *name) const;
       double GetParameterValue(size_t index) const;
       void PrintParameters() const;

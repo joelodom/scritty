@@ -10,6 +10,10 @@ namespace scritty
    class RandomEngine : public Engine
    {
    public:
+      RandomEngine() : Engine()
+      {
+      }
+
       virtual Outcome GetBestMove(std::string *best) const;
    };
 }
