@@ -7,9 +7,9 @@
 
 using namespace scritty;
 
-void Engine::SetToStartPos()
+void Position::SetToStartPos()
 {
-   memcpy (m_position->m_board.m_squares,
+   memcpy (m_board.m_squares,
       "RP\0\0\0\0pr"
       "NP\0\0\0\0pn"
       "BP\0\0\0\0pb"
@@ -17,16 +17,18 @@ void Engine::SetToStartPos()
       "KP\0\0\0\0pk"
       "BP\0\0\0\0pb"
       "NP\0\0\0\0pn"
-      "RP\0\0\0\0pr", sizeof(m_position->m_board.m_squares));
+      "RP\0\0\0\0pr", sizeof(m_board.m_squares));
 
-   m_position->m_white_to_move = true;
+   m_white_to_move = true;
 
-   m_position->m_white_may_castle_short = true;
-   m_position->m_white_may_castle_long = true;
-   m_position->m_black_may_castle_short = true;
-   m_position->m_black_may_castle_long = true;
+   m_white_may_castle_short = true;
+   m_white_may_castle_long = true;
+   m_black_may_castle_short = true;
+   m_black_may_castle_long = true;
 
-   m_position->m_en_passant_allowed_on = NO_EN_PASSANT;
+   m_en_passant_allowed_on = NO_EN_PASSANT;
+
+   *m_chain_length = 0;
 }
 
 void Position::RollBackOneMove()
@@ -51,6 +53,8 @@ void Position::RollBackOneMove()
 void Position::ApplyKnownLegalMove(const Move &move)
 {
    // save position (for various draw rules)
+   if (*m_chain_length >= MAX_POSITION_CHAIN_LEN)
+      return; // TODO: reallocate
    m_chain[(*m_chain_length)++] = *this; // copy to chain
 
    // move the piece

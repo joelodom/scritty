@@ -991,3 +991,22 @@ TEST(engine_tests, threefold_repetition_test)
    position = engine.GetPosition();
    EXPECT_TRUE(position.IsADraw());
 }
+
+TEST(searching_engine_tests, debug_crash3)
+{
+   SearchingEngine engine;
+   UCIHandler handler(&engine);
+
+   uci_tokens tokens;
+   UCIParser::BreakIntoTokens("position startpos moves e2e3 e7e6 d1g4 d8f6 "
+      "f1d3 f8d6 b1c3 h7h5 g4c4 d6e5 c3e4 f6e7 g1f3 d7d5 c4c5 d5e4 c5e5 e4f3 "
+      "e5g7 f3g2 h1g1 e7f6 g7g3 c7c6 e1e2 e6e5 g3g2 c8g4 f2f3 g4f5 d3f5 g8h6 "
+      "f5c8 e8d8 c8b7 e5e4 b7a8 h8e8 f3e4 h6g4 g2g3 d8d7 g1f1 f6e6 d2d3 b8a6 "
+      "a8b7 a6c5 c1d2 c5b7 g3h3 e8h8 d2c3 f7f6 f1g1 a7a6 a1f1 b7d6 b2b3 c6c5 "
+      "f1f6 g4f6 g1g7 d6f7 g7f7 d7d6 e4e5 e6e5 c3e5 d6c6 f7f6", &tokens);
+   EXPECT_TRUE(handler.handle_position(tokens));
+
+   tokens.clear();
+   UCIParser::BreakIntoTokens("go movetime 2000", &tokens);
+   EXPECT_TRUE(handler.handle_go(tokens));
+}

@@ -14,7 +14,7 @@
 // plus 4 castles
 #define MAX_NUMBER_OF_LEGAL_MOVES (16*63 + 16*4 + 4)
 
-#define MAX_POSITION_CHAIN_LEN 1000 // 500 moves TODO: allow reallocation for mo
+#define MAX_POSITION_CHAIN_LEN 1000 // 500 moves
 
 namespace scritty
 {
@@ -50,15 +50,13 @@ namespace scritty
    class Position
    {
    public:
-      Position() {}
-
       Position(Position *chain, size_t *chain_length) : m_chain(chain),
          m_chain_length(chain_length)
       {
-         // only create the vector of past positions for the very first
-         // position in the chain
-         *m_chain_length = 0;
+         SetToStartPos();
       }
+
+      Position() {} // note: does zero setup
 
       Position (const Position &to_copy)
          : m_white_to_move(to_copy.m_white_to_move),
@@ -84,6 +82,7 @@ namespace scritty
       bool m_black_may_castle_short, m_black_may_castle_long;
       unsigned char m_en_passant_allowed_on;
 
+      void SetToStartPos();
       void ApplyKnownLegalMove(const Move &move);
       void RollBackOneMove();
       bool operator==(const Position &other) const;
@@ -99,10 +98,10 @@ namespace scritty
    public:
       Engine()
       {
+         // instantiate a position chain and set up the starting position
          m_position_chain = new Position[MAX_POSITION_CHAIN_LEN];
          m_position_chain_length = new size_t;
          m_position = new Position(m_position_chain, m_position_chain_length);
-         SetToStartPos();
       }
 
       ~Engine() 
@@ -116,7 +115,7 @@ namespace scritty
       static void WritePositionToStdout(const Position &position);
 
       // methods not guaranteed to be efficient
-      void SetToStartPos();
+      void SetToStartPos() { m_position->SetToStartPos(); }
       bool ApplyMove(const std::string &str); // algebraic notation
       char GetPieceAt(const std::string &square) const; // algebraic notation
       bool IsWhiteToMove() const;

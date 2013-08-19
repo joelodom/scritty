@@ -83,6 +83,9 @@ double SearchingEngine::GetBestMove(const Position &position,
       }
    }
 
+   if (best != nullptr)
+      *best = *move_buffer;  // must return something
+
    // alpha-beta pruning minimax search
 
    if (maximize)
@@ -257,6 +260,7 @@ double SearchingEngine::EvaluatePosition(const Position &position) const
       outcome = white->GetBestMove(&white_move);
       if (outcome != OUTCOME_UNDECIDED)
          break;
+      white->ApplyMove(white_move);
 
       // check for win, loose or draw
       Position position = white->GetPosition();
@@ -270,6 +274,7 @@ double SearchingEngine::EvaluatePosition(const Position &position) const
       outcome = black->GetBestMove(&black_move);
       if (outcome != OUTCOME_UNDECIDED)
          break;
+      black->ApplyMove(black_move);
 
       // check for win, loose or draw
       position = black->GetPosition();
