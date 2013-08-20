@@ -16,11 +16,15 @@ namespace scritty
    public:
       SearchingEngine();
 
+      SearchingEngine *Clone() const;
+
       virtual Outcome GetBestMove(std::string *best) const;
 
       virtual int Compare(GeneticEngine *first, GeneticEngine *second) const;
 
    private:
+      SearchingEngine(const SearchingEngine &); // copy disallowed
+
       double GetBestMove(const Position &position, const Move *suggestion,
          size_t current_depth, double alpha, double beta, bool maximize,
          Move **best, Move *move_buffer) const;

@@ -5,6 +5,7 @@
 
 #include <cstring>
 #include <string>
+#include "scritty.h"
 
 #define NO_PIECE '\0'
 #define NO_EN_PASSANT 100
@@ -96,20 +97,26 @@ namespace scritty
    class Engine
    {
    public:
-      Engine()
+      Engine() : m_position_chain(new Position[MAX_POSITION_CHAIN_LEN]),
+            m_position_chain_length(new size_t)
       {
          // instantiate a position chain and set up the starting position
-         m_position_chain = new Position[MAX_POSITION_CHAIN_LEN];
-         m_position_chain_length = new size_t;
          m_position = new Position(m_position_chain, m_position_chain_length);
       }
 
       ~Engine() 
       {
-         // TODO: fix leaks
-         //delete m_position;
-         //delete[] m_position_chain;
-         //delete m_position_chain_length;
+         SCRITTY_ASSERT(m_position != nullptr);
+         delete m_position;
+         m_position = nullptr;
+
+         SCRITTY_ASSERT(m_position_chain_length != nullptr);
+         delete m_position_chain_length;
+         m_position_chain_length = nullptr;
+
+         SCRITTY_ASSERT(m_position_chain != nullptr);
+         delete[] m_position_chain;
+         m_position_chain = nullptr;
       }
 
       static void WritePositionToStdout(const Position &position);
@@ -168,7 +175,8 @@ namespace scritty
       size_t *m_position_chain_length;
 
    private:
-      Engine (const Engine &); // copy disallowed
+      // copy disallowed because too easy to goof position chain
+      Engine(const Engine &);
    };
 }
 

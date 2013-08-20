@@ -23,6 +23,17 @@ SearchingEngine::SearchingEngine() : GeneticEngine()
       "Square Control Value", 0.03));
 }
 
+SearchingEngine *SearchingEngine::Clone() const
+{
+   SearchingEngine *clone = new SearchingEngine;
+   SCRITTY_ASSERT(clone->m_parameters.size() == m_parameters.size());
+
+   for (size_t i = 0; i < m_parameters.size(); ++i)
+      clone->m_parameters[i] = m_parameters[i];
+
+   return clone;
+}
+
 Outcome SearchingEngine::GetBestMove(std::string *best) const
 {
    // the move buffer for all depths is allocated once for performance

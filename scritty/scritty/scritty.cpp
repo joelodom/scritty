@@ -82,8 +82,11 @@ int main(int argc, const char *argv[])
          {
             SearchingEngine engine;
             GeneticTournament<SearchingEngine> tournament(engine);
-            tournament.Go(&engine);
-            engine.PrintParameters();
+
+            SearchingEngine *winner;
+            tournament.Go(&winner);
+            winner->PrintParameters();
+            delete winner;
          }
 
          // allow each command handler a chance to handle

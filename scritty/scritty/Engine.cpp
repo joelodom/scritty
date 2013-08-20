@@ -1302,8 +1302,8 @@ Move& Move::operator=(const Move &rhs)
    unsigned char rank = start_rank + 2;
 
    if (file <= 7 && rank <= 7
-      && position.m_board.m_squares[file][rank] == NO_PIECE
-      || IsOpponentsPiece(start_piece, position.m_board.m_squares[file][rank]))
+      && (position.m_board.m_squares[file][rank] == NO_PIECE
+      || IsOpponentsPiece(start_piece, position.m_board.m_squares[file][rank])))
    {
       endpoints[endpoints_index++] = file;
       endpoints[endpoints_index++] = rank;
@@ -1314,8 +1314,8 @@ Move& Move::operator=(const Move &rhs)
    rank = start_rank + 1;
 
    if (file <= 7 && rank <= 7
-      && position.m_board.m_squares[file][rank] == NO_PIECE
-      || IsOpponentsPiece(start_piece, position.m_board.m_squares[file][rank]))
+      && (position.m_board.m_squares[file][rank] == NO_PIECE
+      || IsOpponentsPiece(start_piece, position.m_board.m_squares[file][rank])))
    {
       endpoints[endpoints_index++] = file;
       endpoints[endpoints_index++] = rank;
@@ -1326,8 +1326,8 @@ Move& Move::operator=(const Move &rhs)
    rank = start_rank - 1;
 
    if (file <= 7 && rank <= 7
-      && position.m_board.m_squares[file][rank] == NO_PIECE
-      || IsOpponentsPiece(start_piece, position.m_board.m_squares[file][rank]))
+      && (position.m_board.m_squares[file][rank] == NO_PIECE
+      || IsOpponentsPiece(start_piece, position.m_board.m_squares[file][rank])))
    {
       endpoints[endpoints_index++] = file;
       endpoints[endpoints_index++] = rank;
@@ -1338,8 +1338,8 @@ Move& Move::operator=(const Move &rhs)
    rank = start_rank - 2;
 
    if (file <= 7 && rank <= 7
-      && position.m_board.m_squares[file][rank] == NO_PIECE
-      || IsOpponentsPiece(start_piece, position.m_board.m_squares[file][rank]))
+      && (position.m_board.m_squares[file][rank] == NO_PIECE
+      || IsOpponentsPiece(start_piece, position.m_board.m_squares[file][rank])))
    {
       endpoints[endpoints_index++] = file;
       endpoints[endpoints_index++] = rank;
@@ -1350,8 +1350,8 @@ Move& Move::operator=(const Move &rhs)
    rank = start_rank - 2;
 
    if (file <= 7 && rank <= 7
-      && position.m_board.m_squares[file][rank] == NO_PIECE
-      || IsOpponentsPiece(start_piece, position.m_board.m_squares[file][rank]))
+      && (position.m_board.m_squares[file][rank] == NO_PIECE
+      || IsOpponentsPiece(start_piece, position.m_board.m_squares[file][rank])))
    {
       endpoints[endpoints_index++] = file;
       endpoints[endpoints_index++] = rank;
@@ -1362,8 +1362,8 @@ Move& Move::operator=(const Move &rhs)
    rank = start_rank - 1;
 
    if (file <= 7 && rank <= 7
-      && position.m_board.m_squares[file][rank] == NO_PIECE
-      || IsOpponentsPiece(start_piece, position.m_board.m_squares[file][rank]))
+      && (position.m_board.m_squares[file][rank] == NO_PIECE
+      || IsOpponentsPiece(start_piece, position.m_board.m_squares[file][rank])))
    {
       endpoints[endpoints_index++] = file;
       endpoints[endpoints_index++] = rank;
@@ -1374,8 +1374,8 @@ Move& Move::operator=(const Move &rhs)
    rank = start_rank + 1;
 
    if (file <= 7 && rank <= 7
-      && position.m_board.m_squares[file][rank] == NO_PIECE
-      || IsOpponentsPiece(start_piece, position.m_board.m_squares[file][rank]))
+      && (position.m_board.m_squares[file][rank] == NO_PIECE
+      || IsOpponentsPiece(start_piece, position.m_board.m_squares[file][rank])))
    {
       endpoints[endpoints_index++] = file;
       endpoints[endpoints_index++] = rank;
@@ -1386,8 +1386,8 @@ Move& Move::operator=(const Move &rhs)
    rank = start_rank + 2;
 
    if (file <= 7 && rank <= 7
-      && position.m_board.m_squares[file][rank] == NO_PIECE
-      || IsOpponentsPiece(start_piece, position.m_board.m_squares[file][rank]))
+      && (position.m_board.m_squares[file][rank] == NO_PIECE
+      || IsOpponentsPiece(start_piece, position.m_board.m_squares[file][rank])))
    {
       endpoints[endpoints_index++] = file;
       endpoints[endpoints_index++] = rank;

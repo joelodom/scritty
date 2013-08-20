@@ -15,6 +15,9 @@ namespace scritty
       }
 
       virtual Outcome GetBestMove(std::string *best) const;
+
+   private:
+      RandomEngine(const RandomEngine &); // copy disallowed
    };
 }
 

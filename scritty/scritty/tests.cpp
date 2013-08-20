@@ -871,8 +871,11 @@ TEST(genetic_tournament_tests, DISABLED_test_genetic_tournament)
 {
    TestGeneticEngine engine;
    GeneticTournament<TestGeneticEngine> tournament(engine);
-   tournament.Go(&engine);
-   EXPECT_NEAR(engine.GetParameterValue(0), 60.0, 1.0);
+
+   TestGeneticEngine *winner;
+   tournament.Go(&winner);
+   EXPECT_NEAR(winner->GetParameterValue(0), 60.0, 1.0);
+   delete winner;
 }
 
 TEST(engine_tests, illegal_move_test_10)

@@ -41,12 +41,10 @@ void GeneticEngine::RandomizeParameters(double max_deviation)
    if (mate1.m_parameters.size() != mate2.m_parameters.size())
       return; // engines should really be same species
    
-   *child = mate1; // clone
-
    for (size_t i = 0; i < mate1.m_parameters.size(); ++i)
    {
-      if (rand() % 2 == 1)
-         child->m_parameters[i] = mate2.m_parameters[i];
+      child->m_parameters[i] = rand() % 2 == 0
+         ? mate1.m_parameters[i] : mate2.m_parameters[i];
    }
 
    child->RandomizeParameters(MAX_INCREMENTAL_DEVIATION);
@@ -58,6 +56,17 @@ TestGeneticEngine::TestGeneticEngine()
 
    for (size_t i = 0; i < 10; ++i)
       m_parameters.push_back(std::pair<std::string, double>("", 50.0));
+}
+
+TestGeneticEngine *TestGeneticEngine::Clone() const
+{
+   TestGeneticEngine *clone = new TestGeneticEngine;
+   SCRITTY_ASSERT(clone->m_parameters.size() == m_parameters.size());
+
+   for (size_t i = 0; i < m_parameters.size(); ++i)
+      clone->m_parameters[i] = m_parameters[i];
+
+   return clone;
 }
 
 /*virtual*/ int TestGeneticEngine::Compare(
