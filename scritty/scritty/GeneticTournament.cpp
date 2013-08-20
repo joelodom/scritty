@@ -21,6 +21,8 @@ void GeneticEngine::PrintParameters() const
       std::cout << it->first << ": " << it->second << std::endl;
 }
 
+#define big_rand() (rand()*rand())
+
 void GeneticEngine::RandomizeParameters(double max_deviation)
 {
    for (size_t i = 0; i < m_parameters.size(); ++i)
@@ -28,7 +30,7 @@ void GeneticEngine::RandomizeParameters(double max_deviation)
       const double PRECISION_MULTIPLIER = 10000.0;
       int a = (unsigned int)::abs(
          m_parameters[i].second*max_deviation*PRECISION_MULTIPLIER);
-      int deviation = rand() % (2*a) - a;
+      int deviation = big_rand() % (2*a) - a;
       m_parameters[i].second += deviation / PRECISION_MULTIPLIER;
    }
 }

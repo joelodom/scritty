@@ -2,6 +2,7 @@
 
 #include "SearchingEngine.h"
 #include <iostream>
+#include "scritty.h"
 
 using namespace scritty;
 
@@ -26,15 +27,33 @@ Outcome SearchingEngine::GetBestMove(std::string *best) const
 {
    // the move buffer for all depths is allocated once for performance
    Move *move_buffer = new Move[MAX_SEARCH_DEPTH*MAX_NUMBER_OF_LEGAL_MOVES];
-   Move move, suggestion;
+   Move move, suggestion, *move_ptr;
 
    // first pass
-   GetBestMove(*m_position, nullptr, FIRST_PASS_SEARCH_DEPTH,
-      -DBL_MAX, DBL_MAX, m_position->m_white_to_move, &suggestion, move_buffer);
+
+   move_ptr = &suggestion;
+
+   double evaluation
+      = GetBestMove(*m_position, nullptr, FIRST_PASS_SEARCH_DEPTH,
+      -DBL_MAX, DBL_MAX, m_position->m_white_to_move, &move_ptr, move_buffer);
+
+   if (move_ptr == nullptr)
+   {
+      // no moves available, so give up only at this point
+      delete[] move_buffer;
+      if (evaluation == 0.0)
+         return OUTCOME_DRAW;
+      return GetOutcome(*m_position);
+   }
 
    // final pass
-   double evaluation = GetBestMove(*m_position, &suggestion, MAX_SEARCH_DEPTH,
-      -DBL_MAX, DBL_MAX, m_position->m_white_to_move, &move, move_buffer);
+   move_ptr = &move;
+   evaluation = GetBestMove(*m_position, &suggestion, MAX_SEARCH_DEPTH,
+      -DBL_MAX, DBL_MAX, m_position->m_white_to_move, &move_ptr, move_buffer);
+
+   SCRITTY_ASSERT(move_ptr != nullptr);
+   SCRITTY_ASSERT(move.start_file <= 7 && move.start_rank <= 7
+      && move.end_file <= 7 && move.end_rank <= 7);
 
    delete[] move_buffer;
    move.ToString(best);
@@ -45,11 +64,26 @@ Outcome SearchingEngine::GetBestMove(std::string *best) const
 double SearchingEngine::GetBestMove(const Position &position,
    const Move *suggestion,
    size_t current_depth, double alpha, double beta, bool maximize,
-   Move *best, Move *move_buffer) const
+   Move **best, Move *move_buffer) const
 {
+   // if best != null, *best must not be null
+   // if no move, resets *best to nullptr
+   SCRITTY_ASSERT(best == nullptr || *best != nullptr);
+
    // if this is beyond max depth, just evaluate the position
    if (current_depth == 0)
+   {
       return EvaluatePosition(position);
+   }
+
+   // for now consider all positions that MAY be claimed as a draw as terminal
+   // nodes as the underdog would normally claim a draw
+   if (position.MayClaimDraw())
+   {
+      if (best != nullptr)
+         *best = nullptr;
+      return 0.0;
+   }
 
    // get all legal moves
    size_t num_moves = ListAllLegalMoves(position, move_buffer);
@@ -58,6 +92,9 @@ double SearchingEngine::GetBestMove(const Position &position,
 
    if (num_moves == 0)
    {
+      if (best != nullptr)
+         *best = nullptr;
+
       Outcome outcome = GetOutcome(position);
 
       if (outcome == OUTCOME_WIN_WHITE)
@@ -84,7 +121,7 @@ double SearchingEngine::GetBestMove(const Position &position,
    }
 
    if (best != nullptr)
-      *best = *move_buffer;  // must return something
+      **best = *move_buffer;  // must return something
 
    // alpha-beta pruning minimax search
 
@@ -105,7 +142,7 @@ double SearchingEngine::GetBestMove(const Position &position,
          {
             alpha = evaluation; // reassignment of formal parameter intentional
             if (best != nullptr)
-               *best = move_buffer[i];
+               **best = move_buffer[i];
          }
 
          if (alpha >= beta)
@@ -131,7 +168,7 @@ double SearchingEngine::GetBestMove(const Position &position,
          {
             beta = evaluation; // reassignment of formal parameter intentional
             if (best != nullptr)
-               *best = move_buffer[i];
+               **best = move_buffer[i];
          }
 
          if (beta <= alpha)
@@ -144,9 +181,6 @@ double SearchingEngine::GetBestMove(const Position &position,
 
 double SearchingEngine::EvaluatePosition(const Position &position) const
 {
-   if (position.IsADraw())
-      return 0.0;
-
    double evaluation = 0.0;
    unsigned char endpoints[8*8*4 + 1]; // f1, r1, promotion1, f2, ..., MAGIC_NUM
 
@@ -241,6 +275,12 @@ double SearchingEngine::EvaluatePosition(const Position &position) const
       black = first;
    }
 
+   std::cout << "White:" << std::endl;
+   white->PrintParameters();
+
+   std::cout << "Black:" << std::endl;
+   black->PrintParameters();
+
    // shake hands
 
    white->SetToStartPos();
@@ -253,7 +293,7 @@ double SearchingEngine::EvaluatePosition(const Position &position) const
 
    for (;;)
    {
-      std::cout << "Move " << moves << std::endl;
+      std::cout << moves << ". ";
 
       // let white move
       std::string white_move;
@@ -261,6 +301,7 @@ double SearchingEngine::EvaluatePosition(const Position &position) const
       if (outcome != OUTCOME_UNDECIDED)
          break;
       white->ApplyMove(white_move);
+      std::cout << white_move << " ";
 
       // check for win, loose or draw
       Position position = white->GetPosition();
@@ -275,6 +316,7 @@ double SearchingEngine::EvaluatePosition(const Position &position) const
       if (outcome != OUTCOME_UNDECIDED)
          break;
       black->ApplyMove(black_move);
+      std::cout << black_move << std::endl;
 
       // check for win, loose or draw
       position = black->GetPosition();

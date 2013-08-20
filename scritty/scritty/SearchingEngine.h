@@ -6,8 +6,8 @@
 #include "Engine.h"
 #include "GeneticTournament.h"
 
-#define FIRST_PASS_SEARCH_DEPTH 4
-#define MAX_SEARCH_DEPTH 5
+#define FIRST_PASS_SEARCH_DEPTH 3
+#define MAX_SEARCH_DEPTH 4
 
 namespace scritty
 {
@@ -23,7 +23,7 @@ namespace scritty
    private:
       double GetBestMove(const Position &position, const Move *suggestion,
          size_t current_depth, double alpha, double beta, bool maximize,
-         Move *best, Move *move_buffer) const;
+         Move **best, Move *move_buffer) const;
       double EvaluatePosition(const Position &position) const; // centipawns
    };
 }

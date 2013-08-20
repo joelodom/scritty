@@ -86,7 +86,7 @@ namespace scritty
       void ApplyKnownLegalMove(const Move &move);
       void RollBackOneMove();
       bool operator==(const Position &other) const;
-      bool IsADraw() const;
+      bool MayClaimDraw() const;
 
    private:
       Position *m_chain;

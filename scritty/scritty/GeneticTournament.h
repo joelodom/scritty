@@ -12,8 +12,8 @@ namespace scritty
    // INTERESTING: seems to work better with fewer participants and more rounds
    // INTERESTING: setting max_deviation too large gives poor results
 
-#define PARTICIPANTS 10
-#define MAX_INITIAL_DEVIATION 1.0 // 100%!
+#define PARTICIPANTS 20
+#define MAX_INITIAL_DEVIATION 0.5 // 50%
 #define MAX_INCREMENTAL_DEVIATION 0.01 // 1%
 #define ROUNDS 1000
 

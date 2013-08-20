@@ -8,6 +8,12 @@
 #define SCRITTY_NAME "Scritty 0.0 Pre-alpha"
 #define SCRITTY_AUTHOR "Joel Odom"
 
+#ifdef _DEBUG
+#define SCRITTY_ASSERT(x) if (!(x)) throw std::string("assert failure");
+#else
+#define SCRITTY_ASSERT(x)
+#endif
+
 namespace scritty
 {
    class ScrittyTestEnvironment : public ::testing::Environment

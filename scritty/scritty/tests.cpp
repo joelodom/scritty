@@ -941,55 +941,55 @@ TEST(engine_tests, threefold_repetition_test)
    engine.SetToStartPos();
    
    Position position = engine.GetPosition();
-   ASSERT_FALSE(position.IsADraw());
+   ASSERT_FALSE(position.MayClaimDraw());
 
    EXPECT_TRUE(engine.ApplyMove("h2h3"));
    position = engine.GetPosition();
-   EXPECT_FALSE(position.IsADraw());
+   EXPECT_FALSE(position.MayClaimDraw());
 
    EXPECT_TRUE(engine.ApplyMove("h7h6"));
    position = engine.GetPosition();
-   EXPECT_FALSE(position.IsADraw());
+   EXPECT_FALSE(position.MayClaimDraw());
 
    EXPECT_TRUE(engine.ApplyMove("h1h2"));
    position = engine.GetPosition();
-   EXPECT_FALSE(position.IsADraw());
+   EXPECT_FALSE(position.MayClaimDraw());
 
    EXPECT_TRUE(engine.ApplyMove("h8h7"));
    position = engine.GetPosition();
-   EXPECT_FALSE(position.IsADraw());
+   EXPECT_FALSE(position.MayClaimDraw());
 
    EXPECT_TRUE(engine.ApplyMove("h2h1"));
    position = engine.GetPosition();
-   EXPECT_FALSE(position.IsADraw());
+   EXPECT_FALSE(position.MayClaimDraw());
 
    EXPECT_TRUE(engine.ApplyMove("h7h8"));
    position = engine.GetPosition();
-   EXPECT_FALSE(position.IsADraw());
+   EXPECT_FALSE(position.MayClaimDraw());
 
    EXPECT_TRUE(engine.ApplyMove("h1h2"));
    position = engine.GetPosition();
-   EXPECT_FALSE(position.IsADraw());
+   EXPECT_FALSE(position.MayClaimDraw());
 
    EXPECT_TRUE(engine.ApplyMove("h8h7"));
    position = engine.GetPosition();
-   EXPECT_FALSE(position.IsADraw());
+   EXPECT_FALSE(position.MayClaimDraw());
 
    EXPECT_TRUE(engine.ApplyMove("h2h1"));
    position = engine.GetPosition();
-   EXPECT_FALSE(position.IsADraw());
+   EXPECT_FALSE(position.MayClaimDraw());
 
    EXPECT_TRUE(engine.ApplyMove("h7h8"));
    position = engine.GetPosition();
-   EXPECT_FALSE(position.IsADraw()); // not yet, castle changed
+   EXPECT_FALSE(position.MayClaimDraw()); // not yet, castle changed
 
    EXPECT_TRUE(engine.ApplyMove("h1h2"));
    position = engine.GetPosition();
-   EXPECT_FALSE(position.IsADraw());
+   EXPECT_FALSE(position.MayClaimDraw());
 
    EXPECT_TRUE(engine.ApplyMove("h8h7"));
    position = engine.GetPosition();
-   EXPECT_TRUE(position.IsADraw());
+   EXPECT_TRUE(position.MayClaimDraw());
 }
 
 TEST(searching_engine_tests, debug_crash3)

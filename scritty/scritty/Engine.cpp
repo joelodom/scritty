@@ -4,6 +4,7 @@
 #include "UCIParser.h"
 #include "Logger.h"
 #include <iostream>
+#include "scritty.h"
 
 using namespace scritty;
 
@@ -53,8 +54,7 @@ void Position::RollBackOneMove()
 void Position::ApplyKnownLegalMove(const Move &move)
 {
    // save position (for various draw rules)
-   if (*m_chain_length >= MAX_POSITION_CHAIN_LEN)
-      return; // TODO: reallocate
+   SCRITTY_ASSERT(*m_chain_length < MAX_POSITION_CHAIN_LEN);
    m_chain[(*m_chain_length)++] = *this; // copy to chain
 
    // move the piece
@@ -1444,7 +1444,7 @@ bool Position::operator==(const Position &other) const
       sizeof(m_board.m_squares)) == 0;
 }
 
-bool Position::IsADraw() const
+bool Position::MayClaimDraw() const
 {
    // alse returns true for situations where either side may claim a draw
 
@@ -1498,7 +1498,7 @@ bool Position::IsADraw() const
    //     colour. (Any number of additional bishops of either color on the same
    //     color of square due to underpromotion do not affect the situation.)
 
-   // TODO
+   // TODO  This should not go in "May Claim Draw" but should be in "Is A Draw"
 
    return false;
 }
