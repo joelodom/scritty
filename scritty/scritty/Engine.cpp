@@ -545,6 +545,10 @@ bool Engine::IsWhiteToMove() const
             || IsAttackingSquare(
             !position.m_white_to_move, 5, 0, position))
             return false;
+
+         // check that the rook is has not been captured
+         if (position.m_board.m_squares[7][0] != 'R')
+            return false;
       }
       else if (move.start_file == 4 && move.start_rank == 0
          && move.end_file == 2 && move.end_rank == 0) // castle long
@@ -563,6 +567,10 @@ bool Engine::IsWhiteToMove() const
 
          if (IsAttackingSquare(!position.m_white_to_move, 3, 0, position)
             || IsAttackingSquare(!position.m_white_to_move, 4, 0, position))
+            return false;
+
+         // check that the rook is has not been captured
+         if (position.m_board.m_squares[0][0] != 'R')
             return false;
       }
       else // normal move
@@ -599,6 +607,10 @@ bool Engine::IsWhiteToMove() const
          if (IsAttackingSquare(!position.m_white_to_move, 4, 7, position)
             || IsAttackingSquare(!position.m_white_to_move, 5, 7, position))
             return false;
+
+         // check that the rook is has not been captured
+         if (position.m_board.m_squares[7][7] != 'r')
+            return false;
       }
       else if (move.start_file == 4 && move.start_rank == 7
          && move.end_file == 2 && move.end_rank == 7) // castle long
@@ -617,6 +629,10 @@ bool Engine::IsWhiteToMove() const
 
          if (IsAttackingSquare(!position.m_white_to_move, 3, 7, position)
             || IsAttackingSquare(!position.m_white_to_move, 4, 7, position))
+            return false;
+
+         // check that the rook is has not been captured
+         if (position.m_board.m_squares[0][7] != 'r')
             return false;
       }
       else // normal move

@@ -21,7 +21,7 @@ SearchingEngine::SearchingEngine() : GeneticEngine()
       "Queen Value", 9.00));
 
    m_parameters.push_back(std::pair<std::string, double>(
-      "Square Control Value", 0.03));
+      "Square Control Value", 0.01));
 }
 
 SearchingEngine *SearchingEngine::Clone() const
@@ -185,7 +185,7 @@ double SearchingEngine::GetBestMove(const Position &position,
          if (current_depth == MAX_SEARCH_DEPTH)
          {
             std::stringstream ss;
-            ss << "score cp " << (int)(100*evaluation) << " ";
+            ss << "score cp " << (int)(-100*evaluation) << " ";
             ss << "currmovenumber " << (i + 1);
             UCIHandler::send_info(ss.str());
          }

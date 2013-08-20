@@ -1013,3 +1013,55 @@ TEST(searching_engine_tests, debug_crash3)
    UCIParser::BreakIntoTokens("go movetime 2000", &tokens);
    EXPECT_TRUE(handler.handle_go(tokens));
 }
+
+TEST(searching_engine_tests, illegal_move_test_11)
+{
+   SearchingEngine engine;
+
+   EXPECT_TRUE(engine.ApplyMove("e2e3"));
+   EXPECT_TRUE(engine.ApplyMove("b8c6"));
+   EXPECT_TRUE(engine.ApplyMove("d1h5"));
+   EXPECT_TRUE(engine.ApplyMove("g8f6"));
+   EXPECT_TRUE(engine.ApplyMove("h5h4"));
+   EXPECT_TRUE(engine.ApplyMove("d7d6"));
+   EXPECT_TRUE(engine.ApplyMove("f1b5"));
+   EXPECT_TRUE(engine.ApplyMove("a7a6"));
+   EXPECT_TRUE(engine.ApplyMove("b5c6"));
+   EXPECT_TRUE(engine.ApplyMove("b7c6"));
+   EXPECT_TRUE(engine.ApplyMove("b2b3"));
+   EXPECT_TRUE(engine.ApplyMove("c8f5"));
+   EXPECT_TRUE(engine.ApplyMove("h4c4"));
+   EXPECT_TRUE(engine.ApplyMove("f5e4"));
+   EXPECT_TRUE(engine.ApplyMove("f2f3"));
+   EXPECT_TRUE(engine.ApplyMove("e4d5"));
+   EXPECT_TRUE(engine.ApplyMove("c4a4"));
+   EXPECT_TRUE(engine.ApplyMove("f6d7"));
+   EXPECT_TRUE(engine.ApplyMove("b1c3"));
+   EXPECT_TRUE(engine.ApplyMove("d7c5"));
+   EXPECT_TRUE(engine.ApplyMove("a4h4"));
+   EXPECT_TRUE(engine.ApplyMove("g7g5"));
+   EXPECT_TRUE(engine.ApplyMove("h4g5"));
+   EXPECT_TRUE(engine.ApplyMove("c5e6"));
+   EXPECT_TRUE(engine.ApplyMove("g5f5"));
+   EXPECT_TRUE(engine.ApplyMove("f8g7"));
+   EXPECT_TRUE(engine.ApplyMove("d2d4"));
+   EXPECT_TRUE(engine.ApplyMove("d8c8"));
+   EXPECT_TRUE(engine.ApplyMove("c3d5"));
+   EXPECT_TRUE(engine.ApplyMove("c6d5"));
+   EXPECT_TRUE(engine.ApplyMove("f5d5"));
+   EXPECT_TRUE(engine.ApplyMove("c7c6"));
+   EXPECT_TRUE(engine.ApplyMove("d5f5"));
+   EXPECT_TRUE(engine.ApplyMove("c6c5"));
+   EXPECT_TRUE(engine.ApplyMove("g1e2"));
+   EXPECT_TRUE(engine.ApplyMove("c5d4"));
+   EXPECT_TRUE(engine.ApplyMove("e3d4"));
+   EXPECT_TRUE(engine.ApplyMove("e6d4"));
+   EXPECT_TRUE(engine.ApplyMove("f5c8"));
+   EXPECT_TRUE(engine.ApplyMove("a8c8"));
+   EXPECT_TRUE(engine.ApplyMove("e2d4"));
+   EXPECT_TRUE(engine.ApplyMove("g7d4"));
+   EXPECT_TRUE(engine.ApplyMove("c1g5"));
+   EXPECT_TRUE(engine.ApplyMove("d4a1"));
+
+   EXPECT_FALSE(engine.ApplyMove("e1c1"));
+}

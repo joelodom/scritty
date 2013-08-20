@@ -140,10 +140,10 @@ namespace scritty
       static size_t ListAllLegalMoves(
          const Position &position, Move *buf = nullptr);
       static Outcome GetOutcome(const Position &position);
-
-   protected:
       static bool IsMoveLegal(
          const Position &position, const Move &move, bool check_king = true);
+
+   protected:
       static inline bool IsOpponentsPiece(char mine, char theirs);
       static inline bool IsRookMoveLegal(
          const Position &position, const Move &move);
