@@ -3,6 +3,7 @@
 #include "SearchingEngine.h"
 #include <iostream>
 #include "scritty.h"
+#include "UCIHandler.h"
 
 using namespace scritty;
 
@@ -83,9 +84,7 @@ double SearchingEngine::GetBestMove(const Position &position,
 
    // if this is beyond max depth, just evaluate the position
    if (current_depth == 0)
-   {
       return EvaluatePosition(position);
-   }
 
    // for now consider all positions that MAY be claimed as a draw as terminal
    // nodes as the underdog would normally claim a draw
@@ -149,6 +148,14 @@ double SearchingEngine::GetBestMove(const Position &position,
 
          must_roll_back.RollBackOneMove();
 
+         if (current_depth == MAX_SEARCH_DEPTH)
+         {
+            std::stringstream ss;
+            ss << "score cp " << (int)(100*evaluation) << " ";
+            ss << "currmovenumber " << (i + 1);
+            UCIHandler::send_info(ss.str());
+         }
+
          if (evaluation > alpha)
          {
             alpha = evaluation; // reassignment of formal parameter intentional
@@ -174,6 +181,14 @@ double SearchingEngine::GetBestMove(const Position &position,
             beta, !maximize, nullptr, move_buffer + MAX_NUMBER_OF_LEGAL_MOVES);
 
          must_roll_back.RollBackOneMove();
+
+         if (current_depth == MAX_SEARCH_DEPTH)
+         {
+            std::stringstream ss;
+            ss << "score cp " << (int)(100*evaluation) << " ";
+            ss << "currmovenumber " << (i + 1);
+            UCIHandler::send_info(ss.str());
+         }
 
          if (evaluation < beta)
          {

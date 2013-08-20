@@ -376,7 +376,7 @@ bool Engine::IsWhiteToMove() const
 /*static*/ bool Engine::IsMoveLegal(
    const Position &position, const Move &move, bool check_king /*= true*/)
 {
-   // TODO: go to pre-calculated move lists like:
+   // TODO P2: go to pre-calculated move lists like:
    // legal_moves[piece][start_file][start_rank][end_file][end_rank] is a null
    // terminated list of squares to check for interposing pieces
 
@@ -1413,7 +1413,7 @@ Move& Move::operator=(const Move &rhs)
          return IsCheck(position, 'k') ? OUTCOME_WIN_WHITE : OUTCOME_DRAW;
    }
 
-   // TODO: decide which draw situations to check for here
+   // TODO P2: decide which draw situations to check for here
    // See SearchingEngine's evaluation for checking for draw conditions
    // Arena automatically draws on threefold repetition, even if not claimed
 
@@ -1484,7 +1484,7 @@ bool Position::MayClaimDraw() const
    // draw is forfeited if it is not used on that move, but the opportunity may
    // occur again.
 
-   // TODO
+   // TODO P2
 
    // Impossibility of checkmate - if a position arises in which neither player
    // could possibly give checkmate by a series of legal moves, the game is a
@@ -1498,7 +1498,7 @@ bool Position::MayClaimDraw() const
    //     colour. (Any number of additional bishops of either color on the same
    //     color of square due to underpromotion do not affect the situation.)
 
-   // TODO  This should not go in "May Claim Draw" but should be in "Is A Draw"
+   // TODO P2 should not go in "May Claim Draw" but should be in "Is A Draw"
 
    return false;
 }

@@ -10,7 +10,7 @@
 #define NO_PIECE '\0'
 #define NO_EN_PASSANT 100
 
-// TODO: whittle this down with more thinking
+// TODO P3: whittle this down with more thinking
 // 16 pieces times 63 squares plus 16 promotion squares times 4 promotion pieces
 // plus 4 castles
 #define MAX_NUMBER_OF_LEGAL_MOVES (16*63 + 16*4 + 4)

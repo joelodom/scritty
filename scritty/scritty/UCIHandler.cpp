@@ -7,6 +7,8 @@
 
 using namespace scritty;
 
+/*static*/ bool UCIHandler::s_in_uci_mode = false;
+
 bool UCIHandler::handle_uci(const uci_tokens &tokens)
 {
    /* REQUIREMENT
@@ -25,7 +27,9 @@ bool UCIHandler::handle_uci(const uci_tokens &tokens)
 
    if (tokens.size() > 0 && tokens[0] == "uci")
    {
-      /* REQUIREMENT TODO: read and make sure I'm supporting all necessary
+      s_in_uci_mode = true;
+
+      /* REQUIREMENT
 
       * id
       * name <x>
@@ -318,7 +322,7 @@ bool UCIHandler::handle_position(const uci_tokens &tokens)
    else if (tokens[1] == "fen")
    {
       // see http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
-      Logger::LogMessage("TODO fen under construction");
+      Logger::LogMessage("TODO P3 fen under construction");
       return false;
    }
    else
@@ -361,6 +365,8 @@ bool UCIHandler::handle_position(const uci_tokens &tokens)
 
 bool UCIHandler::handle_go(const uci_tokens &tokens)
 {
+   // TODO P2: read everything below and keep implementing
+
    /* REQUIREMENT
 
    * go
@@ -420,7 +426,7 @@ bool UCIHandler::handle_go(const uci_tokens &tokens)
 
    std::cout << "info string Scritty is thinking..." << std::endl;
 
-   if (tokens[1] == "movetime")
+   if (tokens[1] == "movetime" || tokens[1] == "depth")
    {
       /* REQUIREMENT
 
@@ -437,7 +443,6 @@ bool UCIHandler::handle_go(const uci_tokens &tokens)
       the the GUI has the complete statistics about the last search.
 
       */
-
 
       std::string best;
       m_engine->GetBestMove(&best);
@@ -456,7 +461,12 @@ bool UCIHandler::handle_go(const uci_tokens &tokens)
       return true;
    }
 
-   // TODO: time controls & other go options
-
    return false;
+}
+
+/*static*/ void UCIHandler::send_info(const std::string &info)
+{
+   // only outputs info in UCI mode
+   if (s_in_uci_mode)
+      std::cout << "info " << info << std::endl;
 }

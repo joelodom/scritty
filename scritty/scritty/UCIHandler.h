@@ -23,8 +23,12 @@ namespace scritty
       bool handle_position(const uci_tokens &tokens);
       bool handle_go(const uci_tokens &tokens);
 
+      static void send_info(const std::string &info);
+
    private:
       Engine* m_engine;
+
+      static bool s_in_uci_mode;
    };
 }
 

@@ -6,8 +6,8 @@
 #include "Engine.h"
 #include "GeneticTournament.h"
 
-#define FIRST_PASS_SEARCH_DEPTH 3
-#define MAX_SEARCH_DEPTH 4
+#define FIRST_PASS_SEARCH_DEPTH 4
+#define MAX_SEARCH_DEPTH 6
 
 namespace scritty
 {

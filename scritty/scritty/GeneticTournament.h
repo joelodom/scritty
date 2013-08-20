@@ -67,7 +67,7 @@ namespace scritty
    class GeneticTournament
    {
    public:
-      // TODO: how to get this out of header???
+      // TODO P4: how to get this out of header???
 
       GeneticTournament(const T &prototype)
       {
@@ -88,8 +88,8 @@ namespace scritty
             delete *it;
       }
 
-      void Go(T **winner) // TODO: larger deviations at first, narrowing down???
-      {
+      void Go(T **winner)
+      { // TODO P3: larger deviations at first, narrowing down???
          // caller should delete winner
          SCRITTY_ASSERT(winner != nullptr);
 

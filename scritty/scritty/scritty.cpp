@@ -21,7 +21,7 @@ using namespace scritty;
 int main(int argc, const char *argv[])
 {
    {
-      srand((unsigned int)time(nullptr)); // TODO: switch to real PRNG
+      srand((unsigned int)time(nullptr)); // TODO P3: switch to real PRNG
 
       Logger::LogMessage("Starting Scritty...");
 

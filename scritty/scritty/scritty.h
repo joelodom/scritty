@@ -27,7 +27,7 @@ namespace scritty
 
       virtual void TearDown()
       {
-         // TODO: I can't figure out how to ignore Google Test global objects,
+         // TODO P3: I can't figure out how to ignore Google Test global objects
          // so I miss leaks during testing, which is kind of stupid.
          _CrtMemCheckpoint(&ScrittyTestEnvironment::s_mem_state);
       }

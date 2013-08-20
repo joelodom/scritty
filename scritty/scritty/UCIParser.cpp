@@ -33,5 +33,6 @@ using namespace scritty;
    move->end_rank = s[3] - '1';
    move->promotion_piece = s.size() > 4 ? s[4] : NO_PIECE;
 
-   return true; // TODO: error checking
+   return move->start_file <= 7 && move->start_rank <= 7
+      && move->end_file <= 7 && move->end_rank <= 7;
 }

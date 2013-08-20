@@ -37,7 +37,7 @@ Logger::~Logger()
 {
    if (m_out_stream == nullptr)
    {
-      // open a log file (TODO: include date and time when started)
+      // open a log file (TODO P4: include date and time when started)
       CHAR temp_path[MAX_PATH + 1];
       ::GetTempPath(MAX_PATH + 1, temp_path);
       m_out_stream = new std::ofstream(std::string(temp_path) + "scritty.log",
