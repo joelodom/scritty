@@ -9,28 +9,52 @@ using namespace scritty;
 
 SearchingEngine::SearchingEngine() : GeneticEngine()
 {
-   m_parameters.push_back(std::pair<std::string, double>(
-      "Pawn Value", 1.00));
-   m_parameters.push_back(std::pair<std::string, double>(
-      "Bishop Value", 3.00));
-   m_parameters.push_back(std::pair<std::string, double>(
-      "Knight Value", 3.00));
-   m_parameters.push_back(std::pair<std::string, double>(
-      "Rook Value", 5.00));
-   m_parameters.push_back(std::pair<std::string, double>(
-      "Queen Value", 9.00));
+   m_parameters_size = 6;
+   m_parameters = new ParameterPair[m_parameters_size];
 
-   m_parameters.push_back(std::pair<std::string, double>(
-      "Square Control Value", 0.01));
+   size_t i = 0;
+
+   strcpy_s(m_parameters[i].name, MAX_PARAMETER_NAME_LEN + 1,
+      "Pawn Value");
+   m_parameters[i++].value = 1.00;
+
+   SCRITTY_ASSERT(i < m_parameters_size);
+   strcpy_s(m_parameters[i].name, MAX_PARAMETER_NAME_LEN + 1,
+      "Bishop Value");
+   m_parameters[i++].value = 3.00;
+
+   SCRITTY_ASSERT(i < m_parameters_size);
+   strcpy_s(m_parameters[i].name, MAX_PARAMETER_NAME_LEN + 1,
+      "Knight Value");
+   m_parameters[i++].value = 3.00;
+
+   SCRITTY_ASSERT(i < m_parameters_size);
+   strcpy_s(m_parameters[i].name, MAX_PARAMETER_NAME_LEN + 1,
+      "Rook Value");
+   m_parameters[i++].value = 5.00;
+
+   SCRITTY_ASSERT(i < m_parameters_size);
+   strcpy_s(m_parameters[i].name, MAX_PARAMETER_NAME_LEN + 1,
+      "Queen Value");
+   m_parameters[i++].value = 9.00;
+
+   SCRITTY_ASSERT(i < m_parameters_size);
+   strcpy_s(m_parameters[i].name, MAX_PARAMETER_NAME_LEN + 1,
+      "Square Control Value");
+   m_parameters[i++].value = 0.01;
 }
 
 SearchingEngine *SearchingEngine::Clone() const
 {
    SearchingEngine *clone = new SearchingEngine;
-   SCRITTY_ASSERT(clone->m_parameters.size() == m_parameters.size());
+   SCRITTY_ASSERT(clone->m_parameters_size == m_parameters_size);
 
-   for (size_t i = 0; i < m_parameters.size(); ++i)
-      clone->m_parameters[i] = m_parameters[i];
+   for (size_t i = 0; i < m_parameters_size; ++i)
+   {
+      SCRITTY_ASSERT(strcmp(
+         clone->m_parameters[i].name, m_parameters[i].name) == 0);
+      clone->m_parameters[i].value = m_parameters[i].value;
+   }
 
    return clone;
 }
@@ -60,6 +84,8 @@ Outcome SearchingEngine::GetBestMove(std::string *best) const
 
    // final pass
    move_ptr = &move;
+   m_nodes_searched = 0;
+   m_start_tick_count = ::GetTickCount64();
    evaluation = GetBestMove(*m_position, &suggestion, MAX_SEARCH_DEPTH,
       -DBL_MAX, DBL_MAX, m_position->m_white_to_move, &move_ptr, move_buffer);
 
@@ -78,6 +104,8 @@ double SearchingEngine::GetBestMove(const Position &position,
    size_t current_depth, double alpha, double beta, bool maximize,
    Move **best, Move *move_buffer) const
 {
+   ++m_nodes_searched;
+
    // if best != null, *best must not be null
    // if no move, resets *best to nullptr
    SCRITTY_ASSERT(best == nullptr || *best != nullptr);
@@ -152,7 +180,10 @@ double SearchingEngine::GetBestMove(const Position &position,
          {
             std::stringstream ss;
             ss << "score cp " << (int)(100*evaluation) << " ";
-            ss << "currmovenumber " << (i + 1);
+            ss << "currmovenumber " << (i + 1) << " ";
+            ss << "nodes " << m_nodes_searched << " ";
+            ss << "nps " << ((double)1000.0*m_nodes_searched)
+               / (::GetTickCount64() - m_start_tick_count);
             UCIHandler::send_info(ss.str());
          }
 
@@ -186,7 +217,10 @@ double SearchingEngine::GetBestMove(const Position &position,
          {
             std::stringstream ss;
             ss << "score cp " << (int)(-100*evaluation) << " ";
-            ss << "currmovenumber " << (i + 1);
+            ss << "currmovenumber " << (i + 1) << " ";
+            ss << "nodes " << m_nodes_searched << " ";
+            ss << "nps " << ((double)1000.0*m_nodes_searched)
+               / (::GetTickCount64() - m_start_tick_count);
             UCIHandler::send_info(ss.str());
          }
 
@@ -219,61 +253,61 @@ double SearchingEngine::EvaluatePosition(const Position &position) const
          case 'P':
             // when pieces are valued based on square and game phase,
             // pawn controlled squares should be captured
-            evaluation += m_parameters[0].second;
+            evaluation += m_parameters[0].value;
             break;
          case 'p':
-            evaluation -= m_parameters[0].second;
+            evaluation -= m_parameters[0].value;
             break;
          case 'B':
             // at present it is busy work to write endpoints to array, but
             // will come into play when individual squares have different
             // values
-            evaluation += m_parameters[1].second;
-            evaluation += m_parameters[5].second
+            evaluation += m_parameters[1].value;
+            evaluation += m_parameters[5].value
                *PopulateBishopEndpoints(position, file, rank, endpoints);
             break;
          case 'b':
-            evaluation -= m_parameters[1].second;
-            evaluation -= m_parameters[5].second
+            evaluation -= m_parameters[1].value;
+            evaluation -= m_parameters[5].value
                *PopulateBishopEndpoints(position, file, rank, endpoints);
             break;
          case 'N':
-            evaluation += m_parameters[2].second;
-            evaluation += m_parameters[5].second
+            evaluation += m_parameters[2].value;
+            evaluation += m_parameters[5].value
                *PopulateKnightEndpoints(position, file, rank, endpoints);
             break;
          case 'n':
-            evaluation -= m_parameters[2].second;
-            evaluation -= m_parameters[5].second
+            evaluation -= m_parameters[2].value;
+            evaluation -= m_parameters[5].value
                *PopulateKnightEndpoints(position, file, rank, endpoints);
             break;
          case 'R':
-            evaluation += m_parameters[3].second;
-            evaluation += m_parameters[5].second
+            evaluation += m_parameters[3].value;
+            evaluation += m_parameters[5].value
                *PopulateRookEndpoints(position, file, rank, endpoints);
             break;
          case 'r':
-            evaluation -= m_parameters[3].second;
-            evaluation -= m_parameters[5].second
+            evaluation -= m_parameters[3].value;
+            evaluation -= m_parameters[5].value
                *PopulateRookEndpoints(position, file, rank, endpoints);
             break;
          case 'Q':
-            evaluation += m_parameters[4].second;
-            evaluation += m_parameters[5].second
+            evaluation += m_parameters[4].value;
+            evaluation += m_parameters[5].value
                *PopulateQueenEndpoints(position, file, rank, endpoints);
             break;
          case 'q':
-            evaluation -= m_parameters[4].second;
-            evaluation -= m_parameters[5].second
+            evaluation -= m_parameters[4].value;
+            evaluation -= m_parameters[5].value
                *PopulateQueenEndpoints(position, file, rank, endpoints);
             break;
          case 'K':
             // castle not considered
-            evaluation += m_parameters[5].second
+            evaluation += m_parameters[5].value
                *PopulateKingEndpoints(position, file, rank, endpoints);
             break;
          case 'k':
-            evaluation -= m_parameters[5].second
+            evaluation -= m_parameters[5].value
                *PopulateKingEndpoints(position, file, rank, endpoints);
             break;
          }

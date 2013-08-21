@@ -426,7 +426,7 @@ bool UCIHandler::handle_go(const uci_tokens &tokens)
 
    std::cout << "info string Scritty is thinking..." << std::endl;
 
-   if (tokens[1] == "movetime" || tokens[1] == "depth")
+   if (tokens[1] == "movetime" || tokens[1] == "depth" || tokens[1] == "nodes")
    {
       /* REQUIREMENT
 

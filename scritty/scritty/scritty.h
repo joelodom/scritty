@@ -5,7 +5,12 @@
 
 #include "gtest/gtest.h"
 
-#define SCRITTY_NAME "Scritty 0.0 Pre-alpha"
+#ifdef _DEBUG
+#define SCRITTY_NAME "Scritty 0.0 Pre-alpha DEBUG"
+#else
+#define SCRITTY_NAME "Scritty 0.0 Pre-alpha RELEASE"
+#endif
+
 #define SCRITTY_AUTHOR "Joel Odom"
 
 #ifdef _DEBUG

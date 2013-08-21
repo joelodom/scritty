@@ -5,6 +5,7 @@
 
 #include "Engine.h"
 #include "GeneticTournament.h"
+#include <Windows.h>
 
 #define FIRST_PASS_SEARCH_DEPTH 4
 #define MAX_SEARCH_DEPTH 6
@@ -15,6 +16,7 @@ namespace scritty
    {
    public:
       SearchingEngine();
+      ~SearchingEngine() { delete[] m_parameters; }
 
       SearchingEngine *Clone() const;
 
@@ -29,6 +31,9 @@ namespace scritty
          size_t current_depth, double alpha, double beta, bool maximize,
          Move **best, Move *move_buffer) const;
       double EvaluatePosition(const Position &position) const; // centipawns
+
+      mutable size_t m_nodes_searched;
+      mutable ULONGLONG m_start_tick_count;
    };
 }
 

@@ -7,44 +7,52 @@ using namespace scritty;
 
 void GeneticEngine::GetParameterName(size_t index, std::string *name) const
 {
-   *name = m_parameters[index].first;
+   SCRITTY_ASSERT(index < m_parameters_size);
+   *name = m_parameters[index].name;
 }
 
 double GeneticEngine::GetParameterValue(size_t index) const
 {
-   return m_parameters[index].second;
+   SCRITTY_ASSERT(index < m_parameters_size);
+   return m_parameters[index].value;
 }
 
 void GeneticEngine::PrintParameters() const
 {
-   for (auto it = m_parameters.begin(); it != m_parameters.end(); ++it)
-      std::cout << it->first << ": " << it->second << std::endl;
+   for (size_t i = 0; i < m_parameters_size; ++i)
+      std::cout << m_parameters[i].name << ": "
+      << m_parameters[i].value << std::endl;
 }
 
 #define big_rand() (rand()*rand())
 
 void GeneticEngine::RandomizeParameters(double max_deviation)
 {
-   for (size_t i = 0; i < m_parameters.size(); ++i)
+   for (size_t i = 0; i < m_parameters_size; ++i)
    {
       const double PRECISION_MULTIPLIER = 10000.0;
       int a = (unsigned int)::abs(
-         m_parameters[i].second*max_deviation*PRECISION_MULTIPLIER);
+         m_parameters[i].value*max_deviation*PRECISION_MULTIPLIER);
       int deviation = big_rand() % (2*a) - a;
-      m_parameters[i].second += deviation / PRECISION_MULTIPLIER;
+      m_parameters[i].value += deviation / PRECISION_MULTIPLIER;
    }
 }
 
 /*static*/ void GeneticEngine::Breed(
    const GeneticEngine &mate1, const GeneticEngine &mate2, GeneticEngine *child)
 {
-   if (mate1.m_parameters.size() != mate2.m_parameters.size())
-      return; // engines should really be same species
+   // engines should normally be same species, though possible to cross breed
+   // if chromosomes are similar enough
+   SCRITTY_ASSERT(mate1.m_parameters_size == mate2.m_parameters_size);
    
-   for (size_t i = 0; i < mate1.m_parameters.size(); ++i)
+   for (size_t i = 0; i < mate1.m_parameters_size; ++i)
    {
-      child->m_parameters[i] = rand() % 2 == 0
-         ? mate1.m_parameters[i] : mate2.m_parameters[i];
+      SCRITTY_ASSERT(strcmp(
+         mate1.m_parameters[i].name, mate2.m_parameters[i].name) == 0);
+      strcpy_s(child->m_parameters[i].name, MAX_PARAMETER_NAME_LEN + 1,
+         mate1.m_parameters[i].name);
+      child->m_parameters[i].value = rand() % 2 == 0
+         ? mate1.m_parameters[i].value : mate2.m_parameters[i].value;
    }
 
    child->RandomizeParameters(MAX_INCREMENTAL_DEVIATION);
@@ -53,18 +61,27 @@ void GeneticEngine::RandomizeParameters(double max_deviation)
 TestGeneticEngine::TestGeneticEngine()
 {
    // initially all start out at 50.0
-
+   m_parameters_size = 10;
+   m_parameters = new ParameterPair[m_parameters_size];
    for (size_t i = 0; i < 10; ++i)
-      m_parameters.push_back(std::pair<std::string, double>("", 50.0));
+   {
+      strcpy_s(m_parameters[i].name, MAX_PARAMETER_NAME_LEN + 1,
+         "Test Parameter");
+      m_parameters[i].value = 50.0;
+   }
 }
 
 TestGeneticEngine *TestGeneticEngine::Clone() const
 {
    TestGeneticEngine *clone = new TestGeneticEngine;
-   SCRITTY_ASSERT(clone->m_parameters.size() == m_parameters.size());
+   SCRITTY_ASSERT(clone->m_parameters_size == m_parameters_size);
 
-   for (size_t i = 0; i < m_parameters.size(); ++i)
-      clone->m_parameters[i] = m_parameters[i];
+   for (size_t i = 0; i < m_parameters_size; ++i)
+   {
+      SCRITTY_ASSERT(strcmp(
+         clone->m_parameters[i].name, m_parameters[i].name) == 0);
+      clone->m_parameters[i].value = m_parameters[i].value;
+   }
 
    return clone;
 }

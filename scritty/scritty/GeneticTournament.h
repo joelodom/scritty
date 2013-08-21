@@ -17,10 +17,12 @@ namespace scritty
 #define MAX_INCREMENTAL_DEVIATION 0.01 // 1%
 #define ROUNDS 1
 
+#define MAX_PARAMETER_NAME_LEN 30 // without terminating null
+
    class GeneticEngine : public Engine
    {
    public:
-      GeneticEngine() : Engine()
+      GeneticEngine() : Engine(), m_parameters(nullptr), m_parameters_size(0)
       {
       }
 
@@ -38,8 +40,16 @@ namespace scritty
          GeneticEngine *second) const = 0; // 1 = first wins
 
    protected:
+
+      struct ParameterPair
+      {
+         char name[MAX_PARAMETER_NAME_LEN + 1];
+         double value;
+      };
+
       // name / value pair
-      std::vector<std::pair<std::string, double>> m_parameters;
+      ParameterPair *m_parameters; // allocate in const / destroy in destructor
+      size_t m_parameters_size; // set in constructor
 
    private:
       GeneticEngine(const GeneticEngine &); // copy disallowed
@@ -49,11 +59,12 @@ namespace scritty
    {
    public:
       TestGeneticEngine();
+      ~TestGeneticEngine() { delete[] m_parameters; }
 
       virtual int Compare(GeneticEngine *first, GeneticEngine *second) const;
 
       virtual Outcome GetBestMove(std::string *best) const
-      {
+      {;
          return OUTCOME_UNDECIDED;
       }
 
