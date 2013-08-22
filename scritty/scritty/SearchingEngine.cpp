@@ -71,7 +71,7 @@ Outcome SearchingEngine::GetBestMove(std::string *best) const
 
    double evaluation
       = GetBestMove(*m_position, nullptr, FIRST_PASS_SEARCH_DEPTH,
-      -DBL_MAX, DBL_MAX, m_position->m_white_to_move, &move_ptr, move_buffer);
+      -DBL_MAX, DBL_MAX, m_position->IsWhiteToMove(), &move_ptr, move_buffer);
 
    if (move_ptr == nullptr)
    {
@@ -79,7 +79,7 @@ Outcome SearchingEngine::GetBestMove(std::string *best) const
       delete[] move_buffer;
       if (evaluation == 0.0)
          return OUTCOME_DRAW;
-      return GetOutcome(*m_position);
+      return m_position->GetOutcome();
    }
 
    // final pass
@@ -87,7 +87,7 @@ Outcome SearchingEngine::GetBestMove(std::string *best) const
    m_nodes_searched = 0;
    m_start_tick_count = ::GetTickCount64();
    evaluation = GetBestMove(*m_position, &suggestion, MAX_SEARCH_DEPTH,
-      -DBL_MAX, DBL_MAX, m_position->m_white_to_move, &move_ptr, move_buffer);
+      -DBL_MAX, DBL_MAX, m_position->IsWhiteToMove(), &move_ptr, move_buffer);
 
    SCRITTY_ASSERT(move_ptr != nullptr);
    SCRITTY_ASSERT(move.start_file <= 7 && move.start_rank <= 7
@@ -124,7 +124,7 @@ double SearchingEngine::GetBestMove(const Position &position,
    }
 
    // get all legal moves
-   size_t num_moves = ListAllLegalMoves(position, move_buffer);
+   size_t num_moves = m_position->ListAllLegalMoves(move_buffer);
 
    // if this is a terminal node, return the value of the outcome
 
@@ -133,7 +133,7 @@ double SearchingEngine::GetBestMove(const Position &position,
       if (best != nullptr)
          *best = nullptr;
 
-      Outcome outcome = GetOutcome(position);
+      Outcome outcome = m_position->GetOutcome();
 
       if (outcome == OUTCOME_WIN_WHITE)
          return DBL_MAX;
@@ -248,7 +248,9 @@ double SearchingEngine::EvaluatePosition(const Position &position) const
    {
       for (unsigned char rank = 0; rank <= 7; ++rank)
       {
-         switch (position.m_board.m_squares[file][rank])
+         char piece = m_position->GetPieceAt(file, rank);
+
+         switch (piece)
          {
          case 'P':
             // when pieces are valued based on square and game phase,
@@ -264,51 +266,51 @@ double SearchingEngine::EvaluatePosition(const Position &position) const
             // values
             evaluation += m_parameters[1].value;
             evaluation += m_parameters[5].value
-               *PopulateBishopEndpoints(position, file, rank, endpoints);
+               *m_position->PopulateBishopEndpoints(file, rank, endpoints);
             break;
          case 'b':
             evaluation -= m_parameters[1].value;
             evaluation -= m_parameters[5].value
-               *PopulateBishopEndpoints(position, file, rank, endpoints);
+               *m_position->PopulateBishopEndpoints(file, rank, endpoints);
             break;
          case 'N':
             evaluation += m_parameters[2].value;
             evaluation += m_parameters[5].value
-               *PopulateKnightEndpoints(position, file, rank, endpoints);
+               *m_position->PopulateKnightEndpoints(file, rank, endpoints);
             break;
          case 'n':
             evaluation -= m_parameters[2].value;
             evaluation -= m_parameters[5].value
-               *PopulateKnightEndpoints(position, file, rank, endpoints);
+               *m_position->PopulateKnightEndpoints(file, rank, endpoints);
             break;
          case 'R':
             evaluation += m_parameters[3].value;
             evaluation += m_parameters[5].value
-               *PopulateRookEndpoints(position, file, rank, endpoints);
+               *m_position->PopulateRookEndpoints(file, rank, endpoints);
             break;
          case 'r':
             evaluation -= m_parameters[3].value;
             evaluation -= m_parameters[5].value
-               *PopulateRookEndpoints(position, file, rank, endpoints);
+               *m_position->PopulateRookEndpoints(file, rank, endpoints);
             break;
          case 'Q':
             evaluation += m_parameters[4].value;
             evaluation += m_parameters[5].value
-               *PopulateQueenEndpoints(position, file, rank, endpoints);
+               *m_position->PopulateQueenEndpoints(file, rank, endpoints);
             break;
          case 'q':
             evaluation -= m_parameters[4].value;
             evaluation -= m_parameters[5].value
-               *PopulateQueenEndpoints(position, file, rank, endpoints);
+               *m_position->PopulateQueenEndpoints(file, rank, endpoints);
             break;
          case 'K':
             // castle not considered
             evaluation += m_parameters[5].value
-               *PopulateKingEndpoints(position, file, rank, endpoints);
+               *m_position->PopulateKingEndpoints(file, rank, endpoints);
             break;
          case 'k':
             evaluation -= m_parameters[5].value
-               *PopulateKingEndpoints(position, file, rank, endpoints);
+               *m_position->PopulateKingEndpoints(file, rank, endpoints);
             break;
          }
       }
@@ -343,8 +345,8 @@ double SearchingEngine::EvaluatePosition(const Position &position) const
 
    // shake hands
 
-   white->SetToStartPos();
-   black->SetToStartPos();
+   white->StartNewGame();
+   black->StartNewGame();
 
    // play
 
@@ -364,9 +366,7 @@ double SearchingEngine::EvaluatePosition(const Position &position) const
       std::cout << white_move << " ";
 
       // check for win, loose or draw
-      Position position = white->GetPosition();
-      outcome = Engine::GetOutcome(position);
-      if (outcome != OUTCOME_UNDECIDED)
+      if (white->GetOutcome() != OUTCOME_UNDECIDED)
          break;
 
       // let black move
@@ -379,9 +379,7 @@ double SearchingEngine::EvaluatePosition(const Position &position) const
       std::cout << black_move << std::endl;
 
       // check for win, loose or draw
-      position = black->GetPosition();
-      outcome = Engine::GetOutcome(position);
-      if (outcome != OUTCOME_UNDECIDED)
+      if (black->GetOutcome() != OUTCOME_UNDECIDED)
          break;
 
       // possibly adjudicate a draw after too many moves

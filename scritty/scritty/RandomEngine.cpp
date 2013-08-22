@@ -17,11 +17,11 @@ Outcome RandomEngine::GetBestMove(std::string *best) const
       move.start_rank = rand() % 8;
       move.end_file = rand() % 8;
       move.end_rank = rand() % 8;
-   } while (!IsMoveLegal(*m_position, move));
+   } while (!m_position->IsMoveLegal(move));
 
    // handle promotion
 
-   char piece = m_position->m_board.m_squares[move.start_file][move.start_rank];
+   char piece = m_position->GetPieceAt(move.start_file, move.start_rank);
 
    if (move.end_rank == 7 && piece == 'P')
       move.promotion_piece = 'Q';

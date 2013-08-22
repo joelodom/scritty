@@ -38,7 +38,6 @@ namespace scritty // for FRIEND_TEST
       tokens.clear();
       UCIParser::BreakIntoTokens("go movetime 2000", &tokens);
       EXPECT_TRUE(handler.handle_go(tokens));
-      //EXPECT_EQ('p', engine.GetPieceAt("e7"));
 
       tokens.clear();
       UCIParser::BreakIntoTokens(
@@ -120,7 +119,7 @@ TEST(uciparser_tests, test_parse_move)
    EXPECT_EQ('Q', move.promotion_piece);
 }
 
-TEST(engine_tests, test_set_to_start_pos)
+TEST(engine_tests, test_start_new_game)
 {
    // implicit
    RandomEngine engine;
@@ -129,7 +128,7 @@ TEST(engine_tests, test_set_to_start_pos)
    EXPECT_TRUE(engine.IsWhiteToMove());
 
    // explicit
-   engine.SetToStartPos();
+   engine.StartNewGame();
    EXPECT_EQ('P', engine.GetPieceAt("e2"));
    EXPECT_EQ('k', engine.GetPieceAt("e8"));
    EXPECT_TRUE(engine.IsWhiteToMove());
@@ -765,7 +764,7 @@ TEST(engine_tests, test_failed_promote)
    EXPECT_FALSE(engine.ApplyMove("d7d8")); // failed to promote
 }
 
-TEST(engine_tests, test_is_check)
+TEST(position_tests, test_is_check)
 {
    RandomEngine engine;
 
@@ -773,22 +772,26 @@ TEST(engine_tests, test_is_check)
    EXPECT_TRUE(engine.ApplyMove("e7e5"));
    EXPECT_TRUE(engine.ApplyMove("g2g4"));
 
-   Position position = engine.GetPosition();
-   EXPECT_FALSE(Engine::IsCheck(position, 'K'));
-   EXPECT_FALSE(Engine::IsCheck(position, 'k'));
+   {
+      const Position &position = engine.GetPosition();
+      EXPECT_FALSE(position.IsCheck(true));
+      EXPECT_FALSE(position.IsCheck(false));
+   }
 
    EXPECT_TRUE(engine.ApplyMove("d8h4")); // mate
 
-   position = engine.GetPosition();
-   EXPECT_TRUE(Engine::IsCheck(position, 'K'));
-   EXPECT_FALSE(Engine::IsCheck(position, 'k'));
+   {
+      const Position &position = engine.GetPosition();
+      EXPECT_TRUE(position.IsCheck(true));
+      EXPECT_FALSE(position.IsCheck(false));
+   }
 }
 
-TEST(engine_tests, test_list_all_legal_moves)
+TEST(position_tests, test_list_all_legal_moves)
 {
    RandomEngine engine;
-   Position position = engine.GetPosition();
-   EXPECT_EQ(1, Engine::ListAllLegalMoves(position));
+   const Position &position = engine.GetPosition();
+   EXPECT_EQ(1, position.ListAllLegalMoves());
 }
 
 TEST(engine_tests, test_get_outcome)
@@ -799,20 +802,24 @@ TEST(engine_tests, test_get_outcome)
    EXPECT_TRUE(engine.ApplyMove("e7e5"));
    EXPECT_TRUE(engine.ApplyMove("g2g4"));
 
-   Position position = engine.GetPosition();
-   EXPECT_FALSE(Engine::IsCheck(position, 'K'));
-   EXPECT_FALSE(Engine::IsCheck(position, 'k'));
+   {
+      const Position &position = engine.GetPosition();
+      EXPECT_FALSE(position.IsCheck(true));
+      EXPECT_FALSE(position.IsCheck(false));
+   }
 
    EXPECT_TRUE(engine.ApplyMove("d8h4")); // mate
 
-   position = engine.GetPosition();
-   EXPECT_TRUE(Engine::IsCheck(position, 'K'));
-   EXPECT_FALSE(Engine::IsCheck(position, 'k'));
+   {
+      const Position &position = engine.GetPosition();
+      EXPECT_TRUE(position.IsCheck(true));
+      EXPECT_FALSE(position.IsCheck(false));
+   }
 
    EXPECT_EQ(OUTCOME_WIN_BLACK, engine.GetOutcome());
 }
 
-TEST(searching_engine_tests, DISABLED_test_get_best_move)
+TEST(searching_engine_tests, test_get_best_move)
 {
    SearchingEngine engine;
 
@@ -821,8 +828,6 @@ TEST(searching_engine_tests, DISABLED_test_get_best_move)
 
    std::string best;
    engine.GetBestMove(&best);
-
-   //EXPECT_STREQ("d4e5", best.c_str());
 }
 
 TEST(searching_engine_tests, debug_crash)
@@ -885,55 +890,74 @@ TEST(engine_tests, illegal_move_test_10)
    EXPECT_FALSE(engine.ApplyMove("b7a6"));
 }
 
-TEST(engine_tests, list_all_legal_moves_test)
+TEST(position_tests, list_all_legal_moves_test)
 {
    RandomEngine engine;
    Move *move_buffer = new Move[MAX_NUMBER_OF_LEGAL_MOVES];
 
-   engine.SetToStartPos();
+   engine.StartNewGame();
 
-   Position position = engine.GetPosition();
-   EXPECT_EQ(20, Engine::ListAllLegalMoves(position, move_buffer));
-   EXPECT_TRUE(engine.ApplyMove("a2a4"));
+   {
+      const Position &position = engine.GetPosition();
+      EXPECT_EQ(20, position.ListAllLegalMoves(move_buffer));
+      EXPECT_TRUE(engine.ApplyMove("a2a4"));
+   }
 
-   position = engine.GetPosition();
-   EXPECT_EQ(20, Engine::ListAllLegalMoves(position, move_buffer));
-   EXPECT_TRUE(engine.ApplyMove("d7d6"));
+   {
+      const Position &position = engine.GetPosition();
+      EXPECT_EQ(20, position.ListAllLegalMoves(move_buffer));
+      EXPECT_TRUE(engine.ApplyMove("d7d6"));
+   }
 
-   position = engine.GetPosition();
-   EXPECT_EQ(21, Engine::ListAllLegalMoves(position, move_buffer));
+   {
+      const Position &position = engine.GetPosition();
+      EXPECT_EQ(21, position.ListAllLegalMoves(move_buffer));
+   }
 
-   engine.SetToStartPos();
+   engine.StartNewGame();
 
-   EXPECT_TRUE(engine.ApplyMove("a2a3"));
-   position = engine.GetPosition();
-   EXPECT_EQ(20, Engine::ListAllLegalMoves(position, move_buffer));
+   {
+      EXPECT_TRUE(engine.ApplyMove("a2a3"));
+      const Position &position = engine.GetPosition();
+      EXPECT_EQ(20, position.ListAllLegalMoves(move_buffer));
+   }
 
-   EXPECT_TRUE(engine.ApplyMove("f7f6"));
-   position = engine.GetPosition();
-   EXPECT_EQ(19, Engine::ListAllLegalMoves(position, move_buffer));
+   {
+      EXPECT_TRUE(engine.ApplyMove("f7f6"));
+      const Position &position = engine.GetPosition();
+      EXPECT_EQ(19, position.ListAllLegalMoves(move_buffer));
+   }
 
-   EXPECT_TRUE(engine.ApplyMove("g2g3"));
-   position = engine.GetPosition();
-   EXPECT_EQ(19, Engine::ListAllLegalMoves(position, move_buffer));
+   {
+      EXPECT_TRUE(engine.ApplyMove("g2g3"));
+      const Position &position = engine.GetPosition();
+      EXPECT_EQ(19, position.ListAllLegalMoves(move_buffer));
+   }
 
-   EXPECT_TRUE(engine.ApplyMove("c7c6"));
-   position = engine.GetPosition();
-   EXPECT_EQ(20, Engine::ListAllLegalMoves(position, move_buffer));
+   {
+      EXPECT_TRUE(engine.ApplyMove("c7c6"));
+      const Position &position = engine.GetPosition();
+      EXPECT_EQ(20, position.ListAllLegalMoves(move_buffer));
+   }
 
-   EXPECT_TRUE(engine.ApplyMove("f1g2"));
-   position = engine.GetPosition();
-   EXPECT_EQ(20, Engine::ListAllLegalMoves(position, move_buffer));
+   {
+      EXPECT_TRUE(engine.ApplyMove("f1g2"));
+      const Position &position = engine.GetPosition();
+      EXPECT_EQ(20, position.ListAllLegalMoves(move_buffer));
+   }
 
-   engine.SetToStartPos();
+   engine.StartNewGame();
 
-   EXPECT_TRUE(engine.ApplyMove("g1f3"));
-   EXPECT_TRUE(engine.ApplyMove("a7a6"));
-   EXPECT_TRUE(engine.ApplyMove("g2g3"));
-   EXPECT_TRUE(engine.ApplyMove("a6a5"));
-   EXPECT_TRUE(engine.ApplyMove("f1h3"));
-   EXPECT_TRUE(engine.ApplyMove("a5a4"));
-   EXPECT_EQ(20, Engine::ListAllLegalMoves(position, move_buffer));
+   {
+      EXPECT_TRUE(engine.ApplyMove("g1f3"));
+      EXPECT_TRUE(engine.ApplyMove("a7a6"));
+      EXPECT_TRUE(engine.ApplyMove("g2g3"));
+      EXPECT_TRUE(engine.ApplyMove("a6a5"));
+      EXPECT_TRUE(engine.ApplyMove("f1h3"));
+      EXPECT_TRUE(engine.ApplyMove("a5a4"));
+      const Position &position = engine.GetPosition();
+      EXPECT_EQ(26, position.ListAllLegalMoves(move_buffer));
+   }
 
    delete[] move_buffer;
 }
@@ -941,58 +965,84 @@ TEST(engine_tests, list_all_legal_moves_test)
 TEST(engine_tests, threefold_repetition_test)
 {
    RandomEngine engine;
-   engine.SetToStartPos();
-   
-   Position position = engine.GetPosition();
-   ASSERT_FALSE(position.MayClaimDraw());
+   engine.StartNewGame();
 
-   EXPECT_TRUE(engine.ApplyMove("h2h3"));
-   position = engine.GetPosition();
-   EXPECT_FALSE(position.MayClaimDraw());
+   {
+      const Position &position = engine.GetPosition();
+      ASSERT_FALSE(position.MayClaimDraw());
+   }
 
-   EXPECT_TRUE(engine.ApplyMove("h7h6"));
-   position = engine.GetPosition();
-   EXPECT_FALSE(position.MayClaimDraw());
+   {
+      EXPECT_TRUE(engine.ApplyMove("h2h3"));
+      const Position &position = engine.GetPosition();
+      EXPECT_FALSE(position.MayClaimDraw());
+   }
 
-   EXPECT_TRUE(engine.ApplyMove("h1h2"));
-   position = engine.GetPosition();
-   EXPECT_FALSE(position.MayClaimDraw());
+   {
+      EXPECT_TRUE(engine.ApplyMove("h7h6"));
+      const Position &position = engine.GetPosition();
+      EXPECT_FALSE(position.MayClaimDraw());
+   }
 
-   EXPECT_TRUE(engine.ApplyMove("h8h7"));
-   position = engine.GetPosition();
-   EXPECT_FALSE(position.MayClaimDraw());
+   {
+      EXPECT_TRUE(engine.ApplyMove("h1h2"));
+      const Position &position = engine.GetPosition();
+      EXPECT_FALSE(position.MayClaimDraw());
+   }
 
-   EXPECT_TRUE(engine.ApplyMove("h2h1"));
-   position = engine.GetPosition();
-   EXPECT_FALSE(position.MayClaimDraw());
+   {
+      EXPECT_TRUE(engine.ApplyMove("h8h7"));
+      const Position &position = engine.GetPosition();
+      EXPECT_FALSE(position.MayClaimDraw());
+   }
 
-   EXPECT_TRUE(engine.ApplyMove("h7h8"));
-   position = engine.GetPosition();
-   EXPECT_FALSE(position.MayClaimDraw());
+   {
+      EXPECT_TRUE(engine.ApplyMove("h2h1"));
+      const Position &position = engine.GetPosition();
+      EXPECT_FALSE(position.MayClaimDraw());
+   }
 
-   EXPECT_TRUE(engine.ApplyMove("h1h2"));
-   position = engine.GetPosition();
-   EXPECT_FALSE(position.MayClaimDraw());
+   {
+      EXPECT_TRUE(engine.ApplyMove("h7h8"));
+      const Position &position = engine.GetPosition();
+      EXPECT_FALSE(position.MayClaimDraw());
+   }
 
-   EXPECT_TRUE(engine.ApplyMove("h8h7"));
-   position = engine.GetPosition();
-   EXPECT_FALSE(position.MayClaimDraw());
+   {
+      EXPECT_TRUE(engine.ApplyMove("h1h2"));
+      const Position &position = engine.GetPosition();
+      EXPECT_FALSE(position.MayClaimDraw());
+   }
 
-   EXPECT_TRUE(engine.ApplyMove("h2h1"));
-   position = engine.GetPosition();
-   EXPECT_FALSE(position.MayClaimDraw());
+   {
+      EXPECT_TRUE(engine.ApplyMove("h8h7"));
+      const Position &position = engine.GetPosition();
+      EXPECT_FALSE(position.MayClaimDraw());
+   }
 
-   EXPECT_TRUE(engine.ApplyMove("h7h8"));
-   position = engine.GetPosition();
-   EXPECT_FALSE(position.MayClaimDraw()); // not yet, castle changed
+   {
+      EXPECT_TRUE(engine.ApplyMove("h2h1"));
+      const Position &position = engine.GetPosition();
+      EXPECT_FALSE(position.MayClaimDraw());
+   }
 
-   EXPECT_TRUE(engine.ApplyMove("h1h2"));
-   position = engine.GetPosition();
-   EXPECT_FALSE(position.MayClaimDraw());
+   {
+      EXPECT_TRUE(engine.ApplyMove("h7h8"));
+      const Position &position = engine.GetPosition();
+      EXPECT_FALSE(position.MayClaimDraw()); // not yet, castle changed
+   }
 
-   EXPECT_TRUE(engine.ApplyMove("h8h7"));
-   position = engine.GetPosition();
-   EXPECT_TRUE(position.MayClaimDraw());
+   {
+      EXPECT_TRUE(engine.ApplyMove("h1h2"));
+      const Position &position = engine.GetPosition();
+      EXPECT_FALSE(position.MayClaimDraw());
+   }
+
+   {
+      EXPECT_TRUE(engine.ApplyMove("h8h7"));
+      const Position &position = engine.GetPosition();
+      EXPECT_TRUE(position.MayClaimDraw());
+   }
 }
 
 TEST(searching_engine_tests, debug_crash3)

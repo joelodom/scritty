@@ -40,6 +40,14 @@ namespace scritty
       static bool s_tests_were_run;
       static _CrtMemState s_mem_state;
    };
+
+   enum Outcome
+   {
+      OUTCOME_UNDECIDED,
+      OUTCOME_WIN_WHITE,
+      OUTCOME_WIN_BLACK,
+      OUTCOME_DRAW
+   };
 }
 
 #endif // #ifndef SCRITTY_H

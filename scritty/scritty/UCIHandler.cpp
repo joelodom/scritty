@@ -288,7 +288,7 @@ bool UCIHandler::handle_ucinewgame(const uci_tokens &tokens)
 
    std::cout << "info string Scritty will defeat you!" << std::endl;
 
-   m_engine->SetToStartPos();
+   m_engine->StartNewGame();
    return true;
 }
 
@@ -317,7 +317,7 @@ bool UCIHandler::handle_position(const uci_tokens &tokens)
 
    if (tokens[1] == "startpos")
    {
-      m_engine->SetToStartPos();
+      m_engine->StartNewGame();
    }
    else if (tokens[1] == "fen")
    {
