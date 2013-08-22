@@ -11,7 +11,7 @@
 #define GAMES_FILE "C:\\Users\\Joel\\Google Drive\\chess_games_db" \
    "\\3965020games.uci"
 #define GAMES_IN_FILE 3965020
-#define MAX_GAMES_TO_PLAY 50
+#define MAX_GAMES_TO_PLAY 60
 
 using namespace scritty;
 
