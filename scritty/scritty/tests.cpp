@@ -1115,3 +1115,30 @@ TEST(searching_engine_tests, illegal_move_test_11)
 
    EXPECT_FALSE(engine.ApplyMove("e1c1"));
 }
+
+TEST(position_tests, test_position_table)
+{
+   // get a position for testing
+   RandomEngine engine;
+   engine.StartNewGame();
+   const Position &position = engine.GetPosition();
+
+   // check that lookup fails
+   PositionTable *table = new PositionTable;
+   ASSERT_TRUE(table != nullptr);
+   size_t possible_moves_size;
+   Move *possible_moves = new Move[MAX_NUMBER_OF_LEGAL_MOVES];
+   EXPECT_FALSE(table->Lookup(position, possible_moves, &possible_moves_size));
+
+   // insert a position
+   possible_moves_size = position.ListAllLegalMoves(possible_moves);
+   EXPECT_EQ(20, possible_moves_size);
+   table->Save(position, possible_moves, possible_moves_size);
+
+   // check that lookup succeeds
+   possible_moves_size = 0;
+   EXPECT_TRUE(table->Lookup(position, possible_moves, &possible_moves_size));
+   EXPECT_EQ(20, possible_moves_size);
+
+   delete table;
+}

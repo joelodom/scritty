@@ -15,6 +15,8 @@
 #define MAX_NUMBER_OF_LEGAL_MOVES (16*63 + 16*4 + 4)
 
 #define MAX_POSITION_CHAIN_LEN 1000 // 500 moves
+#define MAX_CALCULATED_POSITIONS_PER_ELEMENT 10
+#define POSITION_HASH_MODULUS 8192
 
 namespace scritty
 {
@@ -38,7 +40,7 @@ namespace scritty
 
       // normally use this constructor
       Position(Position *chain, size_t *chain_length) : m_chain(chain),
-         m_chain_length(chain_length)
+         m_chain_length(chain_length), m_hash(POSITION_HASH_MODULUS)
       {
          SetToStartPos();
       }
@@ -87,6 +89,8 @@ namespace scritty
          bool white, unsigned char file, unsigned char rank) const;
       bool IsMoveLegal(const Move &move, bool white, bool check_king) const;
 
+      unsigned int GetHash() const;
+
    private:
 
       // this constructor does not copy the position chain deeply, so the
@@ -98,7 +102,8 @@ namespace scritty
          m_black_may_castle_short(to_copy.m_black_may_castle_short),
          m_black_may_castle_long(to_copy.m_black_may_castle_long),
          m_en_passant_allowed_on(to_copy.m_en_passant_allowed_on),
-         m_chain(to_copy.m_chain), m_chain_length(to_copy.m_chain_length)
+         m_chain(to_copy.m_chain), m_chain_length(to_copy.m_chain_length),
+         m_hash(to_copy.m_hash)
       {
          memcpy(m_squares, to_copy.m_squares, sizeof(to_copy.m_squares));
       }
@@ -111,6 +116,43 @@ namespace scritty
 
       Position *m_chain;
       size_t *m_chain_length;
+      mutable unsigned int m_hash; // not valuable for comparison
+   };
+
+   class PositionTable
+   {
+   public:
+
+      // returns false if not found
+      bool Lookup(const Position &position, Move* possible_moves,
+         size_t *possible_moves_size);
+
+      // don't try to save a duplicate position
+      void Save(const Position &position, const Move* possible_moves,
+         size_t possible_moves_size);
+
+   private:
+
+      struct CalculatedPosition
+      {
+         Position position;
+         Move possible_moves[MAX_NUMBER_OF_LEGAL_MOVES];
+         size_t possible_moves_size;
+      };
+
+      class PositionTableElement
+      {
+      public:
+         PositionTableElement() : m_head(m_positions), m_valid_entries(0)
+         {
+         }
+
+         CalculatedPosition *m_head; // next to overwrite
+         size_t m_valid_entries;
+         CalculatedPosition m_positions[MAX_CALCULATED_POSITIONS_PER_ELEMENT];
+      };
+
+      PositionTableElement m_table[POSITION_HASH_MODULUS];
    };
 }
 
