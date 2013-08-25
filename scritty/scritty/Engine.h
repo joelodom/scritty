@@ -12,10 +12,12 @@ namespace scritty
    {
    public:
       Engine() : m_position_chain(new Position[MAX_POSITION_CHAIN_LEN]),
-            m_position_chain_length(new size_t)
+            m_position_chain_length(new size_t),
+            m_position_table(new PositionTable)
       {
          // instantiate a position chain and set up the starting position
-         m_position = new Position(m_position_chain, m_position_chain_length);
+         m_position = new Position(
+            m_position_chain, m_position_chain_length, m_position_table);
       }
 
       ~Engine() 
@@ -31,6 +33,10 @@ namespace scritty
          SCRITTY_ASSERT(m_position_chain != nullptr);
          delete[] m_position_chain;
          m_position_chain = nullptr;
+
+         SCRITTY_ASSERT(m_position_table != nullptr);
+         delete m_position_table;
+         m_position_table = nullptr;
       }
 
       void StartNewGame() { m_position->SetToStartPos(); }
@@ -49,6 +55,7 @@ namespace scritty
       Position *m_position;
       Position *m_position_chain;
       size_t *m_position_chain_length;
+      PositionTable *m_position_table;
 
    private:
       // copy disallowed because too easy to goof position chain

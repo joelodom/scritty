@@ -16,7 +16,7 @@
 
 #define MAX_POSITION_CHAIN_LEN 1000 // 500 moves
 #define MAX_CALCULATED_POSITIONS_PER_ELEMENT 10
-#define POSITION_HASH_MODULUS 8192
+#define POSITION_HASH_MODULUS 11003 // 2 is a primitive root of this prime
 
 namespace scritty
 {
@@ -34,12 +34,16 @@ namespace scritty
       Move& operator=(const Move &rhs);
    };
 
+   class PositionTable; // forward
+
    class Position
    {
    public:
 
       // normally use this constructor
-      Position(Position *chain, size_t *chain_length) : m_chain(chain),
+      Position(
+         Position *chain, size_t *chain_length, PositionTable *position_table)
+         : m_chain(chain), m_position_table(position_table),
          m_chain_length(chain_length), m_hash(POSITION_HASH_MODULUS)
       {
          SetToStartPos();
@@ -91,7 +95,7 @@ namespace scritty
 
       unsigned int GetHash() const;
 
-   private:
+   protected:
 
       // this constructor does not copy the position chain deeply, so the
       // object to copy must have a valid position chain
@@ -103,7 +107,7 @@ namespace scritty
          m_black_may_castle_long(to_copy.m_black_may_castle_long),
          m_en_passant_allowed_on(to_copy.m_en_passant_allowed_on),
          m_chain(to_copy.m_chain), m_chain_length(to_copy.m_chain_length),
-         m_hash(to_copy.m_hash)
+         m_hash(to_copy.m_hash), m_position_table(to_copy.m_position_table)
       {
          memcpy(m_squares, to_copy.m_squares, sizeof(to_copy.m_squares));
       }
@@ -116,6 +120,7 @@ namespace scritty
 
       Position *m_chain;
       size_t *m_chain_length;
+      PositionTable *m_position_table;
       mutable unsigned int m_hash; // not valuable for comparison
    };
 
@@ -127,7 +132,7 @@ namespace scritty
       bool Lookup(const Position &position, Move* possible_moves,
          size_t *possible_moves_size);
 
-      // don't try to save a duplicate position
+      // saving duplicate position will work but is pointless except for testing
       void Save(const Position &position, const Move* possible_moves,
          size_t possible_moves_size);
 
@@ -154,6 +159,29 @@ namespace scritty
 
       PositionTableElement m_table[POSITION_HASH_MODULUS];
    };
+
+   inline unsigned __int64 powmod(unsigned __int64 x)
+   {
+      // calculates 2^x mod POSITION_HASH_MODULUS
+
+      // shorten with totient
+      // (I knew that number theory class would pay off one day)
+      x %= POSITION_HASH_MODULUS - 1;
+
+      unsigned __int64 h = 1;
+      unsigned __int64 b = 2;
+
+      while (x > 0)
+      {
+         if (x & 1)
+            h = (h*b) % POSITION_HASH_MODULUS;
+         x >>= 1;
+         h %= POSITION_HASH_MODULUS;
+         b = (b*b) % POSITION_HASH_MODULUS;
+      }
+
+      return h;
+   }
 }
 
 #endif // #ifndef SCRITTY_POSITION_H

@@ -27,6 +27,8 @@ void Position::SetToStartPos()
    m_en_passant_allowed_on = NO_EN_PASSANT;
 
    *m_chain_length = 0;
+
+   m_hash = POSITION_HASH_MODULUS;
 }
 
 void Position::RollBackOneMove()
@@ -45,6 +47,8 @@ void Position::RollBackOneMove()
    memcpy(m_squares, previous->m_squares, sizeof(previous->m_squares));
 
    --(*m_chain_length);
+
+   m_hash = POSITION_HASH_MODULUS;
 }
 
 void Position::ApplyKnownLegalMove(const Move &move)
@@ -167,6 +171,9 @@ void Position::ApplyKnownLegalMove(const Move &move)
 
    // switch sides
    m_white_to_move = !m_white_to_move;
+
+   // reset hash
+   m_hash = POSITION_HASH_MODULUS;
 }
 
 bool Position::IsRookMoveLegal(const Move &move) const
@@ -1049,10 +1056,17 @@ bool Position::IsCheck(bool white) const
 
 size_t Position::ListAllLegalMoves(Move *buf /*= nullptr*/) const
 {
-   // pass in null buffer to test if there are any legal moves (returns 0 or 1)
+   // pass in null buffer to test if there are any legal moves
+   // (returns 0 if no legal moves)
+
+   size_t count = 0;
+
+   // first check the position table
+   SCRITTY_ASSERT(m_position_table != nullptr);
+   if (m_position_table->Lookup(*this, buf, &count))
+      return count;
 
    const size_t MAGIC_NUM = 100;
-   size_t count = 0;
    unsigned char endpoints[8*8*4 + 1]; // f1, r1, promotion1, f2, ..., MAGIC_NUM
    Move move;
 
@@ -1352,6 +1366,10 @@ size_t Position::ListAllLegalMoves(Move *buf /*= nullptr*/) const
       }
    }
 
+   // save to position table
+   if (buf != nullptr)
+      m_position_table->Save(*this, buf, count);
+
    return count;
 }
 
@@ -1382,62 +1400,38 @@ unsigned int Position::GetHash() const
 {
    if (m_hash == POSITION_HASH_MODULUS)
    {
-      // not very good, but hopefully fast
+      // should be uniform and fairly fast
+      // inspired by CBC-MAC
 
-      m_hash = (unsigned int)(*((unsigned __int64 *)(m_squares))
-         % POSITION_HASH_MODULUS);
+      unsigned __int64 x = m_en_passant_allowed_on;
 
-      m_hash += (unsigned int)(*((unsigned __int64 *)(m_squares + 8))
-         % POSITION_HASH_MODULUS);
-      m_hash *= 2;
-      m_hash %= POSITION_HASH_MODULUS;
-
-      m_hash += (unsigned int)(*((unsigned __int64 *)(m_squares + 16))
-         % POSITION_HASH_MODULUS);
-      m_hash *= 3;
-      m_hash %= POSITION_HASH_MODULUS;
-
-      m_hash += (unsigned int)(*((unsigned __int64 *)(m_squares + 24))
-         % POSITION_HASH_MODULUS);
-      m_hash *= 5;
-      m_hash %= POSITION_HASH_MODULUS;
-
-      m_hash += (unsigned int)(*((unsigned __int64 *)(m_squares + 32))
-         % POSITION_HASH_MODULUS);
-      m_hash *= 7;
-      m_hash %= POSITION_HASH_MODULUS;
-
-      m_hash += (unsigned int)(*((unsigned __int64 *)(m_squares + 40))
-         % POSITION_HASH_MODULUS);
-      m_hash *= 11;
-      m_hash %= POSITION_HASH_MODULUS;
-
-      m_hash += (unsigned int)(*((unsigned __int64 *)(m_squares + 48))
-         % POSITION_HASH_MODULUS);
-      m_hash *= 13;
-      m_hash %= POSITION_HASH_MODULUS;
-
-      m_hash += (unsigned int)(*((unsigned __int64 *)(m_squares + 56))
-         % POSITION_HASH_MODULUS);
-      m_hash *= 17;
-      m_hash %= POSITION_HASH_MODULUS;
+      if (m_white_to_move)
+         x += 256;
 
       if (m_black_may_castle_long)
-         m_hash += 314;
+         x += 512;
 
       if (m_black_may_castle_short)
-         m_hash += 3141;
+         x += 1024;
 
       if (m_white_may_castle_long)
-         m_hash += 271;
+         x += 2048;
 
       if (m_white_may_castle_short)
-         m_hash += 2718;
+         x += 4096;
 
-      m_hash += 31*(m_en_passant_allowed_on + 5);
-      m_hash += 27*(m_white_to_move + 7);
+      x = powmod(x);
 
-      m_hash %= POSITION_HASH_MODULUS;
+      x = powmod(*((unsigned __int64 *)(m_squares[0])) | x);
+      x = powmod(*((unsigned __int64 *)(m_squares[1])) | x);
+      x = powmod(*((unsigned __int64 *)(m_squares[2])) | x);
+      x = powmod(*((unsigned __int64 *)(m_squares[3])) | x);
+      x = powmod(*((unsigned __int64 *)(m_squares[4])) | x);
+      x = powmod(*((unsigned __int64 *)(m_squares[5])) | x);
+      x = powmod(*((unsigned __int64 *)(m_squares[6])) | x);
+      x = powmod(*((unsigned __int64 *)(m_squares[7])) | x);
+
+      m_hash = x % POSITION_HASH_MODULUS;
    }
 
    return m_hash;
@@ -1472,31 +1466,42 @@ void PositionTable::Save(const Position &position, const Move* possible_moves,
 bool PositionTable::Lookup(const Position &position, Move* possible_moves,
    size_t *possible_moves_size)
 {
-   SCRITTY_ASSERT(possible_moves != nullptr && possible_moves_size != nullptr);
+   // pass in null buffer to test if there are any legal moves
+
+   SCRITTY_ASSERT(possible_moves_size != nullptr);
 
    PositionTableElement *element = m_table + position.GetHash();
 
+   // start with last inserted and work backwards
+
    CalculatedPosition *cursor = element->m_head;
+
    for (size_t entries_checked = 0; entries_checked < element->m_valid_entries;
       ++entries_checked)
    {
+      // move the cursor back one
+      --cursor;
+
+      // maybe move the cursor to the end of the buffer
+
+      if (cursor < element->m_positions)
+         cursor
+         = element->m_positions + MAX_CALCULATED_POSITIONS_PER_ELEMENT - 1;
+
       // check the cursor
       if (cursor->position == position)
       {
          // found
-         memcpy(possible_moves, cursor->possible_moves,
+
+         if (possible_moves != nullptr)
+            memcpy(possible_moves, cursor->possible_moves,
             sizeof(Move)*cursor->possible_moves_size);
+
          *possible_moves_size = cursor->possible_moves_size;
          return true;
       }
-
-      // advance the cursor
-      ++cursor;
-
-      // possible move the cursor back to the beginning
-      if (cursor == element->m_positions + MAX_CALCULATED_POSITIONS_PER_ELEMENT)
-         cursor = element->m_positions;
    }
 
+   *possible_moves_size = 0;
    return false;
 }

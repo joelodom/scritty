@@ -18,6 +18,197 @@ using namespace scritty;
 /*static*/ bool ScrittyTestEnvironment::s_tests_were_run = false;
 /*static*/ _CrtMemState ScrittyTestEnvironment::s_mem_state;
 
+TEST(position_tests, test_powmod)
+{
+   EXPECT_EQ(1, powmod(0));
+   EXPECT_EQ(2, powmod(1));
+   EXPECT_EQ(4, powmod(2));
+   EXPECT_EQ(8, powmod(3));
+   EXPECT_EQ(16, powmod(4));
+   EXPECT_EQ(32, powmod(5));
+   EXPECT_EQ(64, powmod(6));
+   EXPECT_EQ(4137, powmod(1234));
+   EXPECT_EQ(1, powmod(POSITION_HASH_MODULUS - 1));
+   EXPECT_EQ(6258, powmod((1ull << 63) - 1234));
+}
+
+#define CHECK_MOVE_HASH(move) { \
+   EXPECT_TRUE(engine.ApplyMove(move)); \
+   const Position &position = engine.GetPosition(); \
+   unsigned int hash = position.GetHash(); \
+   if (hashes.find(hash) != hashes.end()) \
+   ++collisions; \
+   hashes.insert(hash); }
+
+TEST(position_tests, test_hash_uniformity)
+{
+   // tests for reasonable uniformity of hashes
+
+   std::set<unsigned long> hashes;
+   size_t collisions = 0;
+
+   RandomEngine engine;
+   engine.StartNewGame();
+
+   CHECK_MOVE_HASH("a2a3");
+   CHECK_MOVE_HASH("d7d5");
+   CHECK_MOVE_HASH("g2g4");
+   CHECK_MOVE_HASH("b7b5");
+   CHECK_MOVE_HASH("f1g2");
+   CHECK_MOVE_HASH("c8f5");
+   CHECK_MOVE_HASH("c2c3");
+   CHECK_MOVE_HASH("d8d6");
+   CHECK_MOVE_HASH("d1a4");
+   CHECK_MOVE_HASH("b5a4");
+   CHECK_MOVE_HASH("c3c4");
+   CHECK_MOVE_HASH("d6e5");
+   CHECK_MOVE_HASH("b2b3");
+   CHECK_MOVE_HASH("e5e6");
+   CHECK_MOVE_HASH("b3a4");
+   CHECK_MOVE_HASH("a7a5");
+   CHECK_MOVE_HASH("g2d5");
+   CHECK_MOVE_HASH("e6b6");
+   CHECK_MOVE_HASH("f2f4");
+   CHECK_MOVE_HASH("b6b3");
+   CHECK_MOVE_HASH("d5g2");
+   CHECK_MOVE_HASH("e7e6");
+   CHECK_MOVE_HASH("g1f3");
+   CHECK_MOVE_HASH("b3c4");
+   CHECK_MOVE_HASH("f3g5");
+   CHECK_MOVE_HASH("c4d3");
+   CHECK_MOVE_HASH("g2h3");
+   CHECK_MOVE_HASH("f8b4");
+   CHECK_MOVE_HASH("g4f5");
+   CHECK_MOVE_HASH("d3b1");
+   CHECK_MOVE_HASH("e2e4");
+   CHECK_MOVE_HASH("b1b2");
+   CHECK_MOVE_HASH("e1g1");
+   CHECK_MOVE_HASH("b8d7");
+   CHECK_MOVE_HASH("g5f7");
+   CHECK_MOVE_HASH("a8c8");
+   CHECK_MOVE_HASH("f7d8");
+   CHECK_MOVE_HASH("b2c3");
+   CHECK_MOVE_HASH("f1d1");
+   CHECK_MOVE_HASH("d7f8");
+   CHECK_MOVE_HASH("d2d4");
+   CHECK_MOVE_HASH("b4a3");
+   CHECK_MOVE_HASH("f5f6");
+   CHECK_MOVE_HASH("c3b2");
+   CHECK_MOVE_HASH("d8e6");
+   CHECK_MOVE_HASH("b2d2");
+   CHECK_MOVE_HASH("g1h1");
+   CHECK_MOVE_HASH("d2c1");
+   CHECK_MOVE_HASH("a1a2");
+   CHECK_MOVE_HASH("c1c6");
+   CHECK_MOVE_HASH("e6f8");
+   CHECK_MOVE_HASH("c8a8");
+   CHECK_MOVE_HASH("d1e1");
+   CHECK_MOVE_HASH("g7f6");
+   CHECK_MOVE_HASH("e1g1");
+   CHECK_MOVE_HASH("a8a6");
+   CHECK_MOVE_HASH("g1f1");
+   CHECK_MOVE_HASH("c6e6");
+   CHECK_MOVE_HASH("a2f2");
+   CHECK_MOVE_HASH("a6a8");
+   CHECK_MOVE_HASH("d4d5");
+   CHECK_MOVE_HASH("e6f5");
+   CHECK_MOVE_HASH("f8e6");
+   CHECK_MOVE_HASH("f5g5");
+   CHECK_MOVE_HASH("e6d4");
+   CHECK_MOVE_HASH("e8e7");
+   CHECK_MOVE_HASH("h3g4");
+   CHECK_MOVE_HASH("g5f5");
+   CHECK_MOVE_HASH("d4e6");
+   CHECK_MOVE_HASH("g8h6");
+   CHECK_MOVE_HASH("e6f8");
+   CHECK_MOVE_HASH("h6g4");
+   CHECK_MOVE_HASH("f8g6");
+   CHECK_MOVE_HASH("e7d6");
+   CHECK_MOVE_HASH("h2h4");
+   CHECK_MOVE_HASH("h8c8");
+   CHECK_MOVE_HASH("e4e5");
+   CHECK_MOVE_HASH("d6c5");
+   CHECK_MOVE_HASH("f2e2");
+   CHECK_MOVE_HASH("h7h6");
+   CHECK_MOVE_HASH("d5d6");
+   CHECK_MOVE_HASH("c8f8");
+   CHECK_MOVE_HASH("e2d2");
+   CHECK_MOVE_HASH("f5d3");
+   CHECK_MOVE_HASH("g6f8");
+   CHECK_MOVE_HASH("a8a6");
+   CHECK_MOVE_HASH("d2b2");
+   CHECK_MOVE_HASH("d3e4");
+   CHECK_MOVE_HASH("h1g1");
+   CHECK_MOVE_HASH("e4f3");
+   CHECK_MOVE_HASH("f1b1");
+   CHECK_MOVE_HASH("g4f2");
+   CHECK_MOVE_HASH("h4h5");
+   CHECK_MOVE_HASH("c5d4");
+   CHECK_MOVE_HASH("b2b5");
+   CHECK_MOVE_HASH("f2h3");
+   CHECK_MOVE_HASH("g1h2");
+   CHECK_MOVE_HASH("a6c6");
+   CHECK_MOVE_HASH("b1b2");
+   CHECK_MOVE_HASH("f3c3");
+   CHECK_MOVE_HASH("b5b6");
+   CHECK_MOVE_HASH("c3b3");
+   CHECK_MOVE_HASH("e5f6");
+   CHECK_MOVE_HASH("d4c3");
+   CHECK_MOVE_HASH("d6d7");
+   CHECK_MOVE_HASH("c3d4");
+   CHECK_MOVE_HASH("f8g6");
+   CHECK_MOVE_HASH("b3a2");
+   CHECK_MOVE_HASH("b6c6");
+   CHECK_MOVE_HASH("d4e3");
+   CHECK_MOVE_HASH("c6b6");
+   CHECK_MOVE_HASH("a2a1");
+   CHECK_MOVE_HASH("g6h4");
+   CHECK_MOVE_HASH("e3f4");
+   CHECK_MOVE_HASH("b6c6");
+   CHECK_MOVE_HASH("f4g4");
+   CHECK_MOVE_HASH("b2b1");
+   CHECK_MOVE_HASH("a1b1");
+   CHECK_MOVE_HASH("h2g2");
+   CHECK_MOVE_HASH("b1b5");
+   CHECK_MOVE_HASH("c6d6");
+   CHECK_MOVE_HASH("h3f4");
+   CHECK_MOVE_HASH("g2f2");
+   CHECK_MOVE_HASH("a3b4");
+   CHECK_MOVE_HASH("d6d1");
+   CHECK_MOVE_HASH("b4d6");
+   CHECK_MOVE_HASH("d1d2");
+   CHECK_MOVE_HASH("b5d3");
+   CHECK_MOVE_HASH("h4f3");
+   CHECK_MOVE_HASH("d3c3");
+   CHECK_MOVE_HASH("d2c2");
+   CHECK_MOVE_HASH("c3c2");
+   CHECK_MOVE_HASH("f2e3");
+   CHECK_MOVE_HASH("f4e6");
+   CHECK_MOVE_HASH("f6f7");
+   CHECK_MOVE_HASH("e6c5");
+   CHECK_MOVE_HASH("e3d4");
+   CHECK_MOVE_HASH("c2f5");
+   CHECK_MOVE_HASH("f3h4");
+   CHECK_MOVE_HASH("f5f4");
+   CHECK_MOVE_HASH("d4d5");
+   CHECK_MOVE_HASH("f4d2");
+   CHECK_MOVE_HASH("d5c6");
+   CHECK_MOVE_HASH("d6g3");
+   CHECK_MOVE_HASH("c6c5");
+   CHECK_MOVE_HASH("d2g2");
+   CHECK_MOVE_HASH("h4g2");
+   CHECK_MOVE_HASH("g4g5");
+   CHECK_MOVE_HASH("g2e3");
+   CHECK_MOVE_HASH("g5h4");
+   CHECK_MOVE_HASH("e3f1");
+   CHECK_MOVE_HASH("g3f4");
+   CHECK_MOVE_HASH("c5c4");
+   CHECK_MOVE_HASH("f4e5");
+
+   // could change if hash ever changes, but should be low
+   EXPECT_EQ(1, collisions);
+}
+
 TEST(test_gtest, test_gtest)
 {
    EXPECT_TRUE(true) << "law of noncontradiction failed";
@@ -45,7 +236,7 @@ namespace scritty // for FRIEND_TEST
       EXPECT_TRUE(handler.handle_position(tokens));
    }
 
-   TEST(integration_tests, DISABLED_play_through_game_database)
+   TEST(integration_tests, play_through_game_database)
    {
       // open the massive games file
       std::fstream in_file(GAMES_FILE);
@@ -78,7 +269,7 @@ namespace scritty // for FRIEND_TEST
          if (!handler.handle_position(tokens))
          {
             Logger::GetStream() << "Failed game: " << line << std::endl;
-            FAIL() << "Failed on " << line;
+            GTEST_FAIL() << "Failed on " << line;
          }
 
          ++game;
@@ -1116,6 +1307,28 @@ TEST(searching_engine_tests, illegal_move_test_11)
    EXPECT_FALSE(engine.ApplyMove("e1c1"));
 }
 
+// for testing position table
+class TestPosition : public Position
+{
+public:
+   TestPosition() : m_changes(0)
+   {
+      m_chain_length = &m_changes; // has to be something
+      SetToStartPos();
+      m_hash = 31; // should always stay 31
+   }
+
+   void Change()
+   {
+      SCRITTY_ASSERT(m_changes < 64);
+      m_squares[m_changes / 8][m_changes % 8] = 'x';
+      ++m_changes;
+   }
+
+private:
+   size_t m_changes;
+};
+
 TEST(position_tests, test_position_table)
 {
    // get a position for testing
@@ -1139,6 +1352,23 @@ TEST(position_tests, test_position_table)
    possible_moves_size = 0;
    EXPECT_TRUE(table->Lookup(position, possible_moves, &possible_moves_size));
    EXPECT_EQ(20, possible_moves_size);
+
+   // test the wrapping buffer
+
+   TestPosition test_position;
+
+   for (size_t i = 0; i < 2*MAX_CALCULATED_POSITIONS_PER_ELEMENT; ++i)
+   {
+      size_t s;
+      EXPECT_FALSE(table->Lookup(
+         test_position, possible_moves, &s));
+      table->Save(test_position, possible_moves, possible_moves_size);
+      possible_moves_size = 0;
+      EXPECT_TRUE(table->Lookup(
+         test_position, possible_moves, &possible_moves_size));
+      EXPECT_EQ(20, possible_moves_size);
+      test_position.Change();
+   }
 
    delete table;
 }
