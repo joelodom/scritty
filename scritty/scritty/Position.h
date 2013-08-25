@@ -136,6 +136,9 @@ namespace scritty
       void Save(const Position &position, const Move* possible_moves,
          size_t possible_moves_size);
 
+      // for debugging
+      void PrintStats() const;
+
    private:
 
       struct CalculatedPosition

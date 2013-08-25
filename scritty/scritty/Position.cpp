@@ -1422,16 +1422,16 @@ unsigned int Position::GetHash() const
 
       x = powmod(x);
 
-      x = powmod(*((unsigned __int64 *)(m_squares[0])) | x);
-      x = powmod(*((unsigned __int64 *)(m_squares[1])) | x);
-      x = powmod(*((unsigned __int64 *)(m_squares[2])) | x);
-      x = powmod(*((unsigned __int64 *)(m_squares[3])) | x);
-      x = powmod(*((unsigned __int64 *)(m_squares[4])) | x);
-      x = powmod(*((unsigned __int64 *)(m_squares[5])) | x);
-      x = powmod(*((unsigned __int64 *)(m_squares[6])) | x);
-      x = powmod(*((unsigned __int64 *)(m_squares[7])) | x);
+      x = powmod(*((unsigned __int64 *)(m_squares[0])) ^ x);
+      x = powmod(*((unsigned __int64 *)(m_squares[1])) ^ x);
+      x = powmod(*((unsigned __int64 *)(m_squares[2])) ^ x);
+      x = powmod(*((unsigned __int64 *)(m_squares[3])) ^ x);
+      x = powmod(*((unsigned __int64 *)(m_squares[4])) ^ x);
+      x = powmod(*((unsigned __int64 *)(m_squares[5])) ^ x);
+      x = powmod(*((unsigned __int64 *)(m_squares[6])) ^ x);
+      x = powmod(*((unsigned __int64 *)(m_squares[7])) ^ x);
 
-      m_hash = x % POSITION_HASH_MODULUS;
+      m_hash = (unsigned int)x;
    }
 
    return m_hash;
@@ -1504,4 +1504,27 @@ bool PositionTable::Lookup(const Position &position, Move* possible_moves,
 
    *possible_moves_size = 0;
    return false;
+}
+
+void PositionTable::PrintStats() const
+{
+   size_t entry_counts[MAX_CALCULATED_POSITIONS_PER_ELEMENT + 1];
+
+   for (size_t i = 0; i < MAX_CALCULATED_POSITIONS_PER_ELEMENT; ++i)
+      entry_counts[i] = 0;
+
+   for (size_t i = 0; i < POSITION_HASH_MODULUS; ++i)
+      ++entry_counts[m_table[i].m_valid_entries];
+
+   std::cout << "Position Table Counts:" << std::endl;
+   size_t total = 0;
+
+   for (size_t i = 0; i < MAX_CALCULATED_POSITIONS_PER_ELEMENT; ++i)
+   {
+      std::cout << i << ": " << entry_counts[i] << std::endl;
+      if (i > 0)
+         total += entry_counts[i];
+   }
+
+   std::cout << "TOTAL: " << total << std::endl;
 }

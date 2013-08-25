@@ -390,6 +390,8 @@ double SearchingEngine::EvaluatePosition(const Position &position) const
       }
 
       white->ApplyMove(black_move);
+
+      //((SearchingEngine*)white)->PrintTableStats();
    }
 
    // sign the score sheet

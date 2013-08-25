@@ -24,6 +24,8 @@ namespace scritty
 
       virtual int Compare(GeneticEngine *first, GeneticEngine *second) const;
 
+      void PrintTableStats() { m_position_table->PrintStats(); }
+
    private:
       SearchingEngine(const SearchingEngine &); // copy disallowed
 
