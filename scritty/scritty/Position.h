@@ -9,14 +9,12 @@
 #define NO_PIECE '\0'
 #define NO_EN_PASSANT 100
 
-// TODO P3: whittle this down with more thinking
-// 16 pieces times 63 squares plus 16 promotion squares times 4 promotion pieces
-// plus 4 castles
-#define MAX_NUMBER_OF_LEGAL_MOVES (16*63 + 16*4 + 4)
+// TODO P4: seems reasonable, but make sure I've got asserts
+#define MAX_NUMBER_OF_LEGAL_MOVES 200
 
 #define MAX_POSITION_CHAIN_LEN 1000 // 500 moves
 #define MAX_CALCULATED_POSITIONS_PER_ELEMENT 10
-#define POSITION_HASH_MODULUS 11003 // 2 is a primitive root of this prime
+#define POSITION_HASH_MODULUS 43997 // 2 is a primitive root of this prime
 
 namespace scritty
 {
@@ -122,6 +120,8 @@ namespace scritty
       size_t *m_chain_length;
       PositionTable *m_position_table;
       mutable unsigned int m_hash; // not valuable for comparison
+
+      static size_t s_table_hits, s_table_misses;
    };
 
    class PositionTable

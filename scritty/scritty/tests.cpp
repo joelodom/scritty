@@ -27,9 +27,9 @@ TEST(position_tests, test_powmod)
    EXPECT_EQ(16, powmod(4));
    EXPECT_EQ(32, powmod(5));
    EXPECT_EQ(64, powmod(6));
-   EXPECT_EQ(4137, powmod(1234));
+   EXPECT_EQ(6057, powmod(1234));
    EXPECT_EQ(1, powmod(POSITION_HASH_MODULUS - 1));
-   EXPECT_EQ(6258, powmod((1ull << 63) - 1234));
+   EXPECT_EQ(42748, powmod((1ull << 63) - 1234));
 }
 
 #define CHECK_MOVE_HASH(move) { \
@@ -206,7 +206,7 @@ TEST(position_tests, test_hash_uniformity)
    CHECK_MOVE_HASH("f4e5");
 
    // could change if hash ever changes, but should be low
-   EXPECT_EQ(1, collisions);
+   EXPECT_EQ(0, collisions);
 }
 
 TEST(test_gtest, test_gtest)

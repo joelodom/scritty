@@ -1054,6 +1054,9 @@ bool Position::IsCheck(bool white) const
    return false; // should never get here if king is on board
 }
 
+/*static*/ size_t Position::s_table_hits = 0;
+/*static*/ size_t Position::s_table_misses = 0;
+
 size_t Position::ListAllLegalMoves(Move *buf /*= nullptr*/) const
 {
    // pass in null buffer to test if there are any legal moves
@@ -1064,7 +1067,12 @@ size_t Position::ListAllLegalMoves(Move *buf /*= nullptr*/) const
    // first check the position table
    SCRITTY_ASSERT(m_position_table != nullptr);
    if (m_position_table->Lookup(*this, buf, &count))
+   {
+      SCRITTY_ASSERT(++s_table_hits > 0);
       return count;
+   }
+
+   SCRITTY_ASSERT(++s_table_misses > 0);
 
    const size_t MAGIC_NUM = 100;
    unsigned char endpoints[8*8*4 + 1]; // f1, r1, promotion1, f2, ..., MAGIC_NUM
@@ -1526,5 +1534,5 @@ void PositionTable::PrintStats() const
          total += entry_counts[i];
    }
 
-   std::cout << "TOTAL: " << total << std::endl;
+   std::cout << "Total non-zero: " << total << std::endl;
 }
