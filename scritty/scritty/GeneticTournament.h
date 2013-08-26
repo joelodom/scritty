@@ -12,10 +12,10 @@ namespace scritty
    // INTERESTING: seems to work better with fewer participants and more rounds
    // INTERESTING: setting max_deviation too large gives poor results
 
-#define PARTICIPANTS 4
+#define PARTICIPANTS 8
 #define MAX_INITIAL_DEVIATION 0.5 // 50%
 #define MAX_INCREMENTAL_DEVIATION 0.01 // 1%
-#define ROUNDS 1
+#define ROUNDS 1000
 
 #define MAX_PARAMETER_NAME_LEN 30 // without terminating null
 
@@ -26,6 +26,7 @@ namespace scritty
       {
       }
 
+      size_t GetParameterCount() const { return m_parameters_size; }
       void GetParameterName(size_t index, std::string *name) const;
       double GetParameterValue(size_t index) const;
       void PrintParameters() const;
@@ -112,6 +113,8 @@ namespace scritty
             std::cout << "Hosting round " << round_number
                << " of " << ROUNDS << "." << std::endl;
 
+            PrintStats();
+
             std::vector<T *> winners;
 
             while (m_participants.size() > 1) // could leave one unpaired
@@ -175,6 +178,69 @@ namespace scritty
                m_participants.push_back(child);
             }
          }
+      }
+
+      void GeneticTournament<T>::PrintStats()
+      {
+         SCRITTY_ASSERT(m_participants.size() > 0);
+
+         size_t parameter_count = m_participants[0]->GetParameterCount();
+         double* means = new double[parameter_count];
+         double* sigmas = new double[parameter_count];
+
+         // calculate the means
+
+         for (size_t i = 0; i < parameter_count; ++i)
+         {
+            means[i] = 0.0;
+            sigmas[i] = 0.0;
+         }
+
+         for (size_t i = 0; i < parameter_count; ++i)
+         {
+            for (auto it = m_participants.begin();
+               it != m_participants.end(); ++it)
+            {
+               SCRITTY_ASSERT((*it)->GetParameterCount() == parameter_count);
+               means[i] += (*it)->GetParameterValue(i);
+            }
+         }
+
+         for (size_t i = 0; i < parameter_count; ++i)
+            means[i] /= m_participants.size();
+
+         // calculate standard deviations
+
+         for (size_t i = 0; i < parameter_count; ++i)
+         {
+            for (auto it = m_participants.begin();
+               it != m_participants.end(); ++it)
+            {
+               double a = (*it)->GetParameterValue(i) - means[i];
+               sigmas[i] += a*a;
+            }
+         }
+
+         for (size_t i = 0; i < parameter_count; ++i)
+         {
+            sigmas[i] /= m_participants.size();
+            sigmas[i] = sqrt(sigmas[i]);
+         }
+
+         // print output
+
+         std::cout << "Means and standard deviations:" << std::endl;
+
+         for (size_t i = 0; i < parameter_count; ++i)
+         {
+            std::string name;
+            m_participants[0]->GetParameterName(i, &name);
+            std::cout << name << ": " << means[i] << " sigma: " << sigmas[i]
+            << std::endl;
+         }
+
+         delete[] means;
+         delete[] sigmas;
       }
 
    private:
