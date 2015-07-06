@@ -9,14 +9,12 @@ using namespace scritty;
 
 SearchingEngine::SearchingEngine() : GeneticEngine()
 {
-   m_parameters_size = 6;
+   m_parameters_size = 5;
    m_parameters = new ParameterPair[m_parameters_size];
 
    size_t i = 0;
 
-   strcpy_s(m_parameters[i].name, MAX_PARAMETER_NAME_LEN + 1,
-      "Pawn Value");
-   m_parameters[i++].value = 1.00;
+   // pawn value fixed at 1.0
 
    SCRITTY_ASSERT(i < m_parameters_size);
    strcpy_s(m_parameters[i].name, MAX_PARAMETER_NAME_LEN + 1,
@@ -255,61 +253,61 @@ double SearchingEngine::EvaluatePosition(const Position &position) const
          case 'P':
             // when pieces are valued based on square and game phase,
             // pawn controlled squares should be captured
-            evaluation += m_parameters[0].value;
+            evaluation += 1.0;
             break;
          case 'p':
-            evaluation -= m_parameters[0].value;
+            evaluation -= 1.0;
             break;
          case 'B':
             // at present it is busy work to write endpoints to array, but
             // will come into play when individual squares have different
             // values
-            evaluation += m_parameters[1].value;
-            evaluation += m_parameters[5].value
+            evaluation += m_parameters[0].value;
+            evaluation += m_parameters[4].value
                *m_position->PopulateBishopEndpoints(file, rank, endpoints);
             break;
          case 'b':
-            evaluation -= m_parameters[1].value;
-            evaluation -= m_parameters[5].value
+            evaluation -= m_parameters[0].value;
+            evaluation -= m_parameters[4].value
                *m_position->PopulateBishopEndpoints(file, rank, endpoints);
             break;
          case 'N':
-            evaluation += m_parameters[2].value;
-            evaluation += m_parameters[5].value
+            evaluation += m_parameters[1].value;
+            evaluation += m_parameters[4].value
                *m_position->PopulateKnightEndpoints(file, rank, endpoints);
             break;
          case 'n':
-            evaluation -= m_parameters[2].value;
-            evaluation -= m_parameters[5].value
+            evaluation -= m_parameters[1].value;
+            evaluation -= m_parameters[4].value
                *m_position->PopulateKnightEndpoints(file, rank, endpoints);
             break;
          case 'R':
-            evaluation += m_parameters[3].value;
-            evaluation += m_parameters[5].value
+            evaluation += m_parameters[2].value;
+            evaluation += m_parameters[4].value
                *m_position->PopulateRookEndpoints(file, rank, endpoints);
             break;
          case 'r':
-            evaluation -= m_parameters[3].value;
-            evaluation -= m_parameters[5].value
+            evaluation -= m_parameters[2].value;
+            evaluation -= m_parameters[4].value
                *m_position->PopulateRookEndpoints(file, rank, endpoints);
             break;
          case 'Q':
-            evaluation += m_parameters[4].value;
-            evaluation += m_parameters[5].value
+            evaluation += m_parameters[3].value;
+            evaluation += m_parameters[4].value
                *m_position->PopulateQueenEndpoints(file, rank, endpoints);
             break;
          case 'q':
-            evaluation -= m_parameters[4].value;
-            evaluation -= m_parameters[5].value
+            evaluation -= m_parameters[3].value;
+            evaluation -= m_parameters[4].value
                *m_position->PopulateQueenEndpoints(file, rank, endpoints);
             break;
          case 'K':
             // castle not considered
-            evaluation += m_parameters[5].value
+            evaluation += m_parameters[4].value
                *m_position->PopulateKingEndpoints(file, rank, endpoints);
             break;
          case 'k':
-            evaluation -= m_parameters[5].value
+            evaluation -= m_parameters[4].value
                *m_position->PopulateKingEndpoints(file, rank, endpoints);
             break;
          }

@@ -26,14 +26,20 @@ void GeneticEngine::PrintParameters() const
 
 #define big_rand() (rand()*rand())
 
+// changes by max deviation from current value in percent
 void GeneticEngine::RandomizeParameters(double max_deviation)
 {
    for (size_t i = 0; i < m_parameters_size; ++i)
    {
-      const double PRECISION_MULTIPLIER = 10000.0;
+      // the multiplier scales parameters less than one so that we can use integer random functions
+      const double PRECISION_MULTIPLIER = 1000000.0;
+
+      // plus or minus a is the possible range of change
       int a = (unsigned int)::abs(
          m_parameters[i].value*max_deviation*PRECISION_MULTIPLIER);
-      int deviation = big_rand() % (2*a) - a;
+      int deviation = a > 0 ? big_rand() % (2*a) - a : 0; // (not quite uniform, actually)
+
+      // add in the deviation and divide out the multiplier
       m_parameters[i].value += deviation / PRECISION_MULTIPLIER;
    }
 }

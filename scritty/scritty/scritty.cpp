@@ -85,7 +85,11 @@ int main(int argc, const char *argv[])
 
             SearchingEngine *winner;
             tournament.Go(&winner);
+
+            std::cout << "Winner's Parameters:" << std::endl;
             winner->PrintParameters();
+            std::cout << std::endl;
+
             delete winner;
          }
 

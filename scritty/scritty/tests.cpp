@@ -8,9 +8,9 @@
 #include "scritty.h"
 #include "SearchingEngine.h"
 
-#define GAMES_FILE "..\\..\\..\\games database\\3965020games.uci"
+#define GAMES_FILE "..\\..\\..\\..\\games database\\3965020games.uci"
 #define GAMES_IN_FILE 3965020
-#define MAX_GAMES_TO_PLAY 60
+#define MAX_GAMES_TO_PLAY 3965020
 
 using namespace scritty;
 

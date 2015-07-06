@@ -15,7 +15,7 @@ namespace scritty
 #define PARTICIPANTS 8
 #define MAX_INITIAL_DEVIATION 0.5 // 50%
 #define MAX_INCREMENTAL_DEVIATION 0.01 // 1%
-#define ROUNDS 1000
+#define ROUNDS 4
 
 #define MAX_PARAMETER_NAME_LEN 30 // without terminating null
 
@@ -108,19 +108,23 @@ namespace scritty
          // single elimination tournament where eliminated participants are
          // replaced by children of winners at the end of each round
 
+         ULONGLONG start_tick_count = ::GetTickCount64();
+
          for (size_t round_number = 1; round_number <= ROUNDS; ++round_number)
          {
-            std::cout << "Hosting round " << round_number
-               << " of " << ROUNDS << "." << std::endl;
-
+            double seconds_ellapsed = (::GetTickCount64() - start_tick_count) / 1000.0;
+            std::cout << "== Hosting round " << round_number << " of " << ROUNDS
+               << " (" << seconds_ellapsed << " seconds ellapsed so far). ==" << std::endl;
             PrintStats();
+            std::cout << std::endl;
 
             std::vector<T *> winners;
 
             while (m_participants.size() > 1) // could leave one unpaired
             {
                std::cout << m_participants.size() / 2
-                  << " games remaining to play in this round." << std::endl;
+                  << " games remaining to play in this round (round " << round_number << " of "
+                  << ROUNDS << ")." << std::endl;
 
                // pair two random participants
                size_t i = rand() % m_participants.size();
@@ -150,6 +154,8 @@ namespace scritty
                   winners.push_back(first);
                   winners.push_back(second);
                }
+
+               std::cout << std::endl;
             }
 
             // if this is the last round, choose a winner from the master race
