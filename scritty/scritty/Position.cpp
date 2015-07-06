@@ -383,29 +383,326 @@ bool Position::IsKnightMoveLegal(const Move &move) const
    return false;
 }
 
+inline bool IsKnightAttacking(bool white, unsigned char file, unsigned char rank,
+   const char squares[8][8])
+{
+   if (file < 8 && rank < 8) // unsigned char never negative
+   {
+      char piece = squares[file][rank];
+
+      if (white)
+      {
+         if (piece == 'N')
+            return true;
+      }
+      else // black
+      {
+         if (piece == 'n')
+            return true;
+      }
+   }
+
+   return false;
+}
+
 bool Position::IsAttackingSquare(
    bool white, unsigned char file, unsigned char rank) const
 {
-   Move move;
-   move.end_file = file;
-   move.end_rank = rank;
-   move.promotion_piece = NO_PIECE;
+   unsigned char search_file, search_rank;
+   bool king;
 
-   for (move.start_rank = 0; move.start_rank <= 7; ++move.start_rank)
+   // check for attacking pawns
+
+   if (white)
    {
-      for (move.start_file = 0; move.start_file <= 7; ++move.start_file)
+      if (rank > 1)
       {
-         char piece = m_squares[move.start_file][move.start_rank];
-
-         if (piece != NO_PIECE
-            && ((white && piece < 'Z') || (!white && piece > 'a')))
-         {
-            // notice that we don't check to see if king is in check
-            if (IsMoveLegal(move, white, false))
-               return true;
-         }
+         if (file > 0 && m_squares[file - 1][rank - 1] == 'P')
+            return true;
+         if (file < 7 && m_squares[file + 1][rank - 1] == 'P')
+            return true;
       }
    }
+   else // black
+   {
+      if (rank < 6)
+      {
+         if (file > 0 && m_squares[file - 1][rank + 1] == 'p')
+            return true;
+         if (file < 7 && m_squares[file + 1][rank + 1] == 'p')
+            return true;
+      }
+   }
+
+   // check for bishops or queens to the "southwest"
+
+   search_file = file - 1;
+   search_rank = rank - 1;
+   king = true;
+
+   while (search_file < 8 && search_rank < 8) // unsigned char never negative
+   {
+      char piece = m_squares[search_file][search_rank];
+
+      if (piece != NO_PIECE)
+      {
+         if (white)
+         {
+            if (piece == 'B' || piece == 'Q' || (king && piece == 'K') )
+               return true;
+         }
+         else // black
+         {
+            if (piece == 'b' || piece == 'q' || (king && piece == 'k') )
+               return true;
+         }
+
+         break; // interposing piece
+      }
+
+      --search_file;
+      --search_rank;
+      king = false;
+   }
+
+   // check for bishops or queens to the "southeast"
+
+   search_file = file + 1;
+   search_rank = rank - 1;
+   king = true;
+
+   while (search_file < 8 && search_rank < 8) // unsigned char never negative
+   {
+      char piece = m_squares[search_file][search_rank];
+
+      if (piece != NO_PIECE)
+      {
+         if (white)
+         {
+            if (piece == 'B' || piece == 'Q' || (king && piece == 'K') )
+               return true;
+         }
+         else // black
+         {
+            if (piece == 'b' || piece == 'q' || (king && piece == 'k') )
+               return true;
+         }
+
+         break; // interposing piece
+      }
+
+      ++search_file;
+      --search_rank;
+      king = false;
+   }
+
+   // check for bishops or queens to the "northwest"
+
+   search_file = file - 1;
+   search_rank = rank + 1;
+   king = true;
+
+   while (search_file < 8 && search_rank < 8) // unsigned char never negative
+   {
+      char piece = m_squares[search_file][search_rank];
+
+      if (piece != NO_PIECE)
+      {
+         if (white)
+         {
+            if (piece == 'B' || piece == 'Q' || (king && piece == 'K') )
+               return true;
+         }
+         else // black
+         {
+            if (piece == 'b' || piece == 'q' || (king && piece == 'k') )
+               return true;
+         }
+
+         break; // interposing piece
+      }
+
+      --search_file;
+      ++search_rank;
+      king = false;
+   }
+
+   // check for bishops or queens to the "northeast"
+
+   search_file = file + 1;
+   search_rank = rank + 1;
+   king = true;
+
+   while (search_file < 8 && search_rank < 8) // unsigned char never negative
+   {
+      char piece = m_squares[search_file][search_rank];
+
+      if (piece != NO_PIECE)
+      {
+         if (white)
+         {
+            if (piece == 'B' || piece == 'Q' || (king && piece == 'K') )
+               return true;
+         }
+         else // black
+         {
+            if (piece == 'b' || piece == 'q' || (king && piece == 'k') )
+               return true;
+         }
+
+         break; // interposing piece
+      }
+
+      ++search_file;
+      ++search_rank;
+      king = false;
+   }
+
+   // check for rooks or queens to the "south"
+
+   search_file = file;
+   search_rank = rank - 1;
+   king = true;
+
+   while (search_rank < 8) // unsigned char never negative
+   {
+      char piece = m_squares[search_file][search_rank];
+
+      if (piece != NO_PIECE)
+      {
+         if (white)
+         {
+            if (piece == 'R' || piece == 'Q' || (king && piece == 'K') )
+               return true;
+         }
+         else // black
+         {
+            if (piece == 'r' || piece == 'q' || (king && piece == 'k') )
+               return true;
+         }
+
+         break; // interposing piece
+      }
+
+      --search_rank;
+      king = false;
+   }
+
+   // check for rooks or queens to the "north"
+
+   search_file = file;
+   search_rank = rank + 1;
+   king = true;
+
+   while (search_rank < 8) // unsigned char never negative
+   {
+      char piece = m_squares[search_file][search_rank];
+
+      if (piece != NO_PIECE)
+      {
+         if (white)
+         {
+            if (piece == 'R' || piece == 'Q' || (king && piece == 'K') )
+               return true;
+         }
+         else // black
+         {
+            if (piece == 'r' || piece == 'q' || (king && piece == 'k') )
+               return true;
+         }
+
+         break; // interposing piece
+      }
+
+      ++search_rank;
+      king = false;
+   }
+
+   // check for rooks or queens to the "east"
+
+   search_file = file + 1;
+   search_rank = rank;
+   king = true;
+
+   while (search_file < 8) // unsigned char never negative
+   {
+      char piece = m_squares[search_file][search_rank];
+
+      if (piece != NO_PIECE)
+      {
+         if (white)
+         {
+            if (piece == 'R' || piece == 'Q' || (king && piece == 'K') )
+               return true;
+         }
+         else // black
+         {
+            if (piece == 'r' || piece == 'q' || (king && piece == 'k') )
+               return true;
+         }
+
+         break; // interposing piece
+      }
+
+      ++search_file;
+      king = false;
+   }
+
+   // check for rooks or queens to the "west"
+
+   search_file = file - 1;
+   search_rank = rank;
+   king = true;
+
+   while (search_file < 8) // unsigned char never negative
+   {
+      char piece = m_squares[search_file][search_rank];
+
+      if (piece != NO_PIECE)
+      {
+         if (white)
+         {
+            if (piece == 'R' || piece == 'Q' || (king && piece == 'K') )
+               return true;
+         }
+         else // black
+         {
+            if (piece == 'r' || piece == 'q' || (king && piece == 'k') )
+               return true;
+         }
+
+         break; // interposing piece
+      }
+
+      --search_file;
+      king = false;
+   }
+
+   // check for knights
+
+   if (IsKnightAttacking(white, file - 2, rank + 1, m_squares))
+      return true;
+
+   if (IsKnightAttacking(white, file - 1, rank + 2, m_squares))
+      return true;
+
+   if (IsKnightAttacking(white, file + 1, rank + 2, m_squares))
+      return true;
+
+   if (IsKnightAttacking(white, file + 2, rank + 1, m_squares))
+      return true;
+
+   if (IsKnightAttacking(white, file + 2, rank - 1, m_squares))
+      return true;
+
+   if (IsKnightAttacking(white, file + 1, rank - 2, m_squares))
+      return true;
+
+   if (IsKnightAttacking(white, file - 1, rank - 2, m_squares))
+      return true;
+
+   if (IsKnightAttacking(white, file - 2, rank - 1, m_squares))
+      return true;
 
    return false;
 }
@@ -1047,7 +1344,7 @@ bool Position::IsCheck(bool white) const
       for (unsigned char file = 0; file <= 7; ++file)
       {
          if (m_squares[file][rank] == which_king)
-            return IsAttackingSquare(!m_white_to_move, file, rank);
+            return IsAttackingSquare(!white, file, rank);
       }
    }
 
