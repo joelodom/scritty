@@ -724,6 +724,8 @@ size_t Position::PopulateKingEndpoints(unsigned char start_file,
 
    size_t endpoints_index = 0;
 
+   char start_piece = m_squares[start_file][start_rank];
+
    for (char i = -1; i <= 1; ++i)
       for (char j = -1; j <= 1; ++j)
       {
@@ -737,10 +739,14 @@ size_t Position::PopulateKingEndpoints(unsigned char start_file,
          unsigned char rank = start_rank + j;
          if (rank > 7)
             continue;
-
-         endpoints[endpoints_index++] = file;
-         endpoints[endpoints_index++] = rank;
-         endpoints[endpoints_index++] = NO_PIECE;
+         
+         if (m_squares[file][rank] == NO_PIECE
+            || IsOpponentsPiece(start_piece, m_squares[file][rank]))
+         {
+            endpoints[endpoints_index++] = file;
+            endpoints[endpoints_index++] = rank;
+            endpoints[endpoints_index++] = NO_PIECE;
+         }
       }
 
    return endpoints_index;
