@@ -180,8 +180,8 @@ double SearchingEngine::GetBestMove(const Position &position,
             ss << "score cp " << (int)(100*evaluation) << " ";
             ss << "currmovenumber " << (i + 1) << " ";
             ss << "nodes " << m_nodes_searched << " ";
-            ss << "nps " << ((double)1000.0*m_nodes_searched)
-               / (::GetTickCount64() - m_start_tick_count);
+            ss << "nps " << (int)(((double)1000.0*m_nodes_searched)
+               / (::GetTickCount64() - m_start_tick_count));
             UCIHandler::send_info(ss.str());
          }
 
@@ -217,8 +217,8 @@ double SearchingEngine::GetBestMove(const Position &position,
             ss << "score cp " << (int)(-100*evaluation) << " ";
             ss << "currmovenumber " << (i + 1) << " ";
             ss << "nodes " << m_nodes_searched << " ";
-            ss << "nps " << ((double)1000.0*m_nodes_searched)
-               / (::GetTickCount64() - m_start_tick_count);
+            ss << "nps " << (int)(((double)1000.0*m_nodes_searched)
+               / (::GetTickCount64() - m_start_tick_count));
             UCIHandler::send_info(ss.str());
          }
 
