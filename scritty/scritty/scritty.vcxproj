@@ -119,6 +119,7 @@
     <ClCompile Include="GeneticTournament.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="Position.cpp" />
+    <ClCompile Include="Position2.cpp" />
     <ClCompile Include="RandomEngine.cpp" />
     <ClCompile Include="scritty.cpp" />
     <ClCompile Include="SearchingEngine.cpp" />

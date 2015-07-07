@@ -1371,3 +1371,25 @@ TEST(position_tests, test_position_table)
 
    delete table;
 }
+
+TEST(position2_tests, test_set_to_start_pos)
+{
+   Position2 position2;
+   position2.SetToStartPos();
+
+   // get a position for testing
+   RandomEngine engine;
+   engine.StartNewGame();
+   const Position &position = engine.GetPosition();
+
+   for (unsigned char rank = 0; rank <= 7; ++rank)
+      for (unsigned char file = 0; file <= 7; ++file)
+         EXPECT_EQ(position.GetPieceAt(file, rank), position2.GetPieceAt(file, rank));
+
+   EXPECT_TRUE(position2.IsWhiteToMove());
+
+   EXPECT_TRUE(position2.MayWhiteCastleShort());
+   EXPECT_TRUE(position2.MayWhiteCastleLong());
+   EXPECT_TRUE(position2.MayBlackCastleShort());
+   EXPECT_TRUE(position2.MayBlackCastleLong());
+}

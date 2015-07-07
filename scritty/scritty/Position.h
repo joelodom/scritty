@@ -124,6 +124,74 @@ namespace scritty
       static size_t s_table_hits, s_table_misses;
    };
 
+   class Position2
+   {
+   public:
+
+      Position2() {} // note: does zero setup
+
+      ~Position2()
+      {
+      }
+
+      void SetToStartPos();
+      void ApplyKnownLegalMove(const Move &move);
+      void RollBackOneMove();
+      bool operator==(const Position2 &other) const;
+      bool MayClaimDraw() const;
+      bool IsWhiteToMove() const { return m_white_to_move; }
+      bool MayWhiteCastleShort() const { return m_white_may_castle_short; }
+      bool MayWhiteCastleLong() const { return m_white_may_castle_long; }
+      bool MayBlackCastleShort() const { return m_black_may_castle_short; }
+      bool MayBlackCastleLong() const { return m_black_may_castle_long; }
+      bool IsMoveLegal(const Move &move) const;
+      Outcome GetOutcome() const;
+      bool IsCheck(bool white) const;
+      size_t ListAllLegalMoves(Move *buf = nullptr) const;
+
+      char GetPieceAt(unsigned char file, unsigned char rank) const;
+
+      static inline bool IsOpponentsPiece(char mine, char theirs);
+
+      bool IsRookMoveLegal(const Move &move) const;
+      bool IsBishopMoveLegal(const Move &move) const;
+      bool IsKnightMoveLegal(const Move &move) const;
+
+      size_t PopulateBishopEndpoints(unsigned char start_file,
+         unsigned char start_rank, unsigned char *endpoints) const;
+      size_t PopulateKnightEndpoints(unsigned char start_file,
+         unsigned char start_rank, unsigned char *endpoints) const;
+      size_t PopulateRookEndpoints(unsigned char start_file,
+         unsigned char start_rank, unsigned char *endpoints) const;
+      size_t PopulateQueenEndpoints(unsigned char start_file,
+         unsigned char start_rank, unsigned char *endpoints) const;
+      size_t PopulateKingEndpoints(unsigned char start_file,
+         unsigned char start_rank, unsigned char *endpoints) const;
+
+      bool IsAttackingSquare(
+         bool white, unsigned char file, unsigned char rank) const;
+      bool IsMoveLegal(const Move &move, bool white, bool check_king) const;
+
+      unsigned int GetHash() const;
+
+   protected:
+      static inline unsigned __int64 RankAndFileToMask(unsigned char file, unsigned char rank)
+      {
+         return ((__int64)1) << ( (7 - file) + 8*(7 - rank) );
+      }
+
+      unsigned __int64 m_white_pawns, m_black_pawns,
+         m_white_bishops, m_black_bishops,
+         m_white_knights, m_black_knights,
+         m_white_rooks, m_black_rooks,
+         m_white_queens, m_black_queens,
+         m_white_kings, m_black_kings;
+      bool m_white_to_move;
+      bool m_white_may_castle_short, m_white_may_castle_long;
+      bool m_black_may_castle_short, m_black_may_castle_long;
+      unsigned char m_en_passant_allowed_on;
+   };
+
    class PositionTable
    {
    public:
