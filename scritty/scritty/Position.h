@@ -177,6 +177,8 @@ namespace scritty
    protected:
       static inline unsigned __int64 RankAndFileToMask(unsigned char file, unsigned char rank)
       {
+         // Returns a mask with a single one for the given file and rank.  For example, (1, 1) / b2
+         // returns 0x0040000000000000.
          return ((__int64)1) << ( (7 - file) + 8*(7 - rank) );
       }
 

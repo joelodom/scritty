@@ -72,3 +72,142 @@ char Position2::GetPieceAt(unsigned char file, unsigned char rank) const
 
   return NO_PIECE;
 }
+
+void Position2::ApplyKnownLegalMove(const Move &move)
+{
+   unsigned __int64 start_mask = RankAndFileToMask(move.start_file, move.start_rank);
+   unsigned __int64 end_mask = RankAndFileToMask(move.end_file, move.end_rank);
+
+   // remove all pieces from end mask (to account for capture)
+
+   unsigned __int64 not_end_mask = ~end_mask;
+
+   m_white_pawns &= not_end_mask;
+   m_black_pawns &= not_end_mask;
+
+   m_white_bishops &= not_end_mask;
+   m_black_bishops &= not_end_mask;
+
+   m_white_knights &= not_end_mask;
+   m_black_knights &= not_end_mask;
+
+   m_white_rooks &= not_end_mask;
+   m_black_rooks &= not_end_mask;
+
+   m_white_queens &= not_end_mask;
+   m_black_queens &= not_end_mask;
+
+   // place moved piece on end mask and remove from start mask
+
+   if (m_white_pawns & start_mask)
+   {
+      if (end_mask & 0x00000000000000ff)
+      {
+         // must promote (in some UCI output, promotion pieces are not cased as expected)
+         if (move.promotion_piece == 'Q' || move.promotion_piece == 'q')
+         {
+            m_white_queens |= end_mask;
+         }
+         else if (move.promotion_piece == 'R' || move.promotion_piece == 'r')
+         {
+            m_white_rooks |= end_mask;
+         }
+         else if (move.promotion_piece == 'N' || move.promotion_piece == 'n')
+         {
+            m_white_knights |= end_mask;
+         }
+         else // bishop
+         {
+            m_white_bishops |= end_mask;
+         }
+      }
+      else
+      {
+         m_white_pawns |= end_mask;
+      }
+
+      m_white_pawns ^= start_mask;
+   }
+   else if (m_black_pawns & start_mask)
+   {
+      if (end_mask & 0xff00000000000000)
+      {
+         // must promote (in some UCI output, promotion pieces are not cased as expected)
+         if (move.promotion_piece == 'q' || move.promotion_piece == 'Q')
+         {
+            m_black_queens |= end_mask;
+         }
+         else if (move.promotion_piece == 'r' || move.promotion_piece == 'R')
+         {
+            m_black_rooks |= end_mask;
+         }
+         else if (move.promotion_piece == 'n' || move.promotion_piece == 'N')
+         {
+            m_black_knights |= end_mask;
+         }
+         else // bishop
+         {
+            m_black_bishops |= end_mask;
+         }
+      }
+      else
+      {
+         m_black_pawns |= end_mask;
+      }
+
+      m_black_pawns ^= start_mask;
+   }
+   else if (m_white_bishops & start_mask)
+   {
+      m_white_bishops |= end_mask;
+      m_white_bishops ^= start_mask;
+   }
+   else if (m_black_bishops & start_mask)
+   {
+      m_black_bishops |= end_mask;
+      m_black_bishops ^= start_mask;
+   }
+   else if (m_white_knights & start_mask)
+   {
+      m_white_knights |= end_mask;
+      m_white_knights ^= start_mask;
+   }
+   else if (m_black_knights & start_mask)
+   {
+      m_black_knights |= end_mask;
+      m_black_knights ^= start_mask;
+   }
+   else if (m_white_rooks & start_mask)
+   {
+      m_white_rooks |= end_mask;
+      m_white_rooks ^= start_mask;
+   }
+   else if (m_black_rooks & start_mask)
+   {
+      m_black_rooks |= end_mask;
+      m_black_rooks ^= start_mask;
+   }
+   else if (m_white_queens & start_mask)
+   {
+      m_white_queens |= end_mask;
+      m_white_queens ^= start_mask;
+   }
+   else if (m_black_queens & start_mask)
+   {
+      m_black_queens |= end_mask;
+      m_black_queens ^= start_mask;
+   }
+   else if (m_white_kings & start_mask)
+   {
+      m_white_kings |= end_mask;
+      m_white_kings ^= start_mask;
+   }
+   else // black king
+   {
+      m_black_kings |= end_mask;
+      m_black_kings ^= start_mask;
+   }
+
+   // switch sides
+   m_white_to_move = !m_white_to_move;
+}

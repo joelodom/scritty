@@ -1393,3 +1393,79 @@ TEST(position2_tests, test_set_to_start_pos)
    EXPECT_TRUE(position2.MayBlackCastleShort());
    EXPECT_TRUE(position2.MayBlackCastleLong());
 }
+
+TEST(position2_tests, test_apply_known_legal_move)
+{
+   // set up the start position
+
+   Position2 position2;
+   position2.SetToStartPos();
+
+   EXPECT_TRUE(position2.IsWhiteToMove());
+
+   // move a pawn
+
+   EXPECT_EQ('P', position2.GetPieceAt(4, 1));
+
+   Move move;
+   move.start_file = 4; // e
+   move.start_rank = 1; // 2
+   move.end_file = 4; // e
+   move.end_rank = 3; // 4
+
+   position2.ApplyKnownLegalMove(move);
+
+   EXPECT_EQ(NO_PIECE, position2.GetPieceAt(4, 1));
+   EXPECT_EQ('P', position2.GetPieceAt(4, 3));
+   EXPECT_FALSE(position2.IsWhiteToMove());
+
+   // test capture
+
+   move.start_file = 3; // d
+   move.start_rank = 6; // 7
+   move.end_file = 3; // d
+   move.end_rank = 4; // 5
+
+   position2.ApplyKnownLegalMove(move);
+
+   EXPECT_EQ(NO_PIECE, position2.GetPieceAt(3, 6));
+   EXPECT_EQ('p', position2.GetPieceAt(3, 4));
+   EXPECT_TRUE(position2.IsWhiteToMove());
+
+   move.start_file = 4; // e
+   move.start_rank = 3; // 4
+   move.end_file = 3; // d
+   move.end_rank = 4; // 5
+
+   position2.ApplyKnownLegalMove(move);
+
+   EXPECT_EQ(NO_PIECE, position2.GetPieceAt(4, 3));
+   EXPECT_EQ('P', position2.GetPieceAt(3, 4));
+   EXPECT_FALSE(position2.IsWhiteToMove());
+
+   // no, a pawn can't do this and this test should be changed someday
+
+   move.start_file = 3;
+   move.start_rank = 4;
+   move.end_file = 3;
+   move.end_rank = 5;
+
+   position2.ApplyKnownLegalMove(move);
+
+   move.start_file = 3;
+   move.start_rank = 5;
+   move.end_file = 3;
+   move.end_rank = 6;
+
+   position2.ApplyKnownLegalMove(move);
+
+   move.start_file = 3;
+   move.start_rank = 6;
+   move.end_file = 3;
+   move.end_rank = 7;
+   move.promotion_piece = 'Q';
+
+   position2.ApplyKnownLegalMove(move);
+
+   EXPECT_EQ('Q', position2.GetPieceAt(3, 7));
+}
